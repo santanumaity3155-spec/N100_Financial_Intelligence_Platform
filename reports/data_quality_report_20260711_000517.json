@@ -1,0 +1,297 @@
+{
+  "report_title": "N100 Financial Intelligence Platform - Data Quality Report",
+  "generated_at": "2026-07-11T00:05:17.742372",
+  "summary": {
+    "total_datasets": 0,
+    "validation_passed": 0,
+    "validation_failed": 0,
+    "total_rows_loaded": 0,
+    "total_errors": 0,
+    "total_warnings": 0
+  },
+  "validation_summary": {},
+  "normalization_summary": {
+    "total_operations": 20,
+    "operations": [
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 12
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 15
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 13
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 7
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 6
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 4
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 4
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 6
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 92,
+        "normalized_unique": 92
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 9
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 92,
+        "normalized_unique": 92
+      },
+      {
+        "operation": "normalize_dates",
+        "column": "date",
+        "format": "%Y-%m-%d",
+        "original_valid": 5520,
+        "normalized_valid": 5520
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 9
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 92,
+        "normalized_unique": 92
+      },
+      {
+        "operation": "remove_duplicates",
+        "subset": [
+          "company_id"
+        ],
+        "original_count": 552,
+        "removed_count": 460,
+        "final_count": 92
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 16
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 92,
+        "normalized_unique": 92
+      },
+      {
+        "operation": "remove_duplicates",
+        "subset": [
+          "company_id",
+          "period"
+        ],
+        "original_count": 1184,
+        "removed_count": 119,
+        "final_count": 1065
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 4
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 56,
+        "normalized_unique": 56
+      }
+    ]
+  },
+  "transformation_summary": {
+    "total_operations": 12,
+    "operations": [
+      {
+        "dataset": "companies",
+        "operations": [
+          "clean_strings",
+          "normalize_ids"
+        ]
+      },
+      {
+        "dataset": "profit_loss",
+        "operations": [
+          "normalize_ids",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "balance_sheet",
+        "operations": [
+          "normalize_ids",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "cash_flow",
+        "operations": [
+          "normalize_ids",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "analysis",
+        "operations": [
+          "normalize_ids",
+          "clean_strings"
+        ]
+      },
+      {
+        "dataset": "documents",
+        "operations": [
+          "normalize_ids",
+          "clean_strings"
+        ]
+      },
+      {
+        "dataset": "pros_cons",
+        "operations": [
+          "normalize_ids",
+          "clean_strings"
+        ]
+      },
+      {
+        "dataset": "sectors",
+        "operations": [
+          "normalize_ids",
+          "clean_strings"
+        ]
+      },
+      {
+        "dataset": "stock_prices",
+        "operations": [
+          "normalize_ids",
+          "normalize_dates",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "market_cap",
+        "operations": [
+          "normalize_ids",
+          "normalize_dates",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "financial_ratios",
+        "operations": [
+          "normalize_ids",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "peer_groups",
+        "operations": [
+          "normalize_ids",
+          "clean_strings"
+        ]
+      }
+    ]
+  },
+  "load_summary": {
+    "total_tables": 12,
+    "successful_loads": 0,
+    "failed_loads": [
+      "companies",
+      "profit_loss",
+      "balance_sheet",
+      "cash_flow",
+      "analysis",
+      "documents",
+      "pros_cons",
+      "sectors",
+      "stock_prices",
+      "market_cap",
+      "financial_ratios",
+      "peer_groups"
+    ],
+    "total_rows_loaded": 0,
+    "tables": {
+      "companies": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "table companies has no column named mkt_fintech_nifty_100_companies_92_records"
+      },
+      "profit_loss": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "table profit_loss has no column named bluestock_fintech_nifty_100_profit_loss_1_276_records"
+      },
+      "balance_sheet": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "table balance_sheet has no column named bluestock_fintech_nifty_100_balance_sheet_1_312_records"
+      },
+      "cash_flow": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "table cash_flow has no column named bluestock_fintech_nifty_100_cash_flow_1_187_records"
+      },
+      "analysis": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "table analysis has no column named bluestock_fintech_nifty_100_analysis_20_records"
+      },
+      "documents": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "table documents has no column named bluestock_fintech_nifty_100_documents_1_585_records"
+      },
+      "pros_cons": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "table pros_cons has no column named bluestock_fintech_nifty_100_pros_cons_16_records"
+      },
+      "sectors": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "table sectors has no column named id"
+      },
+      "stock_prices": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "too many SQL variables"
+      },
+      "market_cap": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "table market_cap has no column named period"
+      },
+      "financial_ratios": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "table financial_ratios has no column named net_profit_margin_pct"
+      },
+      "peer_groups": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "table peer_groups has no column named is_benchmark"
+      }
+    }
+  },
+  "recommendations": [
+    "Retry failed loads: ['companies', 'profit_loss', 'balance_sheet', 'cash_flow', 'analysis', 'documents', 'pros_cons', 'sectors', 'stock_prices', 'market_cap', 'financial_ratios', 'peer_groups']"
+  ]
+}

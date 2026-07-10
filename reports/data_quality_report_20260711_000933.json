@@ -1,0 +1,340 @@
+{
+  "report_title": "N100 Financial Intelligence Platform - Data Quality Report",
+  "generated_at": "2026-07-11T00:09:33.756482",
+  "summary": {
+    "total_datasets": 0,
+    "validation_passed": 0,
+    "validation_failed": 0,
+    "total_rows_loaded": 92,
+    "total_errors": 0,
+    "total_warnings": 0
+  },
+  "validation_summary": {},
+  "normalization_summary": {
+    "total_operations": 24,
+    "operations": [
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 12
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 92,
+        "normalized_unique": 92
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 15
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 100,
+        "normalized_unique": 100
+      },
+      {
+        "operation": "remove_duplicates",
+        "subset": [
+          "company_id",
+          "period"
+        ],
+        "original_count": 1276,
+        "removed_count": 13,
+        "final_count": 1263
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 13
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 98,
+        "normalized_unique": 98
+      },
+      {
+        "operation": "remove_duplicates",
+        "subset": [
+          "company_id",
+          "period"
+        ],
+        "original_count": 1312,
+        "removed_count": 87,
+        "final_count": 1225
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 7
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 100,
+        "normalized_unique": 100
+      },
+      {
+        "operation": "remove_duplicates",
+        "subset": [
+          "company_id",
+          "period"
+        ],
+        "original_count": 1187,
+        "removed_count": 23,
+        "final_count": 1164
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 6
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 5,
+        "normalized_unique": 5
+      },
+      {
+        "operation": "remove_duplicates",
+        "subset": [
+          "company_id"
+        ],
+        "original_count": 20,
+        "removed_count": 15,
+        "final_count": 5
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 4
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 99,
+        "normalized_unique": 99
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 4
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 5,
+        "normalized_unique": 5
+      },
+      {
+        "operation": "remove_duplicates",
+        "subset": [
+          "company_id"
+        ],
+        "original_count": 16,
+        "removed_count": 11,
+        "final_count": 5
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 6
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 9
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 9
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 16
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 4
+      }
+    ]
+  },
+  "transformation_summary": {
+    "total_operations": 12,
+    "operations": [
+      {
+        "dataset": "companies",
+        "operations": [
+          "clean_strings",
+          "normalize_ids"
+        ]
+      },
+      {
+        "dataset": "profit_loss",
+        "operations": [
+          "normalize_ids",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "balance_sheet",
+        "operations": [
+          "normalize_ids",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "cash_flow",
+        "operations": [
+          "normalize_ids",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "analysis",
+        "operations": [
+          "normalize_ids",
+          "clean_strings"
+        ]
+      },
+      {
+        "dataset": "documents",
+        "operations": [
+          "normalize_ids",
+          "clean_strings"
+        ]
+      },
+      {
+        "dataset": "pros_cons",
+        "operations": [
+          "normalize_ids",
+          "clean_strings"
+        ]
+      },
+      {
+        "dataset": "sectors",
+        "operations": [
+          "normalize_ids",
+          "clean_strings"
+        ]
+      },
+      {
+        "dataset": "stock_prices",
+        "operations": [
+          "normalize_ids",
+          "normalize_dates",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "market_cap",
+        "operations": [
+          "normalize_ids",
+          "normalize_dates",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "financial_ratios",
+        "operations": [
+          "normalize_ids",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "peer_groups",
+        "operations": [
+          "normalize_ids",
+          "clean_strings"
+        ]
+      }
+    ]
+  },
+  "load_summary": {
+    "total_tables": 12,
+    "successful_loads": 1,
+    "failed_loads": [
+      "profit_loss",
+      "balance_sheet",
+      "cash_flow",
+      "analysis",
+      "documents",
+      "pros_cons",
+      "sectors",
+      "stock_prices",
+      "market_cap",
+      "financial_ratios",
+      "peer_groups"
+    ],
+    "total_rows_loaded": 92,
+    "tables": {
+      "companies": {
+        "rows_loaded": 92,
+        "success": true
+      },
+      "profit_loss": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "FOREIGN KEY constraint failed"
+      },
+      "balance_sheet": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "table balance_sheet has no column named other_asset"
+      },
+      "cash_flow": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "FOREIGN KEY constraint failed"
+      },
+      "analysis": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "NOT NULL constraint failed: analysis.period"
+      },
+      "documents": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "FOREIGN KEY constraint failed"
+      },
+      "pros_cons": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "FOREIGN KEY constraint failed"
+      },
+      "sectors": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "table sectors has no column named 1"
+      },
+      "stock_prices": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "too many SQL variables"
+      },
+      "market_cap": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "table market_cap has no column named 1"
+      },
+      "financial_ratios": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "table financial_ratios has no column named 1"
+      },
+      "peer_groups": {
+        "rows_loaded": 0,
+        "success": false,
+        "error": "table peer_groups has no column named 1"
+      }
+    },
+    "verification": {
+      "verified": true,
+      "tables": {
+        "companies": {
+          "expected": 92,
+          "actual": 92,
+          "match": true
+        }
+      }
+    }
+  },
+  "recommendations": [
+    "Address missing values in pros_cons",
+    "Retry failed loads: ['profit_loss', 'balance_sheet', 'cash_flow', 'analysis', 'documents', 'pros_cons', 'sectors', 'stock_prices', 'market_cap', 'financial_ratios', 'peer_groups']"
+  ]
+}
