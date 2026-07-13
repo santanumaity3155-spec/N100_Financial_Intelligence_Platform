@@ -128,6 +128,14 @@ class DataQualityReporter:
             report["summary"]["validation_passed"] = val_summary.get("passed", 0)
             report["summary"]["validation_failed"] = val_summary.get("failed", 0)
             report["validation_summary"] = val_summary
+        else:
+            # No validation results available
+            report["summary"]["total_datasets"] = 0
+            report["summary"]["validation_passed"] = 0
+            report["summary"]["validation_failed"] = 0
+            report["validation_summary"] = {
+                "message": "Validation was not performed or no results available"
+            }
 
         # Normalization summary
         if self.normalization_log:

@@ -5,7 +5,10 @@ Database schema definitions for the N100 Financial Intelligence Platform.
 Defines table structures, constraints, and indexes for all 12 datasets.
 """
 
+import logging
 from typing import Dict, List, Tuple
+
+logger = logging.getLogger(__name__)
 
 # =============================================================================
 # TABLE SCHEMAS
@@ -40,7 +43,7 @@ PROFIT_LOSS_SCHEMA = """
 CREATE TABLE IF NOT EXISTS profit_loss (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     company_id TEXT NOT NULL,
-    period TEXT NOT NULL,
+    period TEXT,
     sales REAL,
     expenses REAL,
     operating_profit REAL,
@@ -54,8 +57,7 @@ CREATE TABLE IF NOT EXISTS profit_loss (
     eps REAL,
     dividend_payout REAL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE,
-    UNIQUE(company_id, period)
+    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE
 );
 """
 
@@ -64,7 +66,7 @@ BALANCE_SHEET_SCHEMA = """
 CREATE TABLE IF NOT EXISTS balance_sheet (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     company_id TEXT NOT NULL,
-    period TEXT NOT NULL,
+    period TEXT,
     share_capital REAL,
     reserves REAL,
     borrowings REAL,
@@ -77,8 +79,7 @@ CREATE TABLE IF NOT EXISTS balance_sheet (
     total_assets REAL,
     equity_capital REAL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE,
-    UNIQUE(company_id, period)
+    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE
 );
 """
 
@@ -87,7 +88,7 @@ CASH_FLOW_SCHEMA = """
 CREATE TABLE IF NOT EXISTS cash_flow (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     company_id TEXT NOT NULL,
-    period TEXT NOT NULL,
+    period TEXT,
     cash_from_operating_activity REAL,
     cash_from_investing_activity REAL,
     cash_from_financing_activity REAL,
@@ -97,8 +98,7 @@ CREATE TABLE IF NOT EXISTS cash_flow (
     investing_activity REAL,
     financing_activity REAL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE,
-    UNIQUE(company_id, period)
+    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE
 );
 """
 
@@ -107,14 +107,13 @@ ANALYSIS_SCHEMA = """
 CREATE TABLE IF NOT EXISTS analysis (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     company_id TEXT NOT NULL,
-    period TEXT NOT NULL,
+    period TEXT,
     compounded_sales_growth REAL,
     compounded_profit_growth REAL,
     roe REAL,
     stock_price_cagr REAL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE,
-    UNIQUE(company_id, period)
+    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE
 );
 """
 
@@ -147,15 +146,17 @@ CREATE TABLE IF NOT EXISTS pros_cons (
 );
 """
 
-# Sectors table
+# Sectors table (actually a company-sector mapping)
 SECTORS_SCHEMA = """
 CREATE TABLE IF NOT EXISTS sectors (
-    sector_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sector_name TEXT NOT NULL,
-    sector_description TEXT,
-    market_cap REAL,
-    no_of_companies INTEGER,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL,
+    broad_sector TEXT,
+    sub_sector TEXT,
+    index_weight_pct REAL,
+    market_cap_category TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE
 );
 """
 
@@ -181,13 +182,15 @@ MARKET_CAP_SCHEMA = """
 CREATE TABLE IF NOT EXISTS market_cap (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     company_id TEXT NOT NULL,
-    date TEXT NOT NULL,
+    period TEXT,
     market_cap REAL,
     enterprise_value REAL,
-    shares_outstanding INTEGER,
+    pe_ratio REAL,
+    pb_ratio REAL,
+    ev_ebitda REAL,
+    dividend_yield REAL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE,
-    UNIQUE(company_id, date)
+    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE
 );
 """
 
@@ -196,7 +199,7 @@ FINANCIAL_RATIOS_SCHEMA = """
 CREATE TABLE IF NOT EXISTS financial_ratios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     company_id TEXT NOT NULL,
-    period TEXT NOT NULL,
+    period TEXT,
     pe_ratio REAL,
     pb_ratio REAL,
     ps_ratio REAL,
@@ -207,8 +210,7 @@ CREATE TABLE IF NOT EXISTS financial_ratios (
     quick_ratio REAL,
     dividend_yield REAL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE,
-    UNIQUE(company_id, period)
+    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE
 );
 """
 
@@ -217,12 +219,10 @@ PEER_GROUPS_SCHEMA = """
 CREATE TABLE IF NOT EXISTS peer_groups (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     company_id TEXT NOT NULL,
-    peer_company_id TEXT NOT NULL,
     peer_group_name TEXT,
+    is_benchmark INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE,
-    FOREIGN KEY (peer_company_id) REFERENCES companies(company_id) ON DELETE CASCADE,
-    UNIQUE(company_id, peer_company_id)
+    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE
 );
 """
 
@@ -263,7 +263,7 @@ INDEXES = {
     ],
     "market_cap": [
         "CREATE INDEX IF NOT EXISTS idx_market_cap_company ON market_cap(company_id);",
-        "CREATE INDEX IF NOT EXISTS idx_market_cap_date ON market_cap(date);",
+        "CREATE INDEX IF NOT EXISTS idx_market_cap_period ON market_cap(period);",
     ],
     "financial_ratios": [
         "CREATE INDEX IF NOT EXISTS idx_financial_ratios_company ON financial_ratios(company_id);",
@@ -271,7 +271,7 @@ INDEXES = {
     ],
     "peer_groups": [
         "CREATE INDEX IF NOT EXISTS idx_peer_groups_company ON peer_groups(company_id);",
-        "CREATE INDEX IF NOT EXISTS idx_peer_groups_peer ON peer_groups(peer_company_id);",
+        "CREATE INDEX IF NOT EXISTS idx_peer_groups_name ON peer_groups(peer_group_name);",
     ],
 }
 

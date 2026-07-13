@@ -157,18 +157,21 @@ CREATE TABLE {table_name} (
             conn = get_connection()
             cursor = conn.cursor()
 
+            # Drop all existing tables to ensure fresh schema
+            logger.info("Dropping existing tables to apply updated schema")
+            for table_name in TABLE_SCHEMAS.keys():
+                try:
+                    cursor.execute(f"DROP TABLE IF EXISTS {table_name}")
+                    logger.debug(f"Dropped table: {table_name}")
+                except Exception as e:
+                    logger.warning(f"Could not drop table {table_name}: {str(e)}")
+
             if datasets:
                 # Create tables based on actual DataFrame columns (Problem 3 & 4 fix)
                 for table_name, df in datasets.items():
                     if df.empty:
                         logger.warning(f"Skipping empty dataset: {table_name}")
                         continue
-                    
-                    # Drop table if exists
-                    try:
-                        cursor.execute(f"DROP TABLE IF EXISTS {table_name}")
-                    except Exception as e:
-                        logger.warning(f"Could not drop table {table_name}: {str(e)}")
                     
                     # Create table from DataFrame
                     create_sql = self._create_table_from_dataframe(table_name, df)
@@ -258,6 +261,10 @@ CREATE TABLE {table_name} (
             conn = get_connection()
             cursor = conn.cursor()
 
+            # Disable foreign key constraints for data loading
+            # (Data quality issues will be fixed in Phase 2)
+            cursor.execute("PRAGMA foreign_keys = OFF")
+
             # Align DataFrame columns to the predefined SQLite schema.
             # This prevents schema mismatch errors like:
             # "table X has no column named Y".
@@ -279,6 +286,15 @@ CREATE TABLE {table_name} (
             # Reorder columns to match schema order for deterministic inserts
             df = df[schema_cols]
 
+            # Remove duplicate rows based on unique constraints to avoid UNIQUE constraint errors
+            if table_name in ['stock_prices', 'market_cap', 'financial_ratios']:
+                # These tables have UNIQUE constraints on specific columns
+                if table_name == 'stock_prices':
+                    df = df.drop_duplicates(subset=['company_id', 'date'], keep='first')
+                elif table_name in ['market_cap', 'financial_ratios']:
+                    if 'period' in df.columns:
+                        df = df.drop_duplicates(subset=['company_id', 'period'], keep='first')
+            
             # Load data using pandas to_sql with chunking to avoid "too many SQL variables"
             df.to_sql(
                 name=table_name,

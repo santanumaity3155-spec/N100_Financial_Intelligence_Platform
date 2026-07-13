@@ -76,19 +76,19 @@ class ETLPipeline:
             if not raw_datasets:
                 raise ValueError("No datasets extracted. Pipeline aborted.")
 
-            # Step 2: Validate
-            validation_results: Dict[str, Any] = {}
-            if validate:
-                logger.info("\n[STEP 2/5] VALIDATION")
-                logger.info("-" * 40)
-                validation_results = self._validate(raw_datasets)
-
-            # Step 3: Normalize
+            # Step 2: Normalize (includes column mapping)
             normalized_datasets = raw_datasets
             if normalize:
-                logger.info("\n[STEP 3/5] NORMALIZATION")
+                logger.info("\n[STEP 2/5] NORMALIZATION")
                 logger.info("-" * 40)
                 normalized_datasets = self._normalize(raw_datasets)
+
+            # Step 3: Validate (after normalization and column mapping)
+            validation_results: Dict[str, Any] = {}
+            if validate:
+                logger.info("\n[STEP 3/5] VALIDATION")
+                logger.info("-" * 40)
+                validation_results = self._validate(normalized_datasets)
 
             # Step 4: Transform
             transformed_datasets = normalized_datasets
@@ -249,14 +249,14 @@ class ETLPipeline:
             "profit_loss": ["company_id", "period"],
             "balance_sheet": ["company_id", "period"],
             "cash_flow": ["company_id", "period"],
-            "analysis": ["company_id", "period"],
+            "analysis": ["company_id"],  # period is optional
             "documents": ["company_id"],
             "pros_cons": ["company_id"],
-            "sectors": ["sector_id"],
+            "sectors": ["company_id"],  # sectors uses company_id, not sector_id
             "stock_prices": ["company_id", "date"],
-            "market_cap": ["company_id", "date"],
+            "market_cap": ["company_id", "period"],
             "financial_ratios": ["company_id", "period"],
-            "peer_groups": ["company_id", "peer_company_id"],
+            "peer_groups": ["company_id"],  # peer_group_name is optional
         }
         return required_columns_map.get(dataset_name, [])
 

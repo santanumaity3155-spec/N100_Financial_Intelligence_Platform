@@ -6,6 +6,7 @@ Responsible for reading Excel files from the raw data directory.
 """
 
 import logging
+import re
 from pathlib import Path
 from typing import Dict, Optional, Any
 
@@ -150,6 +151,17 @@ class DataExtractor:
                 logger.warning(f"No header row found for {file_path.name}, assigning default column names")
                 df.columns = [f'col_{i}' for i in range(len(df.columns))]
             
+            # Special handling for sectors.xlsx - check if company_id is missing
+            # and the first column contains numeric IDs
+            if file_path.name == 'sectors.xlsx' and 'company_id' not in df.columns:
+                logger.warning(f"sectors.xlsx: Re-reading with header=1 to get correct columns")
+                df = pd.read_excel(
+                    file_path,
+                    sheet_name=sheet_name,
+                    header=1,
+                    **kwargs
+                )
+            
             logger.info(
                 f"Successfully read {file_path.name}: "
                 f"{len(df)} rows, {len(df.columns)} columns"
@@ -186,11 +198,21 @@ class DataExtractor:
                 # Read the Excel file - let read_excel_file auto-detect the header
                 df = self.read_excel_file(file_path)
                 
-                # Apply column mapping if available
+                # Normalize column names FIRST (before mapping) to ensure consistent matching
+                # This converts "Year", "YEAR", " year " all to "year" for consistent mapping
+                df = self._normalize_column_names_for_mapping(df)
+                
+                # Apply column mapping if available (BEFORE dropping id column)
                 try:
                     df = apply_column_mapping(df, dataset_name)
                 except Exception as e:
                     logger.warning(f"Could not apply column mapping for {dataset_name}: {str(e)}")
+                
+                # Drop Excel 'id' column if it exists (DB has auto-increment id)
+                # Only drop if it wasn't mapped to company_id
+                if 'id' in df.columns and 'company_id' not in df.columns:
+                    df = df.drop(columns=['id'])
+                    logger.debug(f"Dropped 'id' column from {dataset_name}")
                 
                 # Drop any rows that are completely empty
                 df = df.dropna(how='all')
@@ -215,6 +237,46 @@ class DataExtractor:
 
         logger.info(f"Successfully extracted {len(datasets)} datasets")
         return datasets
+
+    def _normalize_column_names_for_mapping(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Normalize column names for consistent mapping.
+        
+        This is a lightweight normalization that only prepares columns for mapping,
+        without applying the full normalization that happens later in the pipeline.
+        
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame with original column names
+            
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with normalized column names
+        """
+        df = df.copy()
+        
+        # Create mapping of old to new column names
+        new_columns = {}
+        for col in df.columns:
+            # Convert to string, strip whitespace, convert to lowercase
+            col_str = str(col).strip().lower()
+            # Replace spaces and special characters with underscores
+            col_normalized = re.sub(r'[^a-z0-9]+', '_', col_str)
+            # Remove leading/trailing underscores
+            col_normalized = col_normalized.strip('_')
+            # Remove multiple consecutive underscores
+            col_normalized = re.sub(r'_+', '_', col_normalized)
+            
+            if col_normalized and col_normalized != col:
+                new_columns[col] = col_normalized
+        
+        if new_columns:
+            df.rename(columns=new_columns, inplace=True)
+            logger.debug(f"Normalized {len(new_columns)} column names for mapping")
+        
+        return df
 
     def extract_single_dataset(self, dataset_name: str) -> pd.DataFrame:
         """

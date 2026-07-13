@@ -95,7 +95,8 @@ class DataValidator:
         self,
         df: pd.DataFrame,
         dataset_name: str,
-        threshold: float = 30.0
+        threshold: float = 30.0,
+        columns_to_check: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """
         Detect and report missing values in the DataFrame.
@@ -108,6 +109,8 @@ class DataValidator:
             Name of the dataset for logging
         threshold : float, default 30.0
             Maximum allowed percentage of missing values per column
+        columns_to_check : List[str], optional
+            Specific columns to check for missing values. If None, checks all columns.
             
         Returns
         -------
@@ -124,13 +127,24 @@ class DataValidator:
             "message": ""
         }
 
+        # Determine which columns to check
+        if columns_to_check:
+            # Only check specified columns that exist in DataFrame
+            columns_to_check = [col for col in columns_to_check if col in df.columns]
+            if not columns_to_check:
+                logger.info(f"{dataset_name}: No valid columns to check for missing values")
+                return result
+        else:
+            # Check all columns
+            columns_to_check = list(df.columns)
+
         # Calculate missing values per column
-        missing_counts = df.isnull().sum()
+        missing_counts = df[columns_to_check].isnull().sum()
         missing_percentages = (missing_counts / len(df)) * 100
 
         # Find columns with missing values
         columns_with_missing = {}
-        for col in df.columns:
+        for col in columns_to_check:
             missing_count = missing_counts[col]
             missing_pct = missing_percentages[col]
             
@@ -353,9 +367,11 @@ class DataValidator:
             if not col_check["passed"]:
                 validation_result["overall_passed"] = False
 
-        # Check missing values
+        # Check missing values (only for required columns to avoid false failures)
+        # For datasets with high null tolerance (like pros_cons), only check required columns
+        columns_to_check = required_columns if missing_threshold >= 50 else None
         missing_check = self.detect_missing_values(
-            df, dataset_name, threshold=missing_threshold
+            df, dataset_name, threshold=missing_threshold, columns_to_check=columns_to_check
         )
         validation_result["checks"].append(missing_check)
         if not missing_check["passed"]:

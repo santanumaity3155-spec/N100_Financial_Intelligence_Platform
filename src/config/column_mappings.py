@@ -13,7 +13,7 @@ from typing import Dict, List
 
 # Companies dataset column mapping
 COMPANIES_COLUMN_MAPPING = {
-    "id": "company_id",  # Map 'id' to 'company_id'
+    "id": "company_id",  # Map 'id' to 'company_id' - this is the primary key
     "company_name": "company_name",
     "sector": "sector",
     "industry": "industry",
@@ -48,13 +48,14 @@ PROFIT_LOSS_COLUMN_MAPPING = {
     "net_profit": "net_profit",
     "eps": "eps",
     "dividend_payout": "dividend_payout",
+    # Note: 'id' column from Excel is dropped (DB has auto-increment)
 }
 
 # Balance Sheet dataset column mapping
 BALANCE_SHEET_COLUMN_MAPPING = {
     "company_id": "company_id",
     "year": "period",
-    "share_capital": "share_capital",
+    "equity_capital": "share_capital",  # Map equity_capital to share_capital
     "reserves": "reserves",
     "borrowings": "borrowings",
     "other_liabilities": "other_liabilities",
@@ -62,8 +63,10 @@ BALANCE_SHEET_COLUMN_MAPPING = {
     "fixed_assets": "fixed_assets",
     "cwip": "cwip",
     "investments": "investments",
-    "other_assets": "other_assets",
+    "other_asset": "other_assets",  # Map other_asset to other_assets
     "total_assets": "total_assets",
+    # Note: 'id' column from Excel is dropped (DB has auto-increment)
+    # Missing: total_equity, current_assets, current_liabilities (not in source)
 }
 
 # Cash Flow dataset column mapping
@@ -78,6 +81,7 @@ CASH_FLOW_COLUMN_MAPPING = {
     "operating_activity": "operating_activity",
     "investing_activity": "investing_activity",
     "financing_activity": "financing_activity",
+    # Note: 'id' column from Excel is dropped (DB has auto-increment)
 }
 
 # Analysis dataset column mapping
@@ -130,31 +134,36 @@ STOCK_PRICES_COLUMN_MAPPING = {
 MARKET_CAP_COLUMN_MAPPING = {
     "company_id": "company_id",
     "year": "period",  # Map 'year' to 'period'
-    "market_cap": "market_cap",
-    "enterprise_value": "enterprise_value",
-    "shares_outstanding": "shares_outstanding",
+    "market_cap_crore": "market_cap",  # Map market_cap_crore to market_cap
+    "enterprise_value_crore": "enterprise_value",  # Map enterprise_value_crore to enterprise_value
+    "pe_ratio": "pe_ratio",
+    "pb_ratio": "pb_ratio",
+    "ev_ebitda": "ev_ebitda",
+    "dividend_yield_pct": "dividend_yield",  # Map dividend_yield_pct to dividend_yield
+    # Note: 'id' column from Excel is dropped (DB has auto-increment)
+    # Note: shares_outstanding not in source data
 }
 
 # Financial Ratios dataset column mapping
 FINANCIAL_RATIOS_COLUMN_MAPPING = {
     "company_id": "company_id",
     "year": "period",
-    "pe_ratio": "pe_ratio",
-    "pb_ratio": "pb_ratio",
-    "ps_ratio": "ps_ratio",
-    "roe": "roe",
-    "roa": "roa",
+    "return_on_equity_pct": "roe",  # Map return_on_equity_pct to roe
     "debt_to_equity": "debt_to_equity",
-    "current_ratio": "current_ratio",
-    "quick_ratio": "quick_ratio",
-    "dividend_yield": "dividend_yield",
+    "interest_coverage": "interest_coverage",
+    "asset_turnover": "asset_turnover",
+    "earnings_per_share": "eps",  # Map earnings_per_share to eps
+    # Note: 'id' column from Excel is dropped (DB has auto-increment)
+    # Note: Many columns in source don't have direct mapping to DB schema
 }
 
 # Peer Groups dataset column mapping
 PEER_GROUPS_COLUMN_MAPPING = {
     "company_id": "company_id",
-    "peer_company_id": "peer_company_id",
     "peer_group_name": "peer_group_name",
+    "is_benchmark": "is_benchmark",
+    # Note: 'id' column from Excel is dropped (DB has auto-increment)
+    # Note: peer_company_id not in source - using peer_group_name instead
 }
 
 # =============================================================================
@@ -185,14 +194,14 @@ REQUIRED_COLUMNS: Dict[str, List[str]] = {
     "profit_loss": ["company_id", "period"],
     "balance_sheet": ["company_id", "period"],
     "cash_flow": ["company_id", "period"],
-    "analysis": ["company_id"],  # analysis doesn't have period column
+    "analysis": ["company_id"],  # period is optional in analysis
     "documents": ["company_id"],
     "pros_cons": ["company_id"],
-    "sectors": ["company_id"],  # sectors is a mapping, not a master table
+    "sectors": ["company_id"],  # sectors uses company_id as primary key
     "stock_prices": ["company_id", "date"],
     "market_cap": ["company_id", "period"],
     "financial_ratios": ["company_id", "period"],
-    "peer_groups": ["company_id", "peer_company_id"],
+    "peer_groups": ["company_id"],  # peer_group_name is optional
 }
 
 # =============================================================================

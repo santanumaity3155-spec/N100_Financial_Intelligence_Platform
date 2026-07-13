@@ -1,0 +1,20 @@
+[
+  {
+    "company_id": "ABB",
+    "period": "Dec 2012",
+    "calculated_at": "2026-07-13T23:53:13.835439",
+    "kpis": {}
+  },
+  {
+    "company_id": "ADANIENSOL",
+    "period": "Dec 2012",
+    "calculated_at": "2026-07-13T23:53:13.835468",
+    "kpis": {}
+  },
+  {
+    "company_id": "ADANIENT",
+    "period": "Dec 2012",
+    "calculated_at": "2026-07-13T23:53:13.835473",
+    "kpis": {}
+  }
+]
