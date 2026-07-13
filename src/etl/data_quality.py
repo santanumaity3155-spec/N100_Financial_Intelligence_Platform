@@ -122,7 +122,8 @@ class DataQualityReporter:
 
         # Validation summary
         if self.validation_results:
-            val_summary = self.validation_results.get("summary", {})
+            # pipeline may pass either the summary directly or a nested structure
+            val_summary = self.validation_results.get("summary", self.validation_results)
             report["summary"]["total_datasets"] = val_summary.get("total_datasets", 0)
             report["summary"]["validation_passed"] = val_summary.get("passed", 0)
             report["summary"]["validation_failed"] = val_summary.get("failed", 0)
@@ -177,7 +178,9 @@ class DataQualityReporter:
 
         # Check for missing values
         if self.validation_results:
-            datasets = self.validation_results.get("datasets", {})
+            datasets = self.validation_results.get("datasets", self.validation_results.get("datasets", {}))
+            if not datasets:
+                datasets = self.validation_results.get("datasets", {})
             for dataset_name, dataset_info in datasets.items():
                 failed_checks = dataset_info.get("failed_checks", [])
                 if "missing_values" in failed_checks:

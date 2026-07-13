@@ -13,7 +13,7 @@ import pandas as pd
 
 from src.config.logging_config import get_logger
 from src.database.connection import get_connection, commit, rollback, close_connection
-from src.database.schema import get_table_schema, get_all_schemas, get_indexes, TABLE_SCHEMAS
+from src.database.schema import get_table_schema, get_all_schemas, get_indexes, TABLE_SCHEMAS, get_safe_indexes
 
 logger = get_logger(__name__)
 
@@ -255,10 +255,29 @@ CREATE TABLE {table_name} (
         logger.info(f"Loading {len(df)} rows into table: {table_name}")
 
         try:
-            # Sanitize DataFrame columns to match table schema
-            df = self._sanitize_dataframe_columns(df, table_name)
-            
             conn = get_connection()
+            cursor = conn.cursor()
+
+            # Align DataFrame columns to the predefined SQLite schema.
+            # This prevents schema mismatch errors like:
+            # "table X has no column named Y".
+            cursor.execute(f"PRAGMA table_info({table_name})")
+            schema_cols = [row[1] for row in cursor.fetchall()]
+
+            # Sanitize incoming columns (but we'll still filter to schema columns)
+            df = self._sanitize_dataframe_columns(df, table_name)
+
+            # Only keep columns that exist in the schema
+            # (pandas will otherwise attempt to insert non-existing columns)
+            df = df[[col for col in df.columns if col in schema_cols]].copy()
+
+            # Add any missing schema columns as NULL
+            for col in schema_cols:
+                if col not in df.columns:
+                    df[col] = None
+
+            # Reorder columns to match schema order for deterministic inserts
+            df = df[schema_cols]
 
             # Load data using pandas to_sql with chunking to avoid "too many SQL variables"
             df.to_sql(
@@ -267,7 +286,7 @@ CREATE TABLE {table_name} (
                 if_exists=if_exists,
                 index=False,
                 method=method,
-                chunksize=chunksize
+                chunksize=chunksize,
             )
 
             commit()

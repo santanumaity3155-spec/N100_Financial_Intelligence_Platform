@@ -6,7 +6,8 @@ from .normalizer import DataNormalizer, normalize_dataframe
 from .transform import DataTransformer, transform_dataset
 from .load import DataLoader, load_table, load_all_datasets
 from .pipeline import ETLPipeline, run_etl_pipeline
-from .data_quality import DataQualityReporter, generate_data_quality_report
+from .data_quality import DataQualityReporter
+
 
 __all__ = [
     "DataExtractor",
