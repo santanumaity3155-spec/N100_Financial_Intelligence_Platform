@@ -177,10 +177,52 @@ class LiquidityCalculator:
             Cash Ratio value, or None if calculation not possible
         """
         try:
-            # Cash and cash equivalents not available in current balance sheet schema
-            logger.warning("Cash Ratio calculation: Cash and cash equivalents data not available in schema")
-            return None
+            # Check if dataframe is empty
+            if bs_data.empty:
+                logger.warning("Cash Ratio calculation: Empty dataframe provided")
+                return None
             
+            # Try to find cash and cash equivalents
+            # Check multiple possible column names
+            cash = None
+            possible_cash_columns = ['cash', 'cash_equivalents', 'cash_and_equivalents', 
+                                     'cash_at_bank', 'cash_on_hand']
+            
+            for col in possible_cash_columns:
+                if col in bs_data.columns:
+                    cash = bs_data.get(col, pd.Series([None])).iloc[0]
+                    if cash is not None and not pd.isna(cash):
+                        break
+            
+            # If no dedicated cash column found, check if we can use other_assets as proxy
+            if cash is None or pd.isna(cash):
+                other_assets = bs_data.get('other_assets', pd.Series([None])).iloc[0]
+                if other_assets is not None and not pd.isna(other_assets):
+                    cash = other_assets
+                    logger.debug("Cash Ratio calculation: Using 'other_assets' as proxy for cash")
+            
+            # Get current liabilities (using total_liabilities as proxy since current_liabilities not available)
+            current_liabilities = bs_data.get('total_liabilities', pd.Series([None])).iloc[0]
+            
+            if cash is None or pd.isna(cash):
+                logger.warning("Cash Ratio calculation: Cash and cash equivalents data not available in schema")
+                return None
+            
+            if current_liabilities is None or pd.isna(current_liabilities):
+                logger.warning("Cash Ratio calculation: Missing current_liabilities data")
+                return None
+            
+            if current_liabilities == 0:
+                logger.warning("Cash Ratio calculation: Current liabilities is zero")
+                return None
+            
+            ratio = cash / current_liabilities
+            logger.debug(f"Cash Ratio calculated: {ratio:.2f}")
+            return round(ratio, 2)
+            
+        except IndexError as e:
+            logger.error(f"Cash Ratio calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"Cash Ratio calculation failed: {str(e)}")
             return None

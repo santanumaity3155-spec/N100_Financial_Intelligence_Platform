@@ -97,15 +97,36 @@ class CashFlowCalculator:
             Operating Cash Flow value, or None if calculation not possible
         """
         try:
-            ocf = cf_data.get('cash_from_operating_activity', pd.Series([None])).iloc[0]
+            # Check if dataframe is empty
+            if cf_data.empty:
+                logger.warning("Operating Cash Flow calculation: Empty dataframe provided")
+                return None
+            
+            # Try primary column name first
+            ocf = cf_data.get('cash_from_operating_activity', None)
+            
+            # If not available, try alternative column name
+            if ocf is None or (hasattr(ocf, 'isna') and ocf.isna().all()):
+                ocf = cf_data.get('operating_activity', None)
+            
+            # Safely get the value
+            if ocf is not None and hasattr(ocf, 'iloc') and len(ocf) > 0:
+                ocf = ocf.iloc[0]
+            elif ocf is not None and not hasattr(ocf, 'iloc'):
+                ocf = ocf  # Already a scalar
+            else:
+                ocf = None
             
             if ocf is None or pd.isna(ocf):
-                logger.warning("Operating Cash Flow calculation: Missing cash_from_operating_activity data")
+                logger.warning("Operating Cash Flow calculation: Missing cash flow data (tried 'cash_from_operating_activity' and 'operating_activity')")
                 return None
             
             logger.debug(f"Operating Cash Flow calculated: {ocf:.2f}")
             return round(ocf, 2)
             
+        except IndexError as e:
+            logger.error(f"Operating Cash Flow calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"Operating Cash Flow calculation failed: {str(e)}")
             return None
@@ -128,16 +149,33 @@ class CashFlowCalculator:
             Free Cash Flow value, or None if calculation not possible
         """
         try:
+            # Check if dataframe is empty
+            if cf_data.empty:
+                logger.warning("Free Cash Flow calculation: Empty dataframe provided")
+                return None
+            
             # Try to get free_cash_flow directly if available
             fcf = cf_data.get('free_cash_flow', None)
             if fcf is not None and not fcf.isna().all():
-                fcf = fcf.iloc[0]
+                fcf = fcf.iloc[0] if hasattr(fcf, 'iloc') and len(fcf) > 0 else fcf
                 if not pd.isna(fcf):
                     logger.debug(f"Free Cash Flow calculated from direct value: {fcf:.2f}")
                     return round(fcf, 2)
             
             # Otherwise calculate: Operating CF - Capital Expenditures
-            ocf = cf_data.get('cash_from_operating_activity', pd.Series([None])).iloc[0]
+            # Try primary column name first
+            ocf = cf_data.get('cash_from_operating_activity', None)
+            if ocf is None or (hasattr(ocf, 'isna') and ocf.isna().all()):
+                ocf = cf_data.get('operating_activity', None)
+            
+            # Safely get the value
+            if ocf is not None and hasattr(ocf, 'iloc') and len(ocf) > 0:
+                ocf = ocf.iloc[0]
+            elif ocf is not None and not hasattr(ocf, 'iloc'):
+                ocf = ocf
+            else:
+                ocf = None
+            
             capex = cf_data.get('cash_from_investing_activity', pd.Series([0])).iloc[0]
             
             if ocf is None or pd.isna(ocf):
@@ -151,6 +189,9 @@ class CashFlowCalculator:
             logger.debug(f"Free Cash Flow calculated: {fcf:.2f}")
             return round(fcf, 2)
             
+        except IndexError as e:
+            logger.error(f"Free Cash Flow calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"Free Cash Flow calculation failed: {str(e)}")
             return None
@@ -175,7 +216,24 @@ class CashFlowCalculator:
             Cash Conversion Ratio value, or None if calculation not possible
         """
         try:
-            ocf = cf_data.get('cash_from_operating_activity', pd.Series([None])).iloc[0]
+            # Check if dataframes are empty
+            if cf_data.empty or pl_data.empty:
+                logger.warning("Cash Conversion Ratio calculation: Empty dataframes provided")
+                return None
+            
+            # Try primary column name first
+            ocf = cf_data.get('cash_from_operating_activity', None)
+            if ocf is None or (hasattr(ocf, 'isna') and ocf.isna().all()):
+                ocf = cf_data.get('operating_activity', None)
+            
+            # Safely get the value
+            if ocf is not None and hasattr(ocf, 'iloc') and len(ocf) > 0:
+                ocf = ocf.iloc[0]
+            elif ocf is not None and not hasattr(ocf, 'iloc'):
+                ocf = ocf
+            else:
+                ocf = None
+            
             net_profit = pl_data.get('net_profit', pd.Series([None])).iloc[0]
             
             if ocf is None or net_profit is None or pd.isna(ocf) or pd.isna(net_profit):
@@ -190,6 +248,9 @@ class CashFlowCalculator:
             logger.debug(f"Cash Conversion Ratio calculated: {ratio:.2f}")
             return round(ratio, 2)
             
+        except IndexError as e:
+            logger.error(f"Cash Conversion Ratio calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"Cash Conversion Ratio calculation failed: {str(e)}")
             return None

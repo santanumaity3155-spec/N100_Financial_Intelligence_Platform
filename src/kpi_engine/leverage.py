@@ -99,22 +99,39 @@ class LeverageCalculator:
             Debt to Equity ratio, or None if calculation not possible
         """
         try:
-            # Using borrowings as proxy for total debt
-            total_debt = bs_data.get('borrowings', pd.Series([None])).iloc[0]
-            equity = bs_data.get('share_capital', pd.Series([None])).iloc[0]
-            
-            if total_debt is None or equity is None or pd.isna(total_debt) or pd.isna(equity):
-                logger.warning("Debt to Equity calculation: Missing debt or equity data")
+            # Check if dataframe is empty
+            if bs_data.empty:
+                logger.warning("Debt to Equity calculation: Empty dataframe provided")
                 return None
             
-            if equity == 0:
-                logger.warning("Debt to Equity calculation: Equity is zero")
+            # Using borrowings as proxy for total debt
+            total_debt = bs_data.get('borrowings', pd.Series([None])).iloc[0]
+            
+            # Try equity_capital first, then fall back to share_capital + reserves
+            equity = bs_data.get('equity_capital', pd.Series([None])).iloc[0]
+            
+            if equity is None or pd.isna(equity):
+                # Fallback: use share_capital + reserves as proxy for equity
+                share_capital = bs_data.get('share_capital', pd.Series([0])).iloc[0]
+                reserves = bs_data.get('reserves', pd.Series([0])).iloc[0]
+                equity = (share_capital if share_capital and not pd.isna(share_capital) else 0) + \
+                        (reserves if reserves and not pd.isna(reserves) else 0)
+            
+            if total_debt is None or pd.isna(total_debt):
+                logger.warning("Debt to Equity calculation: Missing debt data")
+                return None
+            
+            if equity is None or pd.isna(equity) or equity == 0:
+                logger.warning("Debt to Equity calculation: Equity is zero or not available")
                 return None
             
             ratio = total_debt / equity
             logger.debug(f"Debt to Equity calculated: {ratio:.2f}")
             return round(ratio, 2)
             
+        except IndexError as e:
+            logger.error(f"Debt to Equity calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"Debt to Equity calculation failed: {str(e)}")
             return None
@@ -136,12 +153,21 @@ class LeverageCalculator:
             Debt Ratio value, or None if calculation not possible
         """
         try:
+            # Check if dataframe is empty
+            if bs_data.empty:
+                logger.warning("Debt Ratio calculation: Empty dataframe provided")
+                return None
+            
             # Using borrowings as proxy for total debt
             total_debt = bs_data.get('borrowings', pd.Series([None])).iloc[0]
             total_assets = bs_data.get('total_assets', pd.Series([None])).iloc[0]
             
-            if total_debt is None or total_assets is None or pd.isna(total_debt) or pd.isna(total_assets):
-                logger.warning("Debt Ratio calculation: Missing debt or total_assets data")
+            if total_debt is None or pd.isna(total_debt):
+                logger.warning("Debt Ratio calculation: Missing debt data")
+                return None
+            
+            if total_assets is None or pd.isna(total_assets):
+                logger.warning("Debt Ratio calculation: Missing total_assets data")
                 return None
             
             if total_assets == 0:
@@ -152,6 +178,9 @@ class LeverageCalculator:
             logger.debug(f"Debt Ratio calculated: {ratio:.2f}")
             return round(ratio, 2)
             
+        except IndexError as e:
+            logger.error(f"Debt Ratio calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"Debt Ratio calculation failed: {str(e)}")
             return None
@@ -174,11 +203,20 @@ class LeverageCalculator:
             Interest Coverage ratio, or None if calculation not possible
         """
         try:
+            # Check if dataframe is empty
+            if pl_data.empty:
+                logger.warning("Interest Coverage calculation: Empty dataframe provided")
+                return None
+            
             operating_profit = pl_data.get('operating_profit', pd.Series([None])).iloc[0]
             interest = pl_data.get('interest', pd.Series([None])).iloc[0]
             
-            if operating_profit is None or interest is None or pd.isna(operating_profit) or pd.isna(interest):
-                logger.warning("Interest Coverage calculation: Missing operating_profit or interest data")
+            if operating_profit is None or pd.isna(operating_profit):
+                logger.warning("Interest Coverage calculation: Missing operating_profit data")
+                return None
+            
+            if interest is None or pd.isna(interest):
+                logger.warning("Interest Coverage calculation: Missing interest data")
                 return None
             
             if interest == 0:
@@ -192,6 +230,9 @@ class LeverageCalculator:
             logger.debug(f"Interest Coverage calculated: {coverage:.2f}")
             return round(coverage, 2)
             
+        except IndexError as e:
+            logger.error(f"Interest Coverage calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"Interest Coverage calculation failed: {str(e)}")
             return None
@@ -213,21 +254,38 @@ class LeverageCalculator:
             Financial Leverage ratio, or None if calculation not possible
         """
         try:
-            total_assets = bs_data.get('total_assets', pd.Series([None])).iloc[0]
-            equity = bs_data.get('share_capital', pd.Series([None])).iloc[0]
-            
-            if total_assets is None or equity is None or pd.isna(total_assets) or pd.isna(equity):
-                logger.warning("Financial Leverage calculation: Missing total_assets or equity data")
+            # Check if dataframe is empty
+            if bs_data.empty:
+                logger.warning("Financial Leverage calculation: Empty dataframe provided")
                 return None
             
-            if equity == 0:
-                logger.warning("Financial Leverage calculation: Equity is zero")
+            total_assets = bs_data.get('total_assets', pd.Series([None])).iloc[0]
+            
+            # Try equity_capital first, then fall back to share_capital + reserves
+            equity = bs_data.get('equity_capital', pd.Series([None])).iloc[0]
+            
+            if equity is None or pd.isna(equity):
+                # Fallback: use share_capital + reserves as proxy for equity
+                share_capital = bs_data.get('share_capital', pd.Series([0])).iloc[0]
+                reserves = bs_data.get('reserves', pd.Series([0])).iloc[0]
+                equity = (share_capital if share_capital and not pd.isna(share_capital) else 0) + \
+                        (reserves if reserves and not pd.isna(reserves) else 0)
+            
+            if total_assets is None or pd.isna(total_assets):
+                logger.warning("Financial Leverage calculation: Missing total_assets data")
+                return None
+            
+            if equity is None or pd.isna(equity) or equity == 0:
+                logger.warning("Financial Leverage calculation: Equity is zero or not available")
                 return None
             
             leverage = total_assets / equity
             logger.debug(f"Financial Leverage calculated: {leverage:.2f}")
             return round(leverage, 2)
             
+        except IndexError as e:
+            logger.error(f"Financial Leverage calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"Financial Leverage calculation failed: {str(e)}")
             return None

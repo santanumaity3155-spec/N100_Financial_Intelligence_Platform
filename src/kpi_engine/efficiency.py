@@ -221,6 +221,11 @@ class EfficiencyCalculator:
             Working Capital Turnover ratio, or None if calculation not possible
         """
         try:
+            # Check if dataframes are empty
+            if pl_data.empty or bs_data.empty:
+                logger.warning("Working Capital Turnover calculation: Empty dataframes provided")
+                return None
+            
             sales = pl_data.get('sales', pd.Series([None])).iloc[0]
             current_assets = bs_data.get('total_assets', pd.Series([None])).iloc[0]
             current_liabilities = bs_data.get('total_liabilities', pd.Series([None])).iloc[0]
@@ -233,16 +238,36 @@ class EfficiencyCalculator:
                 logger.warning("Working Capital Turnover calculation: NaN values found")
                 return None
             
+            # Calculate working capital
             working_capital = current_assets - current_liabilities
             
+            # Log the calculated working capital for debugging
+            logger.debug(f"Working Capital Turnover: Current Assets={current_assets}, "
+                        f"Current Liabilities={current_liabilities}, "
+                        f"Working Capital={working_capital}")
+            
+            # Check if working capital is zero or negative
             if working_capital == 0:
-                logger.warning("Working Capital Turnover calculation: Working capital is zero")
+                logger.warning("Working Capital Turnover calculation: Working capital is zero "
+                              "(Current Assets equals Current Liabilities)")
+                return None
+            
+            if working_capital < 0:
+                logger.warning(f"Working Capital Turnover calculation: Working capital is negative ({working_capital:.2f}). "
+                              "This indicates current liabilities exceed current assets.")
+                return None
+            
+            if sales == 0:
+                logger.warning("Working Capital Turnover calculation: Sales is zero")
                 return None
             
             turnover = sales / working_capital
             logger.debug(f"Working Capital Turnover calculated: {turnover:.2f}")
             return round(turnover, 2)
             
+        except IndexError as e:
+            logger.error(f"Working Capital Turnover calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"Working Capital Turnover calculation failed: {str(e)}")
             return None

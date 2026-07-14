@@ -295,6 +295,14 @@ CREATE TABLE {table_name} (
                     if 'period' in df.columns:
                         df = df.drop_duplicates(subset=['company_id', 'period'], keep='first')
             
+            if table_name == "sectors":
+                print("\n========== SECTORS BEFORE INSERT ==========")
+                print(df.columns.tolist())
+                print(df.head(10))
+                print(df["company_id"].isnull().sum())
+                print(df["company_id"].dtype)
+                print("===========================================")
+
             # Load data using pandas to_sql with chunking to avoid "too many SQL variables"
             df.to_sql(
                 name=table_name,

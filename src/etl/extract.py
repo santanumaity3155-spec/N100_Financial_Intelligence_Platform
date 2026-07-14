@@ -138,29 +138,29 @@ class DataExtractor:
             
             logger.debug(f"Using header={header} for {file_path.name}")
             
-            # Read the Excel file with detected header
-            df = pd.read_excel(
-                file_path,
-                sheet_name=sheet_name,
-                header=header,
-                **kwargs
-            )
+            # Read the Excel file with the resolved header row
+            if file_path.name == "sectors.xlsx":
+                logger.info("Using header=0 for sectors.xlsx")
+                df = pd.read_excel(
+                    file_path,
+                    sheet_name=sheet_name,
+                    header=0,
+                    **kwargs
+                )
+            else:
+                df = pd.read_excel(
+                    file_path,
+                    sheet_name=sheet_name,
+                    header=header,
+                    **kwargs
+                )
+            
+            logger.info(f"{file_path.name} columns after read: {list(df.columns)}")
             
             # If no header was found (all numeric columns), assign default names
             if all(isinstance(col, (int, float)) for col in df.columns):
                 logger.warning(f"No header row found for {file_path.name}, assigning default column names")
                 df.columns = [f'col_{i}' for i in range(len(df.columns))]
-            
-            # Special handling for sectors.xlsx - check if company_id is missing
-            # and the first column contains numeric IDs
-            if file_path.name == 'sectors.xlsx' and 'company_id' not in df.columns:
-                logger.warning(f"sectors.xlsx: Re-reading with header=1 to get correct columns")
-                df = pd.read_excel(
-                    file_path,
-                    sheet_name=sheet_name,
-                    header=1,
-                    **kwargs
-                )
             
             logger.info(
                 f"Successfully read {file_path.name}: "
@@ -205,6 +205,7 @@ class DataExtractor:
                 # Apply column mapping if available (BEFORE dropping id column)
                 try:
                     df = apply_column_mapping(df, dataset_name)
+                    logger.info(f"After mapping ({dataset_name}): {list(df.columns)}")
                 except Exception as e:
                     logger.warning(f"Could not apply column mapping for {dataset_name}: {str(e)}")
                 

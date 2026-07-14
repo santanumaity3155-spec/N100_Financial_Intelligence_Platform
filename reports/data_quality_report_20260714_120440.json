@@ -1,0 +1,593 @@
+{
+  "report_title": "N100 Financial Intelligence Platform - Data Quality Report",
+  "generated_at": "2026-07-14T12:04:40.363444",
+  "summary": {
+    "total_datasets": 12,
+    "validation_passed": 11,
+    "validation_failed": 1,
+    "total_rows_loaded": 12164,
+    "total_errors": 0,
+    "total_warnings": 0
+  },
+  "validation_summary": {
+    "total_datasets": 12,
+    "passed": 11,
+    "failed": 1,
+    "pass_rate": 91.67,
+    "datasets": {
+      "companies": {
+        "overall_passed": true,
+        "total_rows": 92,
+        "total_columns": 12,
+        "failed_checks": []
+      },
+      "profit_loss": {
+        "overall_passed": false,
+        "total_rows": 1263,
+        "total_columns": 15,
+        "failed_checks": [
+          "missing_values"
+        ]
+      },
+      "balance_sheet": {
+        "overall_passed": true,
+        "total_rows": 1225,
+        "total_columns": 13,
+        "failed_checks": []
+      },
+      "cash_flow": {
+        "overall_passed": true,
+        "total_rows": 1164,
+        "total_columns": 7,
+        "failed_checks": []
+      },
+      "analysis": {
+        "overall_passed": true,
+        "total_rows": 5,
+        "total_columns": 6,
+        "failed_checks": []
+      },
+      "documents": {
+        "overall_passed": true,
+        "total_rows": 1585,
+        "total_columns": 4,
+        "failed_checks": []
+      },
+      "pros_cons": {
+        "overall_passed": true,
+        "total_rows": 5,
+        "total_columns": 4,
+        "failed_checks": []
+      },
+      "sectors": {
+        "overall_passed": true,
+        "total_rows": 92,
+        "total_columns": 6,
+        "failed_checks": []
+      },
+      "stock_prices": {
+        "overall_passed": true,
+        "total_rows": 5520,
+        "total_columns": 9,
+        "failed_checks": []
+      },
+      "market_cap": {
+        "overall_passed": true,
+        "total_rows": 92,
+        "total_columns": 9,
+        "failed_checks": []
+      },
+      "financial_ratios": {
+        "overall_passed": true,
+        "total_rows": 1065,
+        "total_columns": 16,
+        "failed_checks": []
+      },
+      "peer_groups": {
+        "overall_passed": true,
+        "total_rows": 56,
+        "total_columns": 4,
+        "failed_checks": []
+      }
+    }
+  },
+  "normalization_summary": {
+    "total_operations": 46,
+    "operations": [
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 12
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 92,
+        "normalized_unique": 92
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 15
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 100,
+        "normalized_unique": 100
+      },
+      {
+        "operation": "normalize_numeric",
+        "column": "operating_profit",
+        "original_valid": 1263,
+        "normalized_valid": 1263
+      },
+      {
+        "operation": "normalize_numeric",
+        "column": "net_profit",
+        "original_valid": 1276,
+        "normalized_valid": 1276
+      },
+      {
+        "operation": "normalize_numeric",
+        "column": "eps",
+        "original_valid": 1271,
+        "normalized_valid": 1271
+      },
+      {
+        "operation": "remove_duplicates",
+        "subset": [
+          "company_id",
+          "period"
+        ],
+        "original_count": 1276,
+        "removed_count": 13,
+        "final_count": 1263
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 13
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 98,
+        "normalized_unique": 98
+      },
+      {
+        "operation": "normalize_numeric",
+        "column": "total_assets",
+        "original_valid": 1312,
+        "normalized_valid": 1312
+      },
+      {
+        "operation": "normalize_numeric",
+        "column": "total_liabilities",
+        "original_valid": 1312,
+        "normalized_valid": 1312
+      },
+      {
+        "operation": "remove_duplicates",
+        "subset": [
+          "company_id",
+          "period"
+        ],
+        "original_count": 1312,
+        "removed_count": 87,
+        "final_count": 1225
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 7
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 100,
+        "normalized_unique": 100
+      },
+      {
+        "operation": "remove_duplicates",
+        "subset": [
+          "company_id",
+          "period"
+        ],
+        "original_count": 1187,
+        "removed_count": 23,
+        "final_count": 1164
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 6
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 5,
+        "normalized_unique": 5
+      },
+      {
+        "operation": "remove_duplicates",
+        "subset": [
+          "company_id"
+        ],
+        "original_count": 20,
+        "removed_count": 15,
+        "final_count": 5
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 4
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 99,
+        "normalized_unique": 99
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 4
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 5,
+        "normalized_unique": 5
+      },
+      {
+        "operation": "remove_duplicates",
+        "subset": [
+          "company_id"
+        ],
+        "original_count": 16,
+        "removed_count": 11,
+        "final_count": 5
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 6
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 92,
+        "normalized_unique": 92
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 9
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 92,
+        "normalized_unique": 92
+      },
+      {
+        "operation": "normalize_dates",
+        "column": "date",
+        "format": "%Y-%m-%d",
+        "original_valid": 5520,
+        "normalized_valid": 5520
+      },
+      {
+        "operation": "normalize_numeric",
+        "column": "open_price",
+        "original_valid": 5520,
+        "normalized_valid": 5520
+      },
+      {
+        "operation": "normalize_numeric",
+        "column": "high_price",
+        "original_valid": 5520,
+        "normalized_valid": 5520
+      },
+      {
+        "operation": "normalize_numeric",
+        "column": "low_price",
+        "original_valid": 5520,
+        "normalized_valid": 5520
+      },
+      {
+        "operation": "normalize_numeric",
+        "column": "close_price",
+        "original_valid": 5520,
+        "normalized_valid": 5520
+      },
+      {
+        "operation": "normalize_numeric",
+        "column": "volume",
+        "original_valid": 5520,
+        "normalized_valid": 5520
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 9
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 92,
+        "normalized_unique": 92
+      },
+      {
+        "operation": "normalize_numeric",
+        "column": "market_cap",
+        "original_valid": 552,
+        "normalized_valid": 552
+      },
+      {
+        "operation": "normalize_numeric",
+        "column": "enterprise_value",
+        "original_valid": 552,
+        "normalized_valid": 552
+      },
+      {
+        "operation": "remove_duplicates",
+        "subset": [
+          "company_id"
+        ],
+        "original_count": 552,
+        "removed_count": 460,
+        "final_count": 92
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 16
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 92,
+        "normalized_unique": 92
+      },
+      {
+        "operation": "normalize_numeric",
+        "column": "roe",
+        "original_valid": 1184,
+        "normalized_valid": 1184
+      },
+      {
+        "operation": "normalize_numeric",
+        "column": "debt_to_equity",
+        "original_valid": 1184,
+        "normalized_valid": 1184
+      },
+      {
+        "operation": "remove_duplicates",
+        "subset": [
+          "company_id",
+          "period"
+        ],
+        "original_count": 1184,
+        "removed_count": 119,
+        "final_count": 1065
+      },
+      {
+        "operation": "normalize_column_names",
+        "columns_normalized": 4
+      },
+      {
+        "operation": "normalize_company_id",
+        "column": "company_id",
+        "original_unique": 56,
+        "normalized_unique": 56
+      }
+    ]
+  },
+  "transformation_summary": {
+    "total_operations": 12,
+    "operations": [
+      {
+        "dataset": "companies",
+        "operations": [
+          "clean_strings",
+          "normalize_ids"
+        ]
+      },
+      {
+        "dataset": "profit_loss",
+        "operations": [
+          "normalize_ids",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "balance_sheet",
+        "operations": [
+          "normalize_ids",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "cash_flow",
+        "operations": [
+          "normalize_ids",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "analysis",
+        "operations": [
+          "normalize_ids",
+          "clean_strings"
+        ]
+      },
+      {
+        "dataset": "documents",
+        "operations": [
+          "normalize_ids",
+          "clean_strings"
+        ]
+      },
+      {
+        "dataset": "pros_cons",
+        "operations": [
+          "normalize_ids",
+          "clean_strings"
+        ]
+      },
+      {
+        "dataset": "sectors",
+        "operations": [
+          "normalize_ids",
+          "clean_strings"
+        ]
+      },
+      {
+        "dataset": "stock_prices",
+        "operations": [
+          "normalize_ids",
+          "normalize_dates",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "market_cap",
+        "operations": [
+          "normalize_ids",
+          "normalize_dates",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "financial_ratios",
+        "operations": [
+          "normalize_ids",
+          "convert_numeric"
+        ]
+      },
+      {
+        "dataset": "peer_groups",
+        "operations": [
+          "normalize_ids",
+          "clean_strings"
+        ]
+      }
+    ]
+  },
+  "load_summary": {
+    "total_tables": 12,
+    "successful_loads": 12,
+    "failed_loads": [],
+    "total_rows_loaded": 12164,
+    "tables": {
+      "companies": {
+        "rows_loaded": 92,
+        "success": true
+      },
+      "profit_loss": {
+        "rows_loaded": 1263,
+        "success": true
+      },
+      "balance_sheet": {
+        "rows_loaded": 1225,
+        "success": true
+      },
+      "cash_flow": {
+        "rows_loaded": 1164,
+        "success": true
+      },
+      "analysis": {
+        "rows_loaded": 5,
+        "success": true
+      },
+      "documents": {
+        "rows_loaded": 1585,
+        "success": true
+      },
+      "pros_cons": {
+        "rows_loaded": 5,
+        "success": true
+      },
+      "sectors": {
+        "rows_loaded": 92,
+        "success": true
+      },
+      "stock_prices": {
+        "rows_loaded": 5520,
+        "success": true
+      },
+      "market_cap": {
+        "rows_loaded": 92,
+        "success": true
+      },
+      "financial_ratios": {
+        "rows_loaded": 1065,
+        "success": true
+      },
+      "peer_groups": {
+        "rows_loaded": 56,
+        "success": true
+      }
+    },
+    "verification": {
+      "verified": true,
+      "tables": {
+        "companies": {
+          "expected": 92,
+          "actual": 92,
+          "match": true
+        },
+        "profit_loss": {
+          "expected": 1263,
+          "actual": 1263,
+          "match": true
+        },
+        "balance_sheet": {
+          "expected": 1225,
+          "actual": 1225,
+          "match": true
+        },
+        "cash_flow": {
+          "expected": 1164,
+          "actual": 1164,
+          "match": true
+        },
+        "analysis": {
+          "expected": 5,
+          "actual": 5,
+          "match": true
+        },
+        "documents": {
+          "expected": 1585,
+          "actual": 1585,
+          "match": true
+        },
+        "pros_cons": {
+          "expected": 5,
+          "actual": 5,
+          "match": true
+        },
+        "sectors": {
+          "expected": 92,
+          "actual": 92,
+          "match": true
+        },
+        "stock_prices": {
+          "expected": 5520,
+          "actual": 5520,
+          "match": true
+        },
+        "market_cap": {
+          "expected": 92,
+          "actual": 92,
+          "match": true
+        },
+        "financial_ratios": {
+          "expected": 1065,
+          "actual": 1065,
+          "match": true
+        },
+        "peer_groups": {
+          "expected": 56,
+          "actual": 56,
+          "match": true
+        }
+      }
+    }
+  },
+  "recommendations": [
+    "Review 1 failed dataset validations",
+    "Address missing values in profit_loss"
+  ]
+}

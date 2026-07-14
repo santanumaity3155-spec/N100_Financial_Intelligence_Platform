@@ -105,15 +105,21 @@ class ValuationCalculator:
             EPS value, or None if calculation not possible
         """
         try:
+            # Check if dataframes are empty
+            if pl_data.empty or bs_data.empty:
+                logger.warning("EPS calculation: Empty dataframes provided")
+                return None
+            
             net_profit = pl_data.get('net_profit', pd.Series([None])).iloc[0]
             
             # Try to get shares outstanding, otherwise use share_capital as proxy
             shares = bs_data.get('shares_outstanding', None)
-            if shares is None or shares.isna().all():
+            if shares is None or (hasattr(shares, 'isna') and shares.isna().all()):
                 # Use share_capital as rough proxy (assuming face_value of 1)
                 shares = bs_data.get('share_capital', pd.Series([None]))
             
-            shares = shares.iloc[0] if shares is not None else None
+            # Safely get the first value
+            shares = shares.iloc[0] if shares is not None and len(shares) > 0 else None
             
             if net_profit is None or shares is None or pd.isna(net_profit) or pd.isna(shares):
                 logger.warning("EPS calculation: Missing net_profit or shares data")
@@ -127,6 +133,9 @@ class ValuationCalculator:
             logger.debug(f"EPS calculated: {eps:.2f}")
             return round(eps, 2)
             
+        except IndexError as e:
+            logger.error(f"EPS calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"EPS calculation failed: {str(e)}")
             return None
@@ -151,7 +160,13 @@ class ValuationCalculator:
             PE Ratio value, or None if calculation not possible
         """
         try:
-            # Get EPS
+            # Check if dataframes are empty
+            if pl_data.empty or mc_data.empty:
+                logger.warning("PE Ratio calculation: Empty dataframes provided")
+                return None
+            
+            # Get EPS - pass bs_data (we'll use share_capital from balance sheet if needed)
+            # For PE ratio, we need shares from market_cap or balance sheet
             eps = self.calculate_eps(pl_data, mc_data)
             if eps is None or eps == 0:
                 logger.warning("PE Ratio calculation: EPS is zero or not available")
@@ -160,9 +175,9 @@ class ValuationCalculator:
             # Get market cap and derive price per share
             market_cap = mc_data.get('market_cap', pd.Series([None])).iloc[0]
             shares = mc_data.get('shares_outstanding', None)
-            if shares is None or shares.isna().all():
+            if shares is None or (hasattr(shares, 'isna') and shares.isna().all()):
                 shares = mc_data.get('share_capital', pd.Series([None]))
-            shares = shares.iloc[0] if shares is not None else None
+            shares = shares.iloc[0] if shares is not None and len(shares) > 0 else None
             
             if market_cap is None or shares is None or pd.isna(market_cap) or pd.isna(shares):
                 logger.warning("PE Ratio calculation: Missing market_cap or shares data")
@@ -178,6 +193,9 @@ class ValuationCalculator:
             logger.debug(f"PE Ratio calculated: {pe_ratio:.2f}")
             return round(pe_ratio, 2)
             
+        except IndexError as e:
+            logger.error(f"PE Ratio calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"PE Ratio calculation failed: {str(e)}")
             return None
@@ -187,7 +205,7 @@ class ValuationCalculator:
         Calculate Price to Book (PB) Ratio.
         
         Formula: PB Ratio = Market Price per Share / Book Value per Share
-        Note: Using share_capital as proxy for book value
+        Note: Book value per share = Book Value / Shares Outstanding
         
         Parameters
         ----------
@@ -202,8 +220,22 @@ class ValuationCalculator:
             PB Ratio value, or None if calculation not possible
         """
         try:
-            # Get book value per share (using share_capital as proxy)
-            book_value = bs_data.get('share_capital', pd.Series([None])).iloc[0]
+            # Check if dataframes are empty
+            if bs_data.empty or mc_data.empty:
+                logger.warning("PB Ratio calculation: Empty dataframes provided")
+                return None
+            
+            # Get book value from balance sheet equity_capital or companies table book_value
+            # First try equity_capital from balance sheet
+            book_value = bs_data.get('equity_capital', pd.Series([None])).iloc[0]
+            
+            # If equity_capital not available, we'll need to fetch from companies table
+            # For now, use share_capital + reserves as proxy for book value
+            if book_value is None or pd.isna(book_value):
+                share_capital = bs_data.get('share_capital', pd.Series([0])).iloc[0]
+                reserves = bs_data.get('reserves', pd.Series([0])).iloc[0]
+                book_value = (share_capital if share_capital and not pd.isna(share_capital) else 0) + \
+                            (reserves if reserves and not pd.isna(reserves) else 0)
             
             if book_value is None or pd.isna(book_value) or book_value == 0:
                 logger.warning("PB Ratio calculation: Book value is zero or not available")
@@ -212,9 +244,9 @@ class ValuationCalculator:
             # Get market cap and derive price per share
             market_cap = mc_data.get('market_cap', pd.Series([None])).iloc[0]
             shares = mc_data.get('shares_outstanding', None)
-            if shares is None or shares.isna().all():
+            if shares is None or (hasattr(shares, 'isna') and shares.isna().all()):
                 shares = mc_data.get('share_capital', pd.Series([None]))
-            shares = shares.iloc[0] if shares is not None else None
+            shares = shares.iloc[0] if shares is not None and len(shares) > 0 else None
             
             if market_cap is None or shares is None or pd.isna(market_cap) or pd.isna(shares):
                 logger.warning("PB Ratio calculation: Missing market_cap or shares data")
@@ -231,6 +263,9 @@ class ValuationCalculator:
             logger.debug(f"PB Ratio calculated: {pb_ratio:.2f}")
             return round(pb_ratio, 2)
             
+        except IndexError as e:
+            logger.error(f"PB Ratio calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"PB Ratio calculation failed: {str(e)}")
             return None
@@ -258,15 +293,20 @@ class ValuationCalculator:
             EV/EBITDA value, or None if calculation not possible
         """
         try:
-            # Try to get enterprise_value directly
+            # Check if dataframes are empty
+            if bs_data.empty or pl_data.empty or mc_data.empty:
+                logger.warning("EV/EBITDA calculation: Empty dataframes provided")
+                return None
+            
+            # Try to get enterprise_value directly from market_cap table
             ev = mc_data.get('enterprise_value', None)
-            if ev is not None and not pd.isna(ev.iloc[0] if hasattr(ev, 'iloc') else ev):
-                ev = ev.iloc[0] if hasattr(ev, 'iloc') else ev
+            if ev is not None and not ev.isna().all():
+                ev = ev.iloc[0] if hasattr(ev, 'iloc') and len(ev) > 0 else ev
             else:
                 # Calculate EV = Market Cap + Debt - Cash
                 market_cap = mc_data.get('market_cap', pd.Series([None])).iloc[0]
                 debt = bs_data.get('borrowings', pd.Series([0])).iloc[0]
-                ev = market_cap + debt if market_cap else None
+                ev = market_cap + debt if market_cap and not pd.isna(market_cap) else None
             
             if ev is None or pd.isna(ev):
                 logger.warning("EV/EBITDA calculation: Enterprise value not available")
@@ -294,6 +334,9 @@ class ValuationCalculator:
             logger.debug(f"EV/EBITDA calculated: {ratio:.2f}")
             return round(ratio, 2)
             
+        except IndexError as e:
+            logger.error(f"EV/EBITDA calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"EV/EBITDA calculation failed: {str(e)}")
             return None
@@ -318,6 +361,11 @@ class ValuationCalculator:
             Dividend Yield percentage, or None if calculation not possible
         """
         try:
+            # Check if dataframes are empty
+            if pl_data.empty or mc_data.empty:
+                logger.warning("Dividend Yield calculation: Empty dataframes provided")
+                return None
+            
             # Get dividend payout
             dividend = pl_data.get('dividend_payout', pd.Series([None])).iloc[0]
             
@@ -328,9 +376,9 @@ class ValuationCalculator:
             # Get market cap and derive price per share
             market_cap = mc_data.get('market_cap', pd.Series([None])).iloc[0]
             shares = mc_data.get('shares_outstanding', None)
-            if shares is None or shares.isna().all():
+            if shares is None or (hasattr(shares, 'isna') and shares.isna().all()):
                 shares = mc_data.get('share_capital', pd.Series([None]))
-            shares = shares.iloc[0] if shares is not None else None
+            shares = shares.iloc[0] if shares is not None and len(shares) > 0 else None
             
             if market_cap is None or shares is None or pd.isna(market_cap) or pd.isna(shares):
                 logger.warning("Dividend Yield calculation: Missing market_cap or shares data")
@@ -351,6 +399,9 @@ class ValuationCalculator:
             logger.debug(f"Dividend Yield calculated: {yield_pct:.2f}%")
             return round(yield_pct, 2)
             
+        except IndexError as e:
+            logger.error(f"Dividend Yield calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"Dividend Yield calculation failed: {str(e)}")
             return None

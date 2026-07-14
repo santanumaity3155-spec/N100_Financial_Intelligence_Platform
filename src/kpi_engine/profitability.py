@@ -204,11 +204,20 @@ class ProfitabilityCalculator:
             ROA percentage, or None if calculation not possible
         """
         try:
+            # Check if dataframes are empty
+            if pl_data.empty or bs_data.empty:
+                logger.warning("ROA calculation: Empty dataframes provided")
+                return None
+            
             net_profit = pl_data.get('net_profit', pd.Series([None])).iloc[0]
             total_assets = bs_data.get('total_assets', pd.Series([None])).iloc[0]
             
-            if net_profit is None or total_assets is None or pd.isna(net_profit) or pd.isna(total_assets):
-                logger.warning("ROA calculation: Missing net_profit or total_assets data")
+            if net_profit is None or pd.isna(net_profit):
+                logger.warning("ROA calculation: Missing net_profit data")
+                return None
+            
+            if total_assets is None or pd.isna(total_assets):
+                logger.warning("ROA calculation: Missing total_assets data")
                 return None
             
             if total_assets == 0:
@@ -219,6 +228,9 @@ class ProfitabilityCalculator:
             logger.debug(f"ROA calculated: {roa:.2f}%")
             return round(roa, 2)
             
+        except IndexError as e:
+            logger.error(f"ROA calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"ROA calculation failed: {str(e)}")
             return None
@@ -240,6 +252,11 @@ class ProfitabilityCalculator:
             Net Profit Margin percentage, or None if calculation not possible
         """
         try:
+            # Check if dataframe is empty
+            if pl_data.empty:
+                logger.warning("Net Profit Margin calculation: Empty dataframe provided")
+                return None
+            
             net_profit = pl_data.get('net_profit', pd.Series([None])).iloc[0]
             sales = pl_data.get('sales', pd.Series([None])).iloc[0]
             
@@ -255,6 +272,9 @@ class ProfitabilityCalculator:
             logger.debug(f"Net Profit Margin calculated: {margin:.2f}%")
             return round(margin, 2)
             
+        except IndexError as e:
+            logger.error(f"Net Profit Margin calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"Net Profit Margin calculation failed: {str(e)}")
             return None
@@ -276,6 +296,11 @@ class ProfitabilityCalculator:
             Operating Margin percentage, or None if calculation not possible
         """
         try:
+            # Check if dataframe is empty
+            if pl_data.empty:
+                logger.warning("Operating Margin calculation: Empty dataframe provided")
+                return None
+            
             operating_profit = pl_data.get('operating_profit', pd.Series([None])).iloc[0]
             sales = pl_data.get('sales', pd.Series([None])).iloc[0]
             
@@ -291,6 +316,9 @@ class ProfitabilityCalculator:
             logger.debug(f"Operating Margin calculated: {margin:.2f}%")
             return round(margin, 2)
             
+        except IndexError as e:
+            logger.error(f"Operating Margin calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"Operating Margin calculation failed: {str(e)}")
             return None
@@ -313,16 +341,26 @@ class ProfitabilityCalculator:
             EBIT Margin percentage, or None if calculation not possible
         """
         try:
+            # Check if dataframe is empty
+            if pl_data.empty:
+                logger.warning("EBIT Margin calculation: Empty dataframe provided")
+                return None
+            
             operating_profit = pl_data.get('operating_profit', pd.Series([None])).iloc[0]
             interest = pl_data.get('interest', pd.Series([0])).iloc[0]
             sales = pl_data.get('sales', pd.Series([None])).iloc[0]
             
-            if operating_profit is None or sales is None or pd.isna(operating_profit) or pd.isna(sales):
-                logger.warning("EBIT Margin calculation: Missing operating_profit or sales data")
+            if operating_profit is None or pd.isna(operating_profit):
+                logger.warning("EBIT Margin calculation: Missing operating_profit data")
+                return None
+            
+            if sales is None or pd.isna(sales):
+                logger.warning("EBIT Margin calculation: Missing sales data")
                 return None
             
             # Calculate EBIT
-            ebit = operating_profit + (interest if interest and not pd.isna(interest) else 0)
+            interest = interest if interest and not pd.isna(interest) else 0
+            ebit = operating_profit + interest
             
             if sales == 0:
                 logger.warning("EBIT Margin calculation: Sales is zero")
@@ -332,6 +370,9 @@ class ProfitabilityCalculator:
             logger.debug(f"EBIT Margin calculated: {margin:.2f}%")
             return round(margin, 2)
             
+        except IndexError as e:
+            logger.error(f"EBIT Margin calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"EBIT Margin calculation failed: {str(e)}")
             return None
@@ -354,12 +395,24 @@ class ProfitabilityCalculator:
             Gross Margin percentage, or None if calculation not possible
         """
         try:
+            # Check if dataframe is empty
+            if pl_data.empty:
+                logger.warning("Gross Margin calculation: Empty dataframe provided")
+                return None
+            
             # Try to get gross profit, if not available use operating profit
             gross_profit = pl_data.get('gross_profit', None)
-            if gross_profit is None or gross_profit.isna().all():
+            if gross_profit is None or (hasattr(gross_profit, 'isna') and gross_profit.isna().all()):
                 gross_profit = pl_data.get('operating_profit', pd.Series([None]))
             
-            gross_profit = gross_profit.iloc[0]
+            # Safely get the value
+            if gross_profit is not None and hasattr(gross_profit, 'iloc') and len(gross_profit) > 0:
+                gross_profit = gross_profit.iloc[0]
+            elif gross_profit is not None and not hasattr(gross_profit, 'iloc'):
+                gross_profit = gross_profit
+            else:
+                gross_profit = None
+            
             sales = pl_data.get('sales', pd.Series([None])).iloc[0]
             
             if gross_profit is None or sales is None or pd.isna(gross_profit) or pd.isna(sales):
@@ -374,6 +427,9 @@ class ProfitabilityCalculator:
             logger.debug(f"Gross Margin calculated: {margin:.2f}%")
             return round(margin, 2)
             
+        except IndexError as e:
+            logger.error(f"Gross Margin calculation failed - IndexError (empty dataframe): {str(e)}")
+            return None
         except Exception as e:
             logger.error(f"Gross Margin calculation failed: {str(e)}")
             return None
