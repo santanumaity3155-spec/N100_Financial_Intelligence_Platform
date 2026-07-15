@@ -1,1 +1,1 @@
-﻿"""Placeholder module."""\n
+﻿"""Placeholder module."""
