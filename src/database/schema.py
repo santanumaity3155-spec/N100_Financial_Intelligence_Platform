@@ -199,18 +199,55 @@ FINANCIAL_RATIOS_SCHEMA = """
 CREATE TABLE IF NOT EXISTS financial_ratios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     company_id TEXT NOT NULL,
+    company_name TEXT,
     period TEXT,
-    pe_ratio REAL,
-    pb_ratio REAL,
-    ps_ratio REAL,
+    industry TEXT,
+    sector TEXT,
+    -- Profitability
+    net_profit_margin REAL,
+    operating_profit_margin REAL,
     roe REAL,
+    roce REAL,
     roa REAL,
+    -- Leverage
     debt_to_equity REAL,
-    current_ratio REAL,
-    quick_ratio REAL,
-    dividend_yield REAL,
+    interest_coverage REAL,
+    net_debt REAL,
+    high_leverage_flag INTEGER DEFAULT 0,
+    -- Efficiency
+    asset_turnover REAL,
+    -- CAGR
+    revenue_cagr_3yr REAL,
+    revenue_cagr_5yr REAL,
+    revenue_cagr_10yr REAL,
+    revenue_cagr_3yr_flag TEXT,
+    revenue_cagr_5yr_flag TEXT,
+    revenue_cagr_10yr_flag TEXT,
+    pat_cagr_3yr REAL,
+    pat_cagr_5yr REAL,
+    pat_cagr_10yr REAL,
+    pat_cagr_3yr_flag TEXT,
+    pat_cagr_5yr_flag TEXT,
+    pat_cagr_10yr_flag TEXT,
+    eps_cagr_3yr REAL,
+    eps_cagr_5yr REAL,
+    eps_cagr_10yr REAL,
+    eps_cagr_3yr_flag TEXT,
+    eps_cagr_5yr_flag TEXT,
+    eps_cagr_10yr_flag TEXT,
+    -- Cash Flow
+    free_cash_flow REAL,
+    fcf_margin REAL,
+    cash_conversion REAL,
+    capex_intensity REAL,
+    cash_reinvestment_ratio REAL,
+    cash_return_on_assets REAL,
+    operating_cashflow_growth REAL,
+    capital_allocation_rating TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE,
+    UNIQUE(company_id, period)
 );
 """
 
