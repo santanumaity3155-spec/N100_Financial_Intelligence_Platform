@@ -61,64 +61,72 @@ def temp_db():
     with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
         db_path = f.name
     
-    # Create database and tables
-    conn = sqlite3.connect(db_path)
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS companies (
-            company_id TEXT PRIMARY KEY,
-            company_name TEXT,
-            sector TEXT,
-            industry TEXT
-        )
-    """)
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS financial_ratios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            company_id TEXT NOT NULL,
-            company_name TEXT,
-            period TEXT,
-            industry TEXT,
-            sector TEXT,
-            net_profit_margin REAL,
-            operating_profit_margin REAL,
-            roe REAL,
-            roce REAL,
-            roa REAL,
-            debt_to_equity REAL,
-            interest_coverage REAL,
-            net_debt REAL,
-            high_leverage_flag INTEGER DEFAULT 0,
-            asset_turnover REAL,
-            revenue_cagr_3yr REAL,
-            revenue_cagr_5yr REAL,
-            revenue_cagr_10yr REAL,
-            pat_cagr_3yr REAL,
-            pat_cagr_5yr REAL,
-            pat_cagr_10yr REAL,
-            eps_cagr_3yr REAL,
-            eps_cagr_5yr REAL,
-            eps_cagr_10yr REAL,
-            free_cash_flow REAL,
-            fcf_margin REAL,
-            cash_conversion REAL,
-            capex_intensity REAL,
-            cash_reinvestment_ratio REAL,
-            cash_return_on_assets REAL,
-            operating_cashflow_growth REAL,
-            capital_allocation_rating TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(company_id, period)
-        )
-    """)
-    conn.commit()
-    conn.close()
+    # Ensure any previous connection to this path is closed
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS companies (
+                company_id TEXT PRIMARY KEY,
+                company_name TEXT,
+                sector TEXT,
+                industry TEXT
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS financial_ratios (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                company_id TEXT NOT NULL,
+                company_name TEXT,
+                period TEXT,
+                industry TEXT,
+                sector TEXT,
+                net_profit_margin REAL,
+                operating_profit_margin REAL,
+                roe REAL,
+                roce REAL,
+                roa REAL,
+                debt_to_equity REAL,
+                interest_coverage REAL,
+                net_debt REAL,
+                high_leverage_flag INTEGER DEFAULT 0,
+                asset_turnover REAL,
+                revenue_cagr_3yr REAL,
+                revenue_cagr_5yr REAL,
+                revenue_cagr_10yr REAL,
+                pat_cagr_3yr REAL,
+                pat_cagr_5yr REAL,
+                pat_cagr_10yr REAL,
+                eps_cagr_3yr REAL,
+                eps_cagr_5yr REAL,
+                eps_cagr_10yr REAL,
+                free_cash_flow REAL,
+                fcf_margin REAL,
+                cash_conversion REAL,
+                capex_intensity REAL,
+                cash_reinvestment_ratio REAL,
+                cash_return_on_assets REAL,
+                operating_cashflow_growth REAL,
+                capital_allocation_rating TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(company_id, period)
+            )
+        """)
+        conn.commit()
+    finally:
+        conn.close()
     
     yield db_path
     
-    # Cleanup
-    if os.path.exists(db_path):
-        os.unlink(db_path)
+    # Cleanup - ensure no lingering connections
+    for attempt in range(3):
+        try:
+            if os.path.exists(db_path):
+                os.unlink(db_path)
+            break
+        except PermissionError:
+            import time
+            time.sleep(0.1)
 
 
 @pytest.fixture
@@ -388,8 +396,8 @@ class TestInsertFinancialRatios:
 class TestCheckDuplicatePeriod:
     """Test check_duplicate_period function."""
     
-    def test_no_duplicate(self, temp_db):
-        """Test when no duplicate exists."""
+    def test_duplicate_exists(self, temp_db):
+        """Test that duplicate is detected when record exists."""
         with patch('src.analytics.ratio_engine.get_connection') as mock_get_conn:
             mock_conn = sqlite3.connect(temp_db)
             mock_get_conn.return_value = mock_conn
@@ -407,8 +415,8 @@ class TestCheckDuplicatePeriod:
             
             mock_conn.close()
     
-    def test_no_duplicate_when_not_exists(self, temp_db):
-        """Test when record doesn't exist."""
+    def test_no_duplicate(self, temp_db):
+        """Test when no duplicate exists."""
         with patch('src.analytics.ratio_engine.get_connection') as mock_get_conn:
             mock_conn = sqlite3.connect(temp_db)
             mock_get_conn.return_value = mock_conn
@@ -732,30 +740,22 @@ class TestValidateDatabaseIntegrity:
             assert results["valid"] is True
             
             mock_conn.close()
-    
-    def test_validate_with_duplicates(self, temp_db):
+
+    def test_validate_with_duplicates(self):
         """Test validating database with duplicates."""
         with patch('src.analytics.ratio_engine.get_connection') as mock_get_conn:
-            mock_conn = sqlite3.connect(temp_db)
+            mock_conn = MagicMock()
             mock_get_conn.return_value = mock_conn
             
-            # Insert duplicate records
-            mock_conn.execute(
-                "INSERT INTO financial_ratios (company_id, period) VALUES (?, ?)",
-                ("TEST001", "FY2024")
-            )
-            mock_conn.execute(
-                "INSERT INTO financial_ratios (company_id, period) VALUES (?, ?)",
-                ("TEST001", "FY2024")
-            )
-            mock_conn.commit()
+            # Mock cursor to return duplicate count > 0
+            mock_cursor = MagicMock()
+            mock_cursor.fetchone.return_value = [2]
+            mock_conn.execute.return_value = mock_cursor
             
             results = validate_database_integrity()
             assert results["valid"] is False
             assert any(c["check"] == "duplicates" and c["status"] == "failed" 
                       for c in results["checks"])
-            
-            mock_conn.close()
 
 
 # =============================================================================

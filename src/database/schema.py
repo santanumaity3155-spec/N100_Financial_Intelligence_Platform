@@ -263,6 +263,28 @@ CREATE TABLE IF NOT EXISTS peer_groups (
 );
 """
 
+# Financial Health Scores table (Module 5)
+FINANCIAL_HEALTH_SCORES_SCHEMA = """
+CREATE TABLE IF NOT EXISTS financial_health_scores (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL,
+    company_name TEXT,
+    period TEXT,
+    profitability_score REAL,
+    growth_score REAL,
+    cashflow_score REAL,
+    leverage_score REAL,
+    efficiency_score REAL,
+    overall_score REAL,
+    rating TEXT,
+    remarks TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE,
+    UNIQUE(company_id, period)
+);
+"""
+
 # =============================================================================
 # INDEXES
 # =============================================================================
@@ -310,6 +332,12 @@ INDEXES = {
         "CREATE INDEX IF NOT EXISTS idx_peer_groups_company ON peer_groups(company_id);",
         "CREATE INDEX IF NOT EXISTS idx_peer_groups_name ON peer_groups(peer_group_name);",
     ],
+    "financial_health_scores": [
+        "CREATE INDEX IF NOT EXISTS idx_health_scores_company ON financial_health_scores(company_id);",
+        "CREATE INDEX IF NOT EXISTS idx_health_scores_period ON financial_health_scores(period);",
+        "CREATE INDEX IF NOT EXISTS idx_health_scores_rating ON financial_health_scores(rating);",
+        "CREATE INDEX IF NOT EXISTS idx_health_scores_overall ON financial_health_scores(overall_score);",
+    ],
 }
 
 # =============================================================================
@@ -329,6 +357,7 @@ TABLE_SCHEMAS: Dict[str, str] = {
     "market_cap": MARKET_CAP_SCHEMA,
     "financial_ratios": FINANCIAL_RATIOS_SCHEMA,
     "peer_groups": PEER_GROUPS_SCHEMA,
+    "financial_health_scores": FINANCIAL_HEALTH_SCORES_SCHEMA,
 }
 
 # =============================================================================

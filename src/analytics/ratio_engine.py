@@ -48,6 +48,14 @@ RATIO_ENGINE_LOG = OUTPUT_DIR / "ratio_engine.log"
 # Validation thresholds
 MAX_PROCESSING_TIME_MS = 5000  # 5 seconds target
 
+# CAGR flag fields that come as dicts with "value" and "flag" keys
+CAGR_FLAG_FIELDS = [
+    "revenue_cagr_3yr", "revenue_cagr_5yr", "revenue_cagr_10yr",
+    "pat_cagr_3yr", "pat_cagr_5yr", "pat_cagr_10yr",
+    "eps_cagr_3yr", "eps_cagr_5yr", "eps_cagr_10yr",
+    "ocf_cagr_3yr", "ocf_cagr_5yr", "ocf_cagr_10yr",
+]
+
 
 # =============================================================================
 # DATA VALIDATION
@@ -366,17 +374,21 @@ def merge_kpi_data(
     # Merge CAGR data
     for key, value in cagr_data.items():
         if key not in ["company_id", "period"]:
-            # CAGR data comes as {"value": X, "flag": Y}
-            if isinstance(value, dict):
+            # CAGR data comes as {"value": X, "flag": Y} for CAGR fields
+            if isinstance(value, dict) and "value" in value and "flag" in value:
                 record[key] = value.get("value")
-                record[f"{key}_flag"] = value.get("flag")
+                # Only add flag column if this is a known CAGR flag field
+                if key in CAGR_FLAG_FIELDS:
+                    record[f"{key}_flag"] = value.get("flag")
+            elif isinstance(value, dict) and "value" in value:
+                record[key] = value.get("value")
             else:
                 record[key] = value
     
     # Merge cashflow data
     for key, value in cashflow_data.items():
         if key not in ["company_id", "period"]:
-            if isinstance(value, dict):
+            if isinstance(value, dict) and "value" in value:
                 record[key] = value.get("value")
             else:
                 record[key] = value
@@ -551,6 +563,10 @@ class RatioEnginePipeline:
     Coordinates the calculation and loading of all financial KPIs.
     """
     
+    # Class-level references to output file paths (used by tests)
+    RATIO_LOAD_SUMMARY_CSV: Path = RATIO_LOAD_SUMMARY_CSV
+    RATIO_ENGINE_LOG: Path = RATIO_ENGINE_LOG
+    
     def __init__(self, output_dir: Path = OUTPUT_DIR):
         """
         Initialize pipeline.
@@ -660,6 +676,10 @@ class RatioEnginePipeline:
         # Update statistics
         self.pipeline_stats["companies_processed"] += 1
         self.pipeline_stats["total_processing_time_ms"] += result["processing_time_ms"]
+        
+        # Track failed companies
+        if result["status"] == "failed":
+            self.pipeline_stats["companies_failed"] += 1
         
         # Handle validation errors
         if result["validation_errors"]:
