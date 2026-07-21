@@ -245,6 +245,13 @@ class HealthScoreEngine:
             "errors": [],
             "warnings": [],
             "duplicates_found": 0,
+            "missing_metrics_summary": {
+                "profitability": 0,
+                "growth": 0,
+                "cashflow": 0,
+                "leverage": 0,
+                "efficiency": 0,
+            },
         }
 
     def _setup_dedicated_logger(self) -> None:
@@ -294,25 +301,32 @@ class HealthScoreEngine:
                 logger.warning("No data found in financial_ratios table")
                 return self.data
 
-            # Log column availability
-            required_cols = [
-                "company_id", "period", "company_name",
-                "roe", "roce", "roa", "net_profit_margin", "operating_profit_margin",
-                "revenue_cagr_3yr", "pat_cagr_3yr", "eps_cagr_3yr",
-                "free_cash_flow", "fcf_margin", "cash_conversion",
-                "cash_return_on_assets", "capital_allocation_rating",
-                "debt_to_equity", "interest_coverage", "high_leverage_flag",
-                "asset_turnover",
-            ]
-
-            missing_cols = [c for c in required_cols if c not in self.data.columns]
-            if missing_cols:
-                logger.warning(f"Missing columns in financial_ratios: {missing_cols}")
-                self.pipeline_stats["warnings"].append(
-                    f"Missing columns: {missing_cols}"
+            # Log available columns
+            available_cols = list(self.data.columns)
+            logger.info(f"Available columns: {available_cols}")
+            
+            # Log which optional columns are missing (INFO level, not warning)
+            optional_cols = {
+                'growth': ['revenue_cagr_3yr', 'pat_cagr_3yr', 'eps_cagr_3yr'],
+                'cashflow': ['free_cash_flow', 'fcf_margin', 'cash_conversion', 
+                            'cash_return_on_assets', 'capital_allocation_rating'],
+                'efficiency': ['asset_turnover'],
+                'leverage': ['interest_coverage', 'high_leverage_flag'],
+                'profitability': ['roce', 'net_profit_margin', 'operating_profit_margin']
+            }
+            
+            missing_optional = {}
+            for category, cols in optional_cols.items():
+                missing = [c for c in cols if c not in available_cols]
+                if missing:
+                    missing_optional[category] = missing
+            
+            if missing_optional:
+                logger.info(
+                    f"Optional columns not available in database schema: {missing_optional}. "
+                    f"Engine will calculate scores using only available metrics."
                 )
 
-            logger.info(f"Available columns: {list(self.data.columns)}")
             return self.data
 
         except Exception as e:
@@ -806,11 +820,30 @@ class HealthScoreEngine:
         }
 
         # Track warnings for missing categories
+        missing_categories = []
         for cat, score in category_scores.items():
             if score is None:
-                w = f"No {cat} metrics available for {company_id}, period {period}"
-                warnings.append(w)
-                logger.warning(w)
+                missing_categories.append(cat)
+                # Track missing metrics for summary statistics
+                if cat in self.pipeline_stats["missing_metrics_summary"]:
+                    self.pipeline_stats["missing_metrics_summary"][cat] += 1
+        
+        # Only add to warnings list if ALL categories are missing (truly insufficient data)
+        # Missing individual categories is expected and not a warning-worthy event
+        if len(missing_categories) == len(category_scores):
+            warning_msg = (
+                f"All category metrics missing for {company_id}, period {period} - "
+                f"cannot calculate health score"
+            )
+            warnings.append(warning_msg)
+            logger.warning(warning_msg)
+        elif missing_categories:
+            # Log at DEBUG level only - don't add to warnings list
+            logger.debug(
+                f"Missing metrics for {company_id}, period {period}: "
+                f"{', '.join(missing_categories)} "
+                f"(expected for early periods with limited historical data)"
+            )
 
         # Calculate overall score
         overall_score = self.calculate_overall_score(category_scores)
@@ -871,6 +904,7 @@ class HealthScoreEngine:
         - Rollback on failure
         - Duplicate prevention (INSERT OR REPLACE)
         - Foreign key validation
+        - Proper connection handling
 
         Parameters
         ----------
@@ -890,10 +924,11 @@ class HealthScoreEngine:
 
         self._ensure_table_exists()
 
-        conn = get_connection()
-        cursor = conn.cursor()
-
+        conn = None
         try:
+            conn = get_connection()
+            cursor = conn.cursor()
+
             # Begin transaction
             conn.execute("BEGIN TRANSACTION")
 
@@ -910,8 +945,8 @@ class HealthScoreEngine:
                     if existing:
                         stats["duplicates"] += 1
                         logger.debug(
-                            f"Duplicate found: {record['company_id']}, "
-                            f"{record['period']} - will update"
+                            f"Updating existing record: {record['company_id']}, "
+                            f"{record['period']}"
                         )
 
                     # Prepare column names and placeholders
@@ -921,6 +956,7 @@ class HealthScoreEngine:
                     values = tuple(record.values())
 
                     # UPSERT: INSERT OR REPLACE
+                    # This automatically handles duplicates by replacing the existing row
                     sql = f"""
                         INSERT OR REPLACE INTO {HEALTH_SCORE_TABLE}
                         ({column_names})
@@ -930,13 +966,15 @@ class HealthScoreEngine:
                     stats["inserted"] += 1
 
                 except sqlite3.IntegrityError as e:
-                    # Foreign key violation
+                    # Foreign key violation - company_id doesn't exist in companies table
+                    error_msg = str(e)
                     logger.warning(
-                        f"Foreign key violation for {record.get('company_id')}: {e}"
+                        f"Foreign key violation for {record.get('company_id')}: {error_msg}"
                     )
                     stats["skipped"] += 1
                     self.pipeline_stats["warnings"].append(
-                        f"FK violation: {record.get('company_id')} - {e}"
+                        f"FK violation: {record.get('company_id')} ({record.get('period')}) - "
+                        f"company not found in companies table"
                     )
                 except Exception as e:
                     logger.error(
@@ -948,20 +986,28 @@ class HealthScoreEngine:
             # Commit transaction
             conn.commit()
             logger.info(
-                f"Database save complete: {stats['inserted']} inserted, "
-                f"{stats['skipped']} skipped, {stats['duplicates']} duplicates"
+                f"Database save complete: {stats['inserted']} inserted/updated, "
+                f"{stats['skipped']} skipped (FK violations), "
+                f"{stats['duplicates']} existing records updated"
             )
 
         except Exception as e:
             # Rollback on failure
-            try:
-                conn.rollback()
-                logger.error(f"Transaction rolled back due to error: {str(e)}")
-            except Exception as rb_error:
-                logger.error(f"Rollback also failed: {str(rb_error)}")
+            if conn:
+                try:
+                    conn.rollback()
+                    logger.error(f"Transaction rolled back due to error: {str(e)}")
+                except Exception as rb_error:
+                    logger.error(f"Rollback also failed: {str(rb_error)}")
 
             self.pipeline_stats["errors"].append(f"Database save failed: {str(e)}")
             raise
+
+        finally:
+            # Note: We don't close the connection here because get_connection() returns
+            # a singleton connection that should remain open for the application lifetime.
+            # The connection will be closed when the application exits.
+            pass
 
         return stats
 
@@ -1125,6 +1171,15 @@ class HealthScoreEngine:
         """Log pipeline execution summary."""
         stats = self.pipeline_stats
 
+        # Build missing metrics summary
+        missing_summary = stats.get("missing_metrics_summary", {})
+        missing_lines = []
+        for category, count in missing_summary.items():
+            if count > 0:
+                missing_lines.append(f"  {category.capitalize()} Metrics Missing: {count} records")
+        
+        missing_text = "\n".join(missing_lines) if missing_lines else "  None"
+
         summary = f"""
 {'=' * 60}
 FINANCIAL HEALTH SCORE ENGINE - SUMMARY
@@ -1139,6 +1194,9 @@ Duplicates Found: {stats['duplicates_found']}
 Warnings: {len(stats['warnings'])}
 Errors: {len(stats['errors'])}
 Execution Time: {execution_time:.2f}s
+{'-' * 60}
+Missing Metrics Summary:
+{missing_text}
 {'=' * 60}
 """
 
