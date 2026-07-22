@@ -54,6 +54,34 @@ from src.analytics.ratio_engine import (
     validate_database_integrity,
 )
 
+from src.analytics.peer import (
+    # Core functions
+    load_peer_groups,
+    assign_peer_groups,
+    calculate_percentile_rank,
+    calculate_metric_percentiles,
+    calculate_all_percentiles,
+    save_peer_percentiles,
+    export_percentiles,
+    get_peer_summary,
+    validate_peer_data,
+    # Classes
+    PeerPercentileEngine,
+    PeerAnalysisError,
+    PeerGroupNotFoundError,
+    MetricNotFoundError,
+    ValidationError as PeerValidationError,
+    # Main entry point
+    run_peer_percentile_engine,
+    # Utility functions
+    get_peer_percentile_statistics,
+    validate_database_integrity as validate_peer_database_integrity,
+    # Constants
+    SUPPORTED_METRICS,
+    SUPPORTED_PEER_GROUPS,
+    INVERTED_METRICS,
+)
+
 __all__ = [
     # Ratio functions
     "calculate_net_profit_margin",
@@ -94,4 +122,25 @@ __all__ = [
     "run_ratio_engine_pipeline",
     "get_pipeline_statistics",
     "validate_database_integrity",
+    # Peer Percentile Engine functions (Module 7)
+    "load_peer_groups",
+    "assign_peer_groups",
+    "calculate_percentile_rank",
+    "calculate_metric_percentiles",
+    "calculate_all_percentiles",
+    "save_peer_percentiles",
+    "export_percentiles",
+    "get_peer_summary",
+    "validate_peer_data",
+    "PeerPercentileEngine",
+    "PeerAnalysisError",
+    "PeerGroupNotFoundError",
+    "MetricNotFoundError",
+    "PeerValidationError",
+    "run_peer_percentile_engine",
+    "get_peer_percentile_statistics",
+    "validate_peer_database_integrity",
+    "SUPPORTED_METRICS",
+    "SUPPORTED_PEER_GROUPS",
+    "INVERTED_METRICS",
 ]

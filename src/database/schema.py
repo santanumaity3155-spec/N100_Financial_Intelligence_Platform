@@ -285,6 +285,22 @@ CREATE TABLE IF NOT EXISTS financial_health_scores (
 );
 """
 
+# Peer Percentiles table (Module 7)
+PEER_PERCENTILES_SCHEMA = """
+CREATE TABLE IF NOT EXISTS peer_percentiles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL,
+    peer_group_name TEXT NOT NULL,
+    metric TEXT NOT NULL,
+    metric_value REAL,
+    percentile_rank REAL NOT NULL,
+    period TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE,
+    UNIQUE(company_id, peer_group_name, metric, period)
+);
+"""
+
 # =============================================================================
 # INDEXES
 # =============================================================================
@@ -338,6 +354,12 @@ INDEXES = {
         "CREATE INDEX IF NOT EXISTS idx_health_scores_rating ON financial_health_scores(rating);",
         "CREATE INDEX IF NOT EXISTS idx_health_scores_overall ON financial_health_scores(overall_score);",
     ],
+    "peer_percentiles": [
+        "CREATE INDEX IF NOT EXISTS idx_peer_percentiles_company ON peer_percentiles(company_id);",
+        "CREATE INDEX IF NOT EXISTS idx_peer_percentiles_group ON peer_percentiles(peer_group_name);",
+        "CREATE INDEX IF NOT EXISTS idx_peer_percentiles_metric ON peer_percentiles(metric);",
+        "CREATE INDEX IF NOT EXISTS idx_peer_percentiles_period ON peer_percentiles(period);",
+    ],
 }
 
 # =============================================================================
@@ -358,6 +380,7 @@ TABLE_SCHEMAS: Dict[str, str] = {
     "financial_ratios": FINANCIAL_RATIOS_SCHEMA,
     "peer_groups": PEER_GROUPS_SCHEMA,
     "financial_health_scores": FINANCIAL_HEALTH_SCORES_SCHEMA,
+    "peer_percentiles": PEER_PERCENTILES_SCHEMA,
 }
 
 # =============================================================================

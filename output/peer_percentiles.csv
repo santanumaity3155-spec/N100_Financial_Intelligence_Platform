@@ -1,0 +1,11 @@
+company_id,company_name,peer_group,metric,metric_value,percentile_rank,period
+SIEMENS,Siemens Ltd,No peer group assigned,asset_turnover,1.397987726295555,0.5,Sep 2024
+SIEMENS,Siemens Ltd,No peer group assigned,debt_to_equity,0.0182,0.5,Sep 2024
+SIEMENS,Siemens Ltd,No peer group assigned,eps_cagr_5yr,16.99264218662403,0.5,Sep 2024
+SIEMENS,Siemens Ltd,No peer group assigned,free_cash_flow,2404.1677639819286,0.5,Sep 2024
+SIEMENS,Siemens Ltd,No peer group assigned,interest_coverage,11.515921243548267,0.5,Sep 2024
+SIEMENS,Siemens Ltd,No peer group assigned,net_profit_margin,13.898292967036655,0.5,Sep 2024
+SIEMENS,Siemens Ltd,No peer group assigned,pat_cagr_5yr,3.871254182522992,0.5,Sep 2024
+SIEMENS,Siemens Ltd,No peer group assigned,revenue_cagr_5yr,7.33991780504304,0.5,Sep 2024
+SIEMENS,Siemens Ltd,No peer group assigned,roce,16.811744041439326,0.5,Sep 2024
+SIEMENS,Siemens Ltd,No peer group assigned,roe,17.7,0.5,Sep 2024
