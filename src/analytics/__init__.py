@@ -82,6 +82,33 @@ from src.analytics.peer import (
     INVERTED_METRICS,
 )
 
+from src.analytics.radar import (
+    # Core functions
+    load_percentile_data,
+    load_company_data,
+    calculate_peer_benchmark,
+    prepare_radar_data,
+    validate_chart_inputs,
+    generate_radar_chart,
+    save_chart,
+    generate_all_charts,
+    # Utility functions
+    get_radar_chart_statistics,
+    validate_radar_chart_output,
+    # Classes
+    RadarChartEngine,
+    RadarChartError,
+    CompanyNotFoundError,
+    PeerGroupNotFoundError as RadarPeerGroupNotFoundError,
+    MetricValidationError,
+    ChartGenerationError,
+    # Main entry point
+    run_radar_chart_engine,
+    # Constants
+    RADAR_CHARTS_DIR,
+    METRIC_DISPLAY_NAMES,
+)
+
 __all__ = [
     # Ratio functions
     "calculate_net_profit_margin",
@@ -143,4 +170,24 @@ __all__ = [
     "SUPPORTED_METRICS",
     "SUPPORTED_PEER_GROUPS",
     "INVERTED_METRICS",
+    # Radar Chart Engine functions (Module 8)
+    "load_percentile_data",
+    "load_company_data",
+    "calculate_peer_benchmark",
+    "prepare_radar_data",
+    "validate_chart_inputs",
+    "generate_radar_chart",
+    "save_chart",
+    "generate_all_charts",
+    "get_radar_chart_statistics",
+    "validate_radar_chart_output",
+    "RadarChartEngine",
+    "RadarChartError",
+    "CompanyNotFoundError",
+    "RadarPeerGroupNotFoundError",
+    "MetricValidationError",
+    "ChartGenerationError",
+    "run_radar_chart_engine",
+    "RADAR_CHARTS_DIR",
+    "METRIC_DISPLAY_NAMES",
 ]
