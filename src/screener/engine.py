@@ -124,21 +124,9 @@ class ScreenerEngine:
                     fr.period,
                     fr.roe,
                     fr.roa,
-                    fr.roce,
-                    fr.net_profit_margin,
-                    fr.operating_profit_margin,
-                    fr.revenue_cagr_3yr,
-                    fr.revenue_cagr_5yr,
-                    fr.pat_cagr_3yr,
-                    fr.pat_cagr_5yr,
-                    fr.eps_cagr_3yr,
-                    fr.eps_cagr_5yr,
-                    fr.free_cash_flow,
-                    fr.fcf_margin,
-                    fr.cash_conversion,
-                    fr.cash_return_on_assets,
                     fr.debt_to_equity,
-                    fr.interest_coverage,
+                    fr.current_ratio,
+                    fr.quick_ratio,
                     
                     -- Financial Health Scores
                     fhs.overall_score,
@@ -152,11 +140,7 @@ class ScreenerEngine:
                     -- Market Cap (Valuation & Dividend)
                     mc.pe_ratio,
                     mc.pb_ratio,
-                    mc.dividend_yield,
-                    
-                    -- Balance Sheet (Liquidity)
-                    bs.current_ratio,
-                    bs.quick_ratio
+                    mc.dividend_yield
                     
                 FROM companies c
                 LEFT JOIN financial_ratios fr ON c.company_id = fr.company_id
@@ -164,8 +148,6 @@ class ScreenerEngine:
                     AND fr.period = fhs.period
                 LEFT JOIN market_cap mc ON c.company_id = mc.company_id 
                     AND fr.period = mc.period
-                LEFT JOIN balance_sheet bs ON c.company_id = bs.company_id 
-                    AND fr.period = bs.period
                 
                 WHERE fr.period IS NOT NULL
                 
