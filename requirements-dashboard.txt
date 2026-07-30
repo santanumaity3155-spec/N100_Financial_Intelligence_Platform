@@ -1,0 +1,21 @@
+# N100 Financial Intelligence Platform - Dashboard Dependencies
+# Module 1: Streamlit Dashboard Scaffold
+
+# Core Framework
+streamlit>=1.28.0
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Database
+sqlite3  # Usually included with Python
+
+# Visualization
+plotly>=5.17.0
+
+# Utilities
+python-dotenv>=1.0.0
+
+# Note: Main project dependencies (pandas, numpy) are already in requirements.txt
+# This file contains only dashboard-specific dependencies

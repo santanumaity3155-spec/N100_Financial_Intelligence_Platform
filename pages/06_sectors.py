@@ -14,13 +14,6 @@ import streamlit as st
 # Configure page logger
 logger = logging.getLogger(__name__)
 
-# Page configuration
-st.set_page_config(
-    page_title="Sector Analysis - Nifty 100 Analytics",
-    page_icon="🏭",
-    layout="wide"
-)
-
 # Page header
 st.title("🏭 Sector Analysis")
 st.markdown("---")
