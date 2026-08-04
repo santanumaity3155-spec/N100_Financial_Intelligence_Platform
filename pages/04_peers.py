@@ -245,86 +245,231 @@ def build_radar_chart(
 
     Returns
     -------
-go.Figure
+    go.Figure
         Plotly figure. Returns an empty figure on error.
     """
-    if group_df.empty or "company_id" not in group_df.columns:
-        logger.warning("Radar chart called with empty or invalid group data")
+    import time
+    start_time = time.time()
+    
+    # -------------------------------------------------------------------------
+    # Validation 1: Empty dataframe check
+    # -------------------------------------------------------------------------
+    if group_df is None or group_df.empty:
+        logger.warning("Radar chart skipped: group_df is None or empty")
         return go.Figure()
-
+    
+    # Log the call
+    logger.debug(
+        f"Building radar chart: company={selected_id}, "
+        f"peer_group={peer_group}, df_shape={group_df.shape}"
+    )
+    
+    # -------------------------------------------------------------------------
+    # Validation 2: Required columns check
+    # -------------------------------------------------------------------------
+    if "company_id" not in group_df.columns:
+        logger.warning("Radar chart skipped: 'company_id' column missing from group_df")
+        return go.Figure()
+    
+    # -------------------------------------------------------------------------
+    # Define labels for radar chart
+    # -------------------------------------------------------------------------
     labels = [label for _, label in RADAR_METRICS]
-
-    # Selected company values
+    
+    # -------------------------------------------------------------------------
+    # Validation 3: Check for required metric columns
+    # -------------------------------------------------------------------------
+    required_metrics = [col for col, _ in RADAR_METRICS]
+    missing_metrics = [col for col in required_metrics if col not in group_df.columns]
+    if missing_metrics:
+        logger.warning(
+            f"Radar chart: {len(missing_metrics)} required metrics missing from group_df: "
+            f"{missing_metrics}"
+        )
+        # Continue anyway - we'll handle missing metrics gracefully
+    
+    # -------------------------------------------------------------------------
+    # Validation 4: Selected company exists in peer group
+    # -------------------------------------------------------------------------
     try:
-        row = group_df[group_df["company_id"] == selected_id].iloc[0]
-    except IndexError:
-        logger.error(f"Selected company {selected_id} not found in peer group")
-        return go.Figure()
-
-    company_values: List[float] = []
-    for col, _ in RADAR_METRICS:
-        val = row.get(f"{col}_pct", np.nan)
-        company_values.append(float(val) if pd.notna(val) else 0.0)
-
-    # Peer group average values (mean percentile per metric)
-    peer_avg_values: List[float] = []
-    for col, _ in RADAR_METRICS:
-        pct_col = f"{col}_pct"
-        if pct_col in group_df.columns:
-            mean_val = group_df[pct_col].mean(skipna=True)
-        else:
-            mean_val = np.nan
-        peer_avg_values.append(float(mean_val) if pd.notna(mean_val) else 0.0)
-
-    # Close the radar loop
-    company_plot = company_values + company_values[:1]
-    peer_plot = peer_avg_values + peer_avg_values[:1]
-    theta = labels + labels[:1]
-
-    fig = go.Figure()
-
-    fig.add_trace(
-        go.Scatterpolar(
-            r=company_plot,
-            theta=theta,
-            fill="toself",
-            name=selected_name,
-            line=dict(color="#2E86AB", width=3),
-            fillcolor="rgba(46,134,171,0.25)",
-            hovertemplate="<b>%{theta}</b><br>Percentile: %{r:.0%}<extra></extra>",
-        )
-    )
-
-    fig.add_trace(
-        go.Scatterpolar(
-            r=peer_plot,
-            theta=theta,
-            fill="toself",
-            name="Peer Group Average",
-            line=dict(color="#A23B72", width=3, dash="dash"),
-            fillcolor="rgba(162,59,114,0.15)",
-            hovertemplate="<b>%{theta}</b><br>Percentile: %{r:.0%}<extra></extra>",
-        )
-    )
-
-    fig.update_layout(
-        title=f"{selected_name} vs {peer_group} Peer Average",
-        polar=dict(
-            radialaxis=dict(
-                visible=True,
-                range=[0, 1],
-                tickvals=[0, 0.25, 0.5, 0.75, 1.0],
-                ticktext=["0%", "25%", "50%", "75%", "100%"],
+        company_mask = group_df["company_id"] == selected_id
+        if not company_mask.any():
+            logger.warning(
+                f"Radar chart skipped: selected company {selected_id} not found in peer group"
             )
-        ),
-        showlegend=True,
-        legend=dict(orientation="h", yanchor="bottom", y=-0.15),
-        height=600,
-        margin=dict(l=40, r=40, t=60, b=40),
-    )
+            st.warning("No peer comparison data available.")
+            return go.Figure()
+        
+        row = group_df[company_mask].iloc[0]
+    except (IndexError, KeyError) as e:
+        logger.error(
+            f"Radar chart failed: error accessing selected company {selected_id}: {str(e)}"
+        )
+        st.warning("No peer comparison data available.")
+        return go.Figure()
+    
+    # -------------------------------------------------------------------------
+    # Build company values (with NaN handling)
+    # -------------------------------------------------------------------------
+    company_values: List[float] = []
+    metrics_with_nan = []
+    
+    for col, label in RADAR_METRICS:
+        pct_col = f"{col}_pct"
+        
+        # Check if percentile column exists
+        if pct_col not in group_df.columns:
+            logger.debug(f"Radar chart: percentile column '{pct_col}' missing, using 0.0")
+            company_values.append(0.0)
+            continue
+        
+        # Get value with NaN handling
+        val = row.get(pct_col, np.nan)
+        
+        # Handle NaN/None/invalid values
+        if pd.isna(val) or val is None:
+            company_values.append(0.0)
+            metrics_with_nan.append(label)
+        else:
+            try:
+                float_val = float(val)
+                # Validate range [0, 1] for percentiles
+                if 0 <= float_val <= 1:
+                    company_values.append(float_val)
+                else:
+                    logger.warning(
+                        f"Radar chart: invalid percentile {float_val} for {label}, using 0.0"
+                    )
+                    company_values.append(0.0)
+                    metrics_with_nan.append(label)
+            except (TypeError, ValueError) as e:
+                logger.warning(
+                    f"Radar chart: cannot convert value to float for {label}: {str(e)}"
+                )
+                company_values.append(0.0)
+                metrics_with_nan.append(label)
+    
+    if metrics_with_nan:
+        logger.info(
+            f"Radar chart: {len(metrics_with_nan)} metrics have NaN/invalid values for "
+            f"company {selected_id}: {metrics_with_nan}"
+        )
+    
+    # -------------------------------------------------------------------------
+    # Build peer average values (with NaN handling)
+    # -------------------------------------------------------------------------
+    peer_avg_values: List[float] = []
+    
+    for col, label in RADAR_METRICS:
+        pct_col = f"{col}_pct"
+        
+        # Check if percentile column exists
+        if pct_col not in group_df.columns:
+            peer_avg_values.append(0.0)
+            continue
+        
+        # Calculate mean, skipping NaN values
+        try:
+            mean_val = group_df[pct_col].mean(skipna=True)
+            
+            # Handle NaN mean (e.g., all values are NaN)
+            if pd.isna(mean_val):
+                peer_avg_values.append(0.0)
+                logger.debug(
+                    f"Radar chart: peer average for {label} is NaN (all values missing)"
+                )
+            else:
+                float_val = float(mean_val)
+                # Validate range
+                if 0 <= float_val <= 1:
+                    peer_avg_values.append(float_val)
+                else:
+                    logger.warning(
+                        f"Radar chart: invalid peer average {float_val} for {label}, using 0.0"
+                    )
+                    peer_avg_values.append(0.0)
+        except Exception as e:
+            logger.warning(
+                f"Radar chart: error calculating peer average for {label}: {str(e)}"
+            )
+            peer_avg_values.append(0.0)
+    
+    # -------------------------------------------------------------------------
+    # Handle single-company peer group
+    # -------------------------------------------------------------------------
+    if len(group_df) == 1:
+        logger.info(
+            f"Radar chart: single-company peer group for {selected_id}, "
+            f"peer average equals company values"
+        )
+        # Peer average should equal company values (already calculated above)
+    
+    # -------------------------------------------------------------------------
+    # Create radar chart
+    # -------------------------------------------------------------------------
+    try:
+        # Close the radar loop
+        company_plot = company_values + company_values[:1]
+        peer_plot = peer_avg_values + peer_avg_values[:1]
+        theta = labels + labels[:1]
 
-    logger.info(f"Radar chart generated for {selected_id} in {peer_group}")
-    return fig
+        fig = go.Figure()
+
+        fig.add_trace(
+            go.Scatterpolar(
+                r=company_plot,
+                theta=theta,
+                fill="toself",
+                name=selected_name,
+                line=dict(color="#2E86AB", width=3),
+                fillcolor="rgba(46,134,171,0.25)",
+                hovertemplate="<b>%{theta}</b><br>Percentile: %{r:.0%}<extra></extra>",
+            )
+        )
+
+        fig.add_trace(
+            go.Scatterpolar(
+                r=peer_plot,
+                theta=theta,
+                fill="toself",
+                name="Peer Group Average",
+                line=dict(color="#A23B72", width=3, dash="dash"),
+                fillcolor="rgba(162,59,114,0.15)",
+                hovertemplate="<b>%{theta}</b><br>Percentile: %{r:.0%}<extra></extra>",
+            )
+        )
+
+        fig.update_layout(
+            title=f"{selected_name} vs {peer_group} Peer Average",
+            polar=dict(
+                radialaxis=dict(
+                    visible=True,
+                    range=[0, 1],
+                    tickvals=[0, 0.25, 0.5, 0.75, 1.0],
+                    ticktext=["0%", "25%", "50%", "75%", "100%"],
+                )
+            ),
+            showlegend=True,
+            legend=dict(orientation="h", yanchor="bottom", y=-0.15),
+            height=600,
+            margin=dict(l=40, r=40, t=60, b=40),
+        )
+        
+        elapsed_time = time.time() - start_time
+        logger.info(
+            f"Radar chart generated successfully for {selected_id} in {peer_group} "
+            f"(elapsed: {elapsed_time:.3f}s, peers: {len(group_df)}, "
+            f"metrics_with_nan: {len(metrics_with_nan)})"
+        )
+        
+        return fig
+        
+    except Exception as e:
+        logger.error(
+            f"Radar chart failed: error creating Plotly figure for {selected_id}: {str(e)}",
+            exc_info=True,
+        )
+        return go.Figure()
 
 
 # =============================================================================
