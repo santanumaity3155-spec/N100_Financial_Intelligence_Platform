@@ -1,270 +1,581 @@
 """
-Stock Screener Page - N100 Financial Intelligence Platform
+Screener Screen - N100 Financial Intelligence Platform
+Sprint 4 - Module 3 Implementation
 
-This page provides stock screening capabilities to filter and identify
-companies based on various financial criteria.
+Provides an interactive investment screener that filters Nifty 100 companies
+using fundamental financial metrics. Reuses the Sprint 3 Screener Engine for
+all filtering logic and offers six preset screening strategies.
 
-This is a placeholder page for Module 1. Analytics will be
-implemented in subsequent modules.
+Screen Layout
+-------------
+1. Sidebar: 10 dynamically-ranged sliders + 6 preset buttons
+2. Main: Live result counter, sortable results table, CSV export
 """
 
-import logging
+import io
+import time
+from typing import Any, Dict, List, Optional, Tuple
+
+import pandas as pd
 import streamlit as st
 
-# Configure page logger
-logger = logging.getLogger(__name__)
+from src.config.logging_config import get_logger
+from src.dashboard.utils.db import get_all_screener_data
+from src.screener.engine import ScreenerEngine
+from src.screener.filters import FilterCondition, FilterOperator
 
-# Page header
-st.title("🔍 Stock Screener")
-st.markdown("---")
+logger = get_logger(__name__)
 
-# Page description
-st.header("🎯 Filter & Screen Stocks")
-st.markdown("""
-This page provides advanced stock screening capabilities to identify
-investment opportunities based on multiple criteria:
-- **Fundamental Filters**: P/E, P/B, market cap, and more
-- **Financial Metrics**: Profitability, growth, and efficiency ratios
-- **Custom Criteria**: Build your own screening logic
-- **Save & Export**: Save screens and export results
-""")
+# =============================================================================
+# PAGE CONFIGURATION
+# =============================================================================
 
-st.markdown("---")
+st.set_page_config(
+    page_title="Investment Screener - N100 Financial Intelligence",
+    page_icon="🔍",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
-# Placeholder for screener controls
-st.subheader("⚙️ Screening Criteria")
+# =============================================================================
+# CONSTANTS - FILTER DEFINITIONS
+# =============================================================================
 
-col1, col2, col3 = st.columns(3)
+# Order of filters in the sidebar (display label, data column, unit suffix)
+FILTER_DEFS: List[Tuple[str, str, str]] = [
+    ("ROE Minimum", "roe", "%"),
+    ("Debt to Equity Maximum", "debt_to_equity", ""),
+    ("Free Cash Flow Minimum", "free_cash_flow", "₹ Cr"),
+    ("Revenue CAGR 5 Year Minimum", "revenue_cagr_5yr", "%"),
+    ("PAT CAGR Minimum", "pat_cagr_5yr", "%"),
+    ("Operating Profit Margin Minimum", "operating_profit_margin", "%"),
+    ("PE Maximum", "pe_ratio", "x"),
+    ("PB Maximum", "pb_ratio", "x"),
+    ("Dividend Yield Minimum", "dividend_yield", "%"),
+    ("Interest Coverage Minimum", "interest_coverage", "x"),
+]
 
-with col1:
-    st.info("""
-    **Valuation Filters**
-    
-    **Module 2 will include:**
-    - P/E Ratio range
-    - P/B Ratio range
-    - EV/EBITDA range
-    - Market Cap range
-    - Dividend Yield
-    """)
+# Which filters are "minimum" (>=) vs "maximum" (<=)
+MIN_FILTERS = {
+    "roe",
+    "free_cash_flow",
+    "revenue_cagr_5yr",
+    "pat_cagr_5yr",
+    "operating_profit_margin",
+    "dividend_yield",
+    "interest_coverage",
+}
+MAX_FILTERS = {"debt_to_equity", "pe_ratio", "pb_ratio"}
 
-with col2:
-    st.success("""
-    **Profitability Filters**
-    
-    **Module 2 will include:**
-    - ROE minimum
-    - ROA minimum
-    - Profit Margin range
-    - Revenue Growth
-    - Profit Growth
-    """)
+# Preset strategies - populate every slider then run filter immediately
+PRESETS: Dict[str, Dict[str, float]] = {
+    "Quality Compounder": {
+        "roe": 18.0,
+        "debt_to_equity": 0.5,
+        "free_cash_flow": 500.0,
+        "revenue_cagr_5yr": 12.0,
+        "pat_cagr_5yr": 12.0,
+        "operating_profit_margin": 10.0,
+        "pe_ratio": 45.0,
+        "pb_ratio": 12.0,
+        "dividend_yield": 0.0,
+        "interest_coverage": 3.0,
+    },
+    "Value Pick": {
+        "roe": 12.0,
+        "debt_to_equity": 0.8,
+        "free_cash_flow": -1e18,  # no constraint
+        "revenue_cagr_5yr": -1e18,
+        "pat_cagr_5yr": -1e18,
+        "operating_profit_margin": -1e18,
+        "pe_ratio": 18.0,
+        "pb_ratio": 3.0,
+        "dividend_yield": 1.0,
+        "interest_coverage": 2.0,
+    },
+    "Growth Accelerator": {
+        "roe": 15.0,
+        "debt_to_equity": 1.2,
+        "free_cash_flow": -1e18,
+        "revenue_cagr_5yr": 15.0,
+        "pat_cagr_5yr": 18.0,
+        "operating_profit_margin": -1e18,
+        "pe_ratio": 60.0,
+        "pb_ratio": 15.0,
+        "dividend_yield": 0.0,
+        "interest_coverage": -1e18,
+    },
+    "Dividend Champion": {
+        "roe": 10.0,
+        "debt_to_equity": 1.0,
+        "free_cash_flow": -1e18,
+        "revenue_cagr_5yr": -1e18,
+        "pat_cagr_5yr": -1e18,
+        "operating_profit_margin": -1e18,
+        "pe_ratio": 40.0,
+        "pb_ratio": 10.0,
+        "dividend_yield": 2.5,
+        "interest_coverage": 2.0,
+    },
+    "Debt-Free Blue Chip": {
+        "roe": 14.0,
+        "debt_to_equity": 0.15,
+        "free_cash_flow": 0.0,
+        "revenue_cagr_5yr": 8.0,
+        "pat_cagr_5yr": 8.0,
+        "operating_profit_margin": 12.0,
+        "pe_ratio": 55.0,
+        "pb_ratio": 12.0,
+        "dividend_yield": 0.0,
+        "interest_coverage": 4.0,
+    },
+    "Turnaround Watch": {
+        "roe": -1e18,
+        "debt_to_equity": 2.5,
+        "free_cash_flow": -1e18,
+        "revenue_cagr_5yr": -1e18,
+        "pat_cagr_5yr": -20.0,
+        "operating_profit_margin": -1e18,
+        "pe_ratio": 1e18,
+        "pb_ratio": 20.0,
+        "dividend_yield": 0.0,
+        "interest_coverage": -1e18,
+    },
+}
 
-with col3:
-    st.warning("""
-    **Financial Health**
-    
-    **Module 2 will include:**
-    - Debt-to-Equity
-    - Current Ratio
-    - Interest Coverage
-    - Credit Rating
-    - Altman Z-Score
-    """)
+# Result table column order (display label, source column)
+RESULT_COLUMNS: List[Tuple[str, str]] = [
+    ("Company ID", "company_id"),
+    ("Ticker", "ticker"),
+    ("Company Name", "company_name"),
+    ("Sector", "sector"),
+    ("Composite Quality Score", "composite_quality_score"),
+    ("ROE", "roe"),
+    ("ROCE", "roce"),
+    ("Debt to Equity", "debt_to_equity"),
+    ("Revenue CAGR", "revenue_cagr_5yr"),
+    ("PAT CAGR", "pat_cagr_5yr"),
+    ("PE", "pe_ratio"),
+    ("PB", "pb_ratio"),
+    ("Dividend Yield", "dividend_yield"),
+    ("Interest Coverage", "interest_coverage"),
+    ("Latest Free Cash Flow", "free_cash_flow"),
+]
 
-st.markdown("---")
 
-# Placeholder for results
-st.subheader("📊 Screening Results")
+# =============================================================================
+# DATA LOADING
+# =============================================================================
 
-st.info("""
-**Module 2 will include:**
+@st.cache_data(ttl=600, show_spinner=False)
+def load_screener_data() -> pd.DataFrame:
+    """
+    Load the consolidated screener dataset.
 
-- **Dynamic Results Table**: Real-time filtered results
-- **Sortable Columns**: Click headers to sort
-- **Export to CSV**: Download results for analysis
-- **Visual Charts**: Distribution charts and histograms
-- **Save Screen**: Save criteria for future use
-""")
+    Returns
+    -------
+    pd.DataFrame
+        Consolidated screener metrics for all companies.
+    """
+    df = get_all_screener_data()
+    if df.empty:
+        logger.warning("Screener dataset is empty")
+    return df
 
-st.markdown("---")
 
-# Pre-built screens placeholder
-st.subheader("🎨 Pre-built Screens")
+# =============================================================================
+# FILTER RANGE HELPERS
+# =============================================================================
 
-col1, col2 = st.columns(2)
+def _numeric_bounds(series: pd.Series, default: Tuple[float, float]) -> Tuple[float, float]:
+    """
+    Compute safe numeric bounds from a series using percentiles.
 
-with col1:
-    st.markdown("### Popular Screens")
-    st.info("""
-    **Coming in Module 2:**
-    
-    1. **Value Stocks**
-       - Low P/E, Low P/B, High Dividend
-    
-    2. **Growth Stocks**
-       - High Revenue Growth, High ROE
-    
-    3. **Quality Stocks**
-       - High ROE, Low Debt, Consistent Profits
-    
-    4. **Dividend Aristocrats**
-       - Consistent dividend history
-    """)
+    Parameters
+    ----------
+    series : pd.Series
+        Data column.
+    default : Tuple[float, float]
+        Fallback (min, max) when data is unusable.
 
-with col2:
-    st.markdown("### Custom Screens")
-    st.info("""
-    **Coming in Module 2:**
-    
-    - **Create Custom Screen**: Build your own criteria
-    - **Save Screen**: Store for future use
-    - **Share Screen**: Export and share with others
-    - **Schedule Screen**: Automated screening alerts
-    """)
+    Returns
+    -------
+    Tuple[float, float]
+        (min, max) bounds suitable for a slider.
+    """
+    vals = pd.to_numeric(series, errors="coerce").dropna()
+    if vals.empty:
+        return default
+    lo = float(vals.quantile(0.02))
+    hi = float(vals.quantile(0.98))
+    if lo == hi:
+        lo, hi = float(vals.min()), float(vals.max())
+    if lo == hi:  # still constant
+        lo, hi = default
+    return lo, hi
 
-st.markdown("---")
 
-# How it works
-st.subheader("📖 How Stock Screening Works")
+def get_filter_ranges(data: pd.DataFrame) -> Dict[str, Tuple[float, float]]:
+    """
+    Dynamically compute slider ranges for every filter from the dataset.
 
-st.markdown("""
-### The Screening Process
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Consolidated screener dataset.
 
-1. **Define Criteria**
-   - Select filters from available options
-   - Set minimum/maximum values
-   - Combine multiple criteria
+    Returns
+    -------
+    Dict[str, Tuple[float, float]]
+        Mapping of filter column -> (min, max).
+    """
+    ranges: Dict[str, Tuple[float, float]] = {}
+    for _, col, _ in FILTER_DEFS:
+        if col not in data.columns:
+            ranges[col] = (0.0, 100.0)
+            continue
+        default = (0.0, 100.0) if col in MIN_FILTERS else (0.0, 10.0)
+        ranges[col] = _numeric_bounds(data[col], default)
+    return ranges
 
-2. **Run Screen**
-   - Execute screening against Nifty 100
-   - Real-time results update
-   - View filtered companies
 
-3. **Analyze Results**
-   - Review matching companies
-   - Sort by different metrics
-   - View detailed profiles
+# =============================================================================
+# PRESET LOGIC
+# =============================================================================
 
-4. **Take Action**
-   - Export results to CSV/Excel
-   - Save screen for future use
-   - Dive deeper into selected companies
-""")
+def apply_preset_values(preset: Dict[str, float], ranges: Dict[str, Tuple[float, float]]) -> Dict[str, float]:
+    """
+    Clamp preset values to the dynamic slider ranges.
 
-st.markdown("---")
+    Values of -1e18 / 1e18 represent "no constraint" and are mapped to the
+    most permissive bound of the slider (min for MIN_FILTERS, max for MAX_FILTERS).
 
-# Features overview
-st.subheader("✨ Features")
+    Parameters
+    ----------
+    preset : Dict[str, float]
+        Preset slider values keyed by filter column.
+    ranges : Dict[str, Tuple[float, float]]
+        Dynamic slider ranges.
 
-col1, col2, col3 = st.columns(3)
+    Returns
+    -------
+    Dict[str, float]
+        Clamped preset values.
+    """
+    result: Dict[str, float] = {}
+    for col, value in preset.items():
+        lo, hi = ranges.get(col, (0.0, 100.0))
+        if col in MIN_FILTERS:
+            result[col] = lo if value <= -1e12 else min(max(value, lo), hi)
+        elif col in MAX_FILTERS:
+            result[col] = hi if value >= 1e12 else min(max(value, lo), hi)
+        else:
+            result[col] = min(max(value, lo), hi)
+    return result
 
-with col1:
-    st.markdown("### 🔢 Multi-Criteria")
-    st.markdown("""
-    - Combine unlimited filters
-    - AND/OR logic
-    - Weighted scoring
-    - Custom formulas
-    """)
 
-with col2:
-    st.markdown("### 📊 Real-time Results")
-    st.markdown("""
-    - Instant filtering
-    - Live updates
-    - Performance metrics
-    - Result statistics
-    """)
+# =============================================================================
+# FILTERING - REUSES SCREENER ENGINE
+# =============================================================================
 
-with col3:
-    st.markdown("### 💾 Save & Export")
-    st.markdown("""
-    - Save screens
-    - Export to CSV/Excel
-    - Share with team
-    - Schedule alerts
-    """)
+def build_filter_conditions(
+    slider_values: Dict[str, float], ranges: Dict[str, Tuple[float, float]]
+) -> List[FilterCondition]:
+    """
+    Build Screener Engine filter conditions from slider values.
 
-st.markdown("---")
+    A slider positioned at its most permissive bound imposes no constraint and
+    is skipped. For MIN filters the permissive bound is the range minimum; for
+    MAX filters it is the range maximum.
 
-# Use cases
-st.subheader("💡 Use Cases")
+    Parameters
+    ----------
+    slider_values : Dict[str, float]
+        Current slider values keyed by filter column.
+    ranges : Dict[str, Tuple[float, float]]
+        Dynamic slider ranges (col -> (min, max)).
 
-with st.expander("📚 Example Screening Scenarios"):
-    st.markdown("""
-    ### Value Investing Screen
-    
-    **Criteria:**
-    - P/E Ratio < 15
-    - P/B Ratio < 2
-    - ROE > 15%
-    - Debt-to-Equity < 0.5
-    - Dividend Yield > 2%
-    
-    **Purpose:** Find undervalued, financially strong companies
-    
-    ---
-    
-    ### Growth Investing Screen
-    
-    **Criteria:**
-    - Revenue Growth (3Y) > 20%
-    - Profit Growth (3Y) > 20%
-    - ROE > 20%
-    - Market Cap > ₹10,000 Cr
-    
-    **Purpose:** Identify high-growth potential companies
-    
-    ---
-    
-    ### Quality Screen
-    
-    **Criteria:**
-    - ROE > 18% (consistent 5 years)
-    - Debt-to-Equity < 0.3
-    - Current Ratio > 2
-    - Interest Coverage > 5
-    - Positive Free Cash Flow
-    
-    **Purpose:** Find high-quality, financially sound companies
-    """)
+    Returns
+    -------
+    List[FilterCondition]
+        Filter conditions for the Screener Engine.
+    """
+    conditions: List[FilterCondition] = []
+    eps = 1e-9
+    for _, col, _ in FILTER_DEFS:
+        value = slider_values.get(col)
+        if value is None or pd.isna(value):
+            continue
+        lo, hi = ranges.get(col, (0.0, 100.0))
+        if col in MIN_FILTERS:
+            # Permissive bound -> no constraint
+            if value <= lo + eps:
+                continue
+            conditions.append(
+                FilterCondition(field=col, operator=FilterOperator.GREATER_THAN_OR_EQUAL, value=value)
+            )
+        elif col in MAX_FILTERS:
+            # Permissive bound -> no constraint
+            if value >= hi - eps:
+                continue
+            conditions.append(
+                FilterCondition(field=col, operator=FilterOperator.LESS_THAN_OR_EQUAL, value=value)
+            )
+    return conditions
 
-st.markdown("---")
 
-# Status
-st.subheader("ℹ️ Page Status")
+def run_screener(data: pd.DataFrame, slider_values: Dict[str, float]) -> pd.DataFrame:
+    """
+    Execute screening using the Sprint 3 Screener Engine.
 
-col1, col2, col3 = st.columns(3)
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Consolidated screener dataset.
+    slider_values : Dict[str, float]
+        Slider values keyed by filter column.
 
-with col1:
-    st.metric(
-        label="Status",
-        value="Scaffold",
-        delta="Module 1"
+    Returns
+    -------
+    pd.DataFrame
+        Filtered results (empty if none match or an error occurs).
+    """
+    try:
+        engine = ScreenerEngine()
+        engine.data = data.copy()
+        ranges = get_filter_ranges(data)
+        conditions = build_filter_conditions(slider_values, ranges)
+        if conditions:
+            engine.apply_filters(conditions, logic="AND")
+            result = engine.filtered_data
+        else:
+            result = engine.data
+        return result if result is not None else pd.DataFrame()
+    except Exception as e:
+        logger.error(f"Screener Engine failed: {str(e)}", exc_info=True)
+        return pd.DataFrame()
+
+
+# =============================================================================
+# UI RENDERING
+# =============================================================================
+
+def _preset_state_key(col: str) -> str:
+    """Return the session-state key for a filter slider."""
+    return f"slider_{col}"
+
+
+def render_sidebar_filters(data: pd.DataFrame) -> Tuple[Dict[str, float], Optional[str]]:
+    """
+    Render the sidebar filter sliders and preset buttons.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Consolidated screener dataset used to derive slider ranges.
+
+    Returns
+    -------
+    Tuple[Dict[str, float], Optional[str]]
+        (slider_values, selected_preset_id_or_None)
+    """
+    ranges = get_filter_ranges(data)
+
+    st.sidebar.header("🎛️ Screening Filters")
+    st.sidebar.caption("Ranges are derived from the dataset automatically.")
+
+    # Preset buttons
+    st.sidebar.subheader("⚡ Preset Strategies")
+    preset_cols = st.sidebar.columns(2)
+    selected_preset: Optional[str] = None
+    for idx, preset_name in enumerate(PRESETS.keys()):
+        col = preset_cols[idx % 2]
+        if col.button(preset_name, key=f"preset_{preset_name}", use_container_width=True):
+            selected_preset = preset_name
+            logger.info(f"Preset selected: {preset_name}")
+
+    # When a preset is clicked, populate every slider's session state.
+    if selected_preset is not None:
+        preset_values = apply_preset_values(PRESETS[selected_preset], ranges)
+        for col, value in preset_values.items():
+            st.session_state[_preset_state_key(col)] = float(value)
+        logger.info(f"Preset {selected_preset} values applied to all sliders")
+
+    st.sidebar.markdown("---")
+
+    # Lookup label by column (built once)
+    label_by_col = {col: label for label, col, _ in FILTER_DEFS}
+
+    # Sliders
+    slider_values: Dict[str, float] = {}
+    for _, col, unit in FILTER_DEFS:
+        lo, hi = ranges.get(col, (0.0, 100.0))
+        step = round((hi - lo) / 100.0, 4) if hi > lo else 1.0
+        step = max(step, 0.01)
+        is_min = col in MIN_FILTERS
+        default = lo if is_min else hi
+        key = _preset_state_key(col)
+
+        label = f"{label_by_col[col]} ({unit})".strip()
+        slider_values[col] = st.sidebar.slider(
+            label,
+            min_value=float(lo),
+            max_value=float(hi),
+            value=float(st.session_state.get(key, default)),
+            step=float(step),
+            key=key,
+        )
+
+    st.sidebar.markdown("---")
+    if st.sidebar.button("🔄 Reset Filters", use_container_width=True):
+        for _, col, _ in FILTER_DEFS:
+            st.session_state.pop(_preset_state_key(col), None)
+        st.rerun()
+
+    return slider_values, selected_preset
+
+
+def format_result_table(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Format the filtered data into the display-ready result table.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Filtered screener results.
+
+    Returns
+    -------
+    pd.DataFrame
+        Renamed, rounded table for display/export.
+    """
+    out = pd.DataFrame()
+    for label, col in RESULT_COLUMNS:
+        if col in data.columns:
+            out[label] = data[col]
+    # Round numeric columns
+    numeric_labels = [label for label, col in RESULT_COLUMNS if col in data.columns]
+    for label in numeric_labels:
+        if label not in out.columns:
+            continue
+        try:
+            out[label] = pd.to_numeric(out[label], errors="coerce").round(2)
+        except Exception:
+            pass
+    return out
+
+
+def render_results_table(result_df: pd.DataFrame) -> None:
+    """
+    Render the sortable, scrollable, responsive results table.
+
+    Parameters
+    ----------
+    result_df : pd.DataFrame
+        Formatted result table.
+    """
+    st.dataframe(
+        result_df,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            col: st.column_config.Column(col, width="medium")
+            for col in result_df.columns
+        },
     )
 
-with col2:
-    st.metric(
-        label="Filters",
-        value="Coming Soon",
-        delta="Module 2"
+
+def render_csv_export(result_df: pd.DataFrame) -> None:
+    """
+    Render a download button for the visible (filtered) results.
+
+    Parameters
+    ----------
+    result_df : pd.DataFrame
+        Formatted result table (visible rows only).
+    """
+    if result_df.empty:
+        return
+    csv_buffer = io.StringIO()
+    result_df.to_csv(csv_buffer, index=False, encoding="utf-8")
+    st.download_button(
+        label="⬇️ Download CSV",
+        data=csv_buffer.getvalue(),
+        file_name="screener_results.csv",
+        mime="text/csv",
+        use_container_width=True,
+    )
+    logger.info(f"CSV exported with {len(result_df)} rows")
+
+
+# =============================================================================
+# MAIN
+# =============================================================================
+
+def main() -> None:
+    """
+    Render the Investment Screener screen.
+    """
+    logger.info("Screener screen accessed")
+    st.title("🔍 Investment Screener")
+    st.markdown("### Filter Nifty 100 companies using financial metrics.")
+    st.markdown("---")
+
+    start_time = time.time()
+
+    # Load data
+    with st.spinner("Loading screening data..."):
+        data = load_screener_data()
+
+    if data.empty:
+        st.error("No financial data is available. Please check the database connection.")
+        logger.error("Screener dataset empty - cannot render screen")
+        return
+
+    # Sidebar controls
+    slider_values, selected_preset = render_sidebar_filters(data)
+
+    if selected_preset:
+        st.info(f"⚡ Preset **{selected_preset}** applied to all filters.")
+        logger.info(f"Preset applied: {selected_preset}")
+
+    # Run filter (live - every slider change updates results immediately)
+    filtered = run_screener(data, slider_values)
+    logger.info(
+        f"Screening executed: {len(filtered)} results in {time.time() - start_time:.3f}s"
     )
 
-with col3:
-    st.metric(
-        label="Companies",
-        value="100",
-        delta="Nifty 100"
+    # Result count
+    count = len(filtered)
+    st.subheader(f"📊 Results")
+    if count:
+        st.markdown(f"### **{count} companies match your criteria**")
+    else:
+        st.markdown("### **0 companies match your criteria**")
+
+    st.markdown("---")
+
+    # Results table + export
+    if count:
+        result_df = format_result_table(filtered)
+        col_table, col_export = st.columns([4, 1])
+        with col_table:
+            render_results_table(result_df)
+        with col_export:
+            render_csv_export(result_df)
+    else:
+        st.warning("No companies match the selected criteria.")
+        st.info("Try relaxing one or more filter thresholds.")
+
+    # Footer
+    st.markdown("---")
+    st.caption(
+        "💡 **Tip:** Results update instantly as you move any slider. "
+        "Use a preset strategy to quickly populate all filters."
     )
+    logger.info(f"Screener screen rendered in {time.time() - start_time:.2f}s")
 
-st.markdown("---")
 
-# Footer
-st.caption("""
-💡 **Note**: This page is part of Module 1 (Dashboard Scaffold). 
-Full screening functionality will be implemented in Module 2.
-""")
+if __name__ == "__main__":
+    main()
 
-# Log page visit
-logger.info("Stock Screener page accessed")

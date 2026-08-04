@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 # Database path configuration
 # Try multiple possible locations for the database
 DB_PATHS = [
+    Path("data/database/n100.db"),
     Path("data/database/nifty100.db"),
     Path("data/nifty100.db"),
     Path("nifty100.db"),
@@ -713,6 +714,268 @@ def get_valuation(ticker: str) -> pd.DataFrame:
         return pd.DataFrame()
     except Exception as e:
         logger.error(f"Unexpected error in get_valuation() for {ticker}: {str(e)}", exc_info=True)
+        return pd.DataFrame()
+
+
+# =============================================================================
+# MODULE 3 - SCREENER & PEER COMPARISON HELPERS
+# =============================================================================
+
+
+def _read_df(query: str, params: Optional[List[Any]] = None) -> pd.DataFrame:
+    """
+    Execute a read-only SQL query and return a DataFrame.
+
+    Parameters
+    ----------
+    query : str
+        SQL SELECT statement.
+    params : Optional[List[Any]], optional
+        Query parameters for safe binding, by default None.
+
+    Returns
+    -------
+    pd.DataFrame
+        Query result. Empty DataFrame on any error.
+    """
+    try:
+        with get_connection() as conn:
+            return pd.read_sql_query(query, conn, params=params or [])
+    except Exception as e:  # pragma: no cover - defensive
+        logger.error(f"Database query failed: {str(e)}", exc_info=True)
+        return pd.DataFrame()
+
+
+@st.cache_data(ttl=600)
+def get_company_master() -> pd.DataFrame:
+    """
+    Retrieve company master data using the canonical n100.db schema.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with columns: company_id, company_name, sector, industry.
+    """
+    logger.info("Executing query: get_company_master()")
+    df = _read_df(
+        """
+        SELECT company_id, company_name, sector, industry
+        FROM companies
+        ORDER BY company_name
+        """
+    )
+    logger.info(f"get_company_master() returned {len(df)} rows")
+    return df
+
+
+@st.cache_data(ttl=600)
+def get_peer_groups_list() -> List[str]:
+    """
+    Retrieve the list of all available peer group names.
+
+    Returns
+    -------
+    List[str]
+        Sorted list of distinct peer group names.
+    """
+    logger.info("Executing query: get_peer_groups_list()")
+    df = _read_df(
+        """
+        SELECT DISTINCT peer_group_name
+        FROM peer_groups
+        WHERE peer_group_name IS NOT NULL
+        ORDER BY peer_group_name
+        """
+    )
+    groups = df["peer_group_name"].dropna().astype(str).tolist() if not df.empty else []
+    logger.info(f"get_peer_groups_list() returned {len(groups)} groups")
+    return groups
+
+
+@st.cache_data(ttl=600)
+def get_peer_group_companies(group_name: str) -> pd.DataFrame:
+    """
+    Retrieve companies belonging to a specific peer group.
+
+    Parameters
+    ----------
+    group_name : str
+        Peer group name (e.g., 'IT Services').
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with columns: company_id, is_benchmark, company_name, sector.
+    """
+    logger.info(f"Executing query: get_peer_group_companies(group_name={group_name})")
+    if not group_name or not isinstance(group_name, str):
+        return pd.DataFrame()
+    df = _read_df(
+        """
+        SELECT pg.company_id, pg.is_benchmark, c.company_name, c.sector
+        FROM peer_groups pg
+        LEFT JOIN companies c ON pg.company_id = c.company_id
+        WHERE pg.peer_group_name = ?
+        ORDER BY pg.is_benchmark DESC, c.company_name
+        """,
+        params=[group_name],
+    )
+    logger.info(f"get_peer_group_companies() returned {len(df)} rows")
+    return df
+
+
+@st.cache_data(ttl=600)
+def get_all_screener_data(period: str = "Mar 2024") -> pd.DataFrame:
+    """
+    Build a consolidated screener dataset joining all relevant tables.
+
+    The dataset is assembled from:
+    - companies (company_id, company_name, sector, industry)
+    - financial_ratios (roe, debt_to_equity)
+    - financial_kpis (roce, net_profit_margin, operating_margin, interest_coverage)
+    - financial_kpis TTM (revenue_cagr, profit_cagr)
+    - financial_health_scores (overall_score as composite quality score, rating)
+    - cash_flow (operating_activity + investing_activity = free_cash_flow)
+    - market_cap (pe_ratio, pb_ratio, dividend_yield - latest available)
+
+    Parameters
+    ----------
+    period : str, optional
+        Reporting period for annual metrics, by default "Mar 2024".
+
+    Returns
+    -------
+    pd.DataFrame
+        One row per company with all screener metrics.
+    """
+    logger.info(f"Building consolidated screener dataset for period {period}")
+    try:
+        with get_connection() as conn:
+            companies = pd.read_sql_query(
+                "SELECT company_id, company_name, sector, industry FROM companies",
+                conn,
+            )
+            ratios = pd.read_sql_query(
+                """
+                SELECT company_id, roe, debt_to_equity
+                FROM financial_ratios
+                WHERE period = ?
+                """,
+                conn,
+                params=[period],
+            )
+            kpis = pd.read_sql_query(
+                """
+                SELECT company_id, roce, net_profit_margin, operating_margin,
+                       interest_coverage
+                FROM financial_kpis
+                WHERE period = ?
+                """,
+                conn,
+                params=[period],
+            )
+            health = pd.read_sql_query(
+                """
+                SELECT company_id, overall_score, rating
+                FROM financial_health_scores
+                WHERE period = ?
+                """,
+                conn,
+                params=[period],
+            )
+            cagr = pd.read_sql_query(
+                """
+                SELECT company_id, revenue_cagr, profit_cagr
+                FROM financial_kpis
+                WHERE period = 'TTM'
+                """,
+                conn,
+            )
+            cf = pd.read_sql_query(
+                """
+                SELECT company_id, operating_activity, investing_activity
+                FROM cash_flow
+                WHERE period IN (?, ?)
+                ORDER BY CASE WHEN period = ? THEN 1 ELSE 0 END, company_id
+                """,
+                conn,
+                params=[period, "Mar-24", "Mar-24"],
+            )
+            cf = cf.drop_duplicates(subset=["company_id"], keep="first").copy()
+            cf["free_cash_flow"] = cf["operating_activity"] + cf["investing_activity"]
+            valuation = pd.read_sql_query(
+                """
+                SELECT company_id, pe_ratio, pb_ratio, dividend_yield
+                FROM market_cap
+                WHERE period = (SELECT MAX(period) FROM market_cap)
+                """,
+                conn,
+            )
+
+        df = companies.merge(ratios, on="company_id", how="left")
+        df = df.merge(kpis, on="company_id", how="left")
+        df = df.merge(health, on="company_id", how="left")
+        df = df.merge(cagr, on="company_id", how="left")
+        df = df.merge(cf, on="company_id", how="left")
+        df = df.merge(valuation, on="company_id", how="left")
+
+        # Standardized output columns used by the screener/peer pages
+        df["composite_quality_score"] = df["overall_score"]
+        df["operating_profit_margin"] = df["operating_margin"]
+        df["revenue_cagr_5yr"] = df["revenue_cagr"]
+        df["pat_cagr_5yr"] = df["profit_cagr"]
+        df["ticker"] = df["company_id"]
+        df["company"] = df["company_name"]
+
+        drop_cols = [
+            "operating_margin", "revenue_cagr", "profit_cagr",
+            "overall_score", "operating_activity", "investing_activity",
+        ]
+        df = df.drop(columns=[c for c in drop_cols if c in df.columns], errors="ignore")
+
+        logger.info(f"Consolidated screener dataset built: {len(df)} rows")
+        return df
+    except Exception as e:
+        logger.error(f"Failed to build screener dataset: {str(e)}", exc_info=True)
+        return pd.DataFrame()
+
+
+@st.cache_data(ttl=600)
+def get_peer_group_metrics(period: str = "Mar 2024") -> pd.DataFrame:
+    """
+    Build a consolidated dataset of peer-group company metrics.
+
+    Combines peer group assignments with the consolidated screener dataset.
+
+    Parameters
+    ----------
+    period : str, optional
+        Reporting period for annual metrics, by default "Mar 2024".
+
+    Returns
+    -------
+    pd.DataFrame
+        One row per company per peer group with all metrics.
+    """
+    logger.info(f"Building peer group metrics for period {period}")
+    try:
+        peers = _read_df(
+            """
+            SELECT pg.company_id, pg.peer_group_name, pg.is_benchmark
+            FROM peer_groups pg
+            WHERE pg.peer_group_name IS NOT NULL
+            ORDER BY pg.peer_group_name, pg.is_benchmark DESC
+            """
+        )
+        screener_df = get_all_screener_data(period)
+        if peers.empty or screener_df.empty:
+            logger.warning("No peer group or screener data available")
+            return pd.DataFrame()
+        merged = peers.merge(screener_df, on="company_id", how="left")
+        logger.info(f"Peer group metrics built: {len(merged)} rows")
+        return merged
+    except Exception as e:
+        logger.error(f"Failed to build peer group metrics: {str(e)}", exc_info=True)
         return pd.DataFrame()
 
 

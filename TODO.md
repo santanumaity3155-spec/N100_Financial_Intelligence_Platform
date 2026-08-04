@@ -1,51 +1,48 @@
-# Module 5 - Financial Health Score Engine - TODO
+# Sprint 4 – Module 3 Implementation TODO
 
 ## Steps
 
-### 1. Create Constants File
-- [ ] Create `src/health_score/constants.py` with score weights, thresholds, rating bands, remark templates
+- [x] 0. Analyze task & gather repo understanding
+- [x] 1. Inspect database schema & data availability
+- [x] 2. Present & approve implementation plan
 
-### 2. Update Database Schema
-- [ ] Add `financial_health_scores` table schema to `src/database/schema.py`
-- [ ] Register in TABLE_SCHEMAS dict
-- [ ] Add indexes for the new table
+- [ ] 3. Add minimal read-only DB helper functions to `src/dashboard/utils/db.py`
+      - `get_peer_groups_list()`
+      - `get_peer_group_companies(group_name)`
+      - `get_peer_group_metrics()`
+      - `get_all_screener_data()`
+      - `get_latest_financial_data()` (shared latest-period loader)
 
-### 3. Implement Core Engine
-- [ ] Create `src/health_score/engine.py` with `HealthScoreEngine` class
-  - [ ] `load_data()` - read from financial_ratios
-  - [ ] `_clean_numeric()` - sanitize values
-  - [ ] `_normalize_score()` - normalize to 0-100
-  - [ ] `calculate_profitability_score()` - ROE, ROCE, ROA, NPM, OPM
-  - [ ] `calculate_growth_score()` - Revenue/PAT/EPS CAGR
-  - [ ] `calculate_cashflow_score()` - FCF, FCF Margin, Cash Conversion, Cash ROA, CapAlloc
-  - [ ] `calculate_leverage_score()` - D/E, Interest Coverage, High Leverage Flag
-  - [ ] `calculate_efficiency_score()` - Asset Turnover
-  - [ ] `calculate_overall_score()` - Weighted average
-  - [ ] `generate_rating()` - Qualitative rating
-  - [ ] `generate_remarks()` - Auto-generated remarks
-  - [ ] `save_to_database()` - UPSERT with transactions
-  - [ ] `export_csv()` - CSV output
-  - [ ] `run()` - Full pipeline
+- [ ] 4. Implement `pages/03_screener.py`
+      - Screener title/subtitle
+      - 10 dynamic sidebar sliders
+      - 6 preset buttons (populate sliders + run filter)
+      - Sortable result table (15 columns)
+      - Live result count
+      - CSV export (visible rows, UTF-8)
+      - Empty state + error handling
+      - Logging
 
-### 4. Update Package Init
-- [ ] Update `src/health_score/__init__.py` to export engine
+- [ ] 5. Implement `pages/04_peers.py`
+      - Peer group dropdown (11 groups)
+      - Company selector with search/autocomplete
+      - Plotly Scatterpolar radar chart (8 metrics)
+      - Peer KPI table with highlights (selected/benchmark/best/worst)
+      - Percentile computation (live, reusing Peer Engine)
+      - Error handling + logging
 
-### 5. Create Test Suite
-- [ ] Create `tests/health_score/__init__.py`
-- [ ] Create `tests/health_score/test_health_score_engine.py` with 50+ test cases
-  - [ ] Individual score calculation tests
-  - [ ] Overall score tests
-  - [ ] Rating tests
-  - [ ] Remarks tests
-  - [ ] Missing/edge case tests
-  - [ ] Database operation tests
-  - [ ] CSV export tests
-  - [ ] End-to-end tests
+- [ ] 6. Run headless smoke-test validation
+      - Import checks
+      - DB helper tests
+      - Screener filter pipeline test
+      - Radar data prep test
+      - No SQL/runtime/cache errors
 
-### 6. Update Existing Test Placeholder
-- [ ] Update `src/tests/test_health_score.py`
+- [ ] 7. Produce Module 3 completion report
 
-### 7. Run Tests & Validate
-- [ ] Run `python -m pytest tests/health_score/test_health_score_engine.py -v`
-- [ ] Fix any failures
+## Constraints
+- Do NOT modify Modules 1–2 pages
+- Do NOT modify Sprint 3 engine logic
+- Do NOT change DB schema
+- Do NOT duplicate filtering/peer/radar logic
 
