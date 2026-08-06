@@ -539,7 +539,7 @@ class IntegrationTestSuite:
                 
                 # Try to compile the file (syntax check)
                 try:
-                    with open(page_path, 'r') as f:
+                    with open(page_path, 'r', encoding='utf-8') as f:
                         code = f.read()
                     compile(code, page_path, 'exec')
                     logger.info(f"✅ {page_file}: Syntax OK")

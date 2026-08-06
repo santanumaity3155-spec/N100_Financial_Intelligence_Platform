@@ -114,19 +114,18 @@ def get_companies() -> pd.DataFrame:
     
     Returns:
         pd.DataFrame: DataFrame containing company information with columns:
-            - ticker: Company ticker symbol
-            - name: Company name
+            - ticker: Company ticker symbol (company_id)
+            - name: Company name (company_name)
             - sector: Sector classification
             - industry: Industry classification
-            - isin: ISIN number
+            - isin: ISIN number (isin_code)
             - listed_date: Date of listing
-            - market_cap: Market capitalization
-            
+             
     Returns empty DataFrame if:
         - Database is unavailable
         - Table doesn't exist
         - No data found
-        
+         
     Example:
         df = get_companies()
         print(df.head())
@@ -138,15 +137,14 @@ def get_companies() -> pd.DataFrame:
         with get_connection() as conn:
             query = """
                 SELECT 
-                    ticker,
-                    name,
+                    company_id as ticker,
+                    company_name as name,
                     sector,
                     industry,
-                    isin,
-                    listed_date,
-                    market_cap
+                    isin_code as isin,
+                    listed_date
                 FROM companies
-                ORDER BY ticker
+                ORDER BY company_id
             """
             
             df = pd.read_sql_query(query, conn)
@@ -177,19 +175,19 @@ def get_ratios(ticker: str, year: Optional[int] = None) -> pd.DataFrame:
         pd.DataFrame: DataFrame containing financial ratios with columns:
             - ticker: Company ticker
             - year: Financial year
-            - pe_ratio: Price to Earnings ratio
-            - pb_ratio: Price to Book ratio
+            - pe_ratio: Price to Earnings ratio (from financial_kpis)
+            - pb_ratio: Price to Book ratio (from financial_kpis)
             - roe: Return on Equity
             - roa: Return on Assets
             - debt_equity: Debt to Equity ratio
             - current_ratio: Current ratio
             - And other financial metrics
-            
+             
     Returns empty DataFrame if:
         - Ticker is missing or empty
         - No data found for the ticker
         - Database is unavailable
-        
+         
     Example:
         df = get_ratios('RELIANCE', year=2024)
     """
@@ -205,39 +203,44 @@ def get_ratios(ticker: str, year: Optional[int] = None) -> pd.DataFrame:
     
     try:
         with get_connection() as conn:
-            # Base query
+            # Base query - pe_ratio and pb_ratio are in financial_kpis, not financial_ratios
+            # Note: financial_ratios uses 'period' column (e.g., 'Mar 2024'), not 'year'
             query = """
                 SELECT 
-                    ticker,
-                    year,
-                    pe_ratio,
-                    pb_ratio,
-                    roe,
-                    roa,
-                    debt_equity,
-                    current_ratio,
-                    quick_ratio,
-                    gross_margin,
-                    operating_margin,
-                    net_margin,
-                    asset_turnover,
-                    inventory_turnover,
-                    revenue_growth,
-                    profit_growth,
-                    eps,
-                    book_value_per_share,
-                    dividend_yield
-                FROM financial_ratios
-                WHERE ticker = ?
+                    r.company_id as ticker,
+                    r.period as year,
+                    r.roe,
+                    r.roa,
+                    r.debt_to_equity as debt_equity,
+                    r.current_ratio,
+                    r.quick_ratio,
+                    r.dividend_yield,
+                    k.pe_ratio,
+                    k.pb_ratio,
+                    k.net_profit_margin,
+                    k.operating_margin,
+                    k.gross_margin,
+                    k.interest_coverage,
+                    k.asset_turnover,
+                    k.inventory_turnover,
+                    k.revenue_cagr as revenue_growth,
+                    k.profit_cagr as profit_growth,
+                    k.eps,
+                    k.ev_ebitda
+                FROM financial_ratios r
+                LEFT JOIN financial_kpis k ON r.company_id = k.company_id AND r.period = k.period
+                WHERE r.company_id = ?
             """
             params = [ticker]
             
-            # Add year filter if provided
+            # Add year filter if provided (convert int year to period format)
             if year is not None:
-                query += " AND year = ?"
-                params.append(year)
+                # Try to match year to period format (e.g., 2024 -> 'Mar 2024')
+                # This is a best-effort match since period format varies
+                query += " AND r.period LIKE ?"
+                params.append(f"%{year}%")
             
-            query += " ORDER BY year DESC"
+            query += " ORDER BY r.period DESC"
             
             df = pd.read_sql_query(query, conn, params=params)
             
@@ -268,15 +271,11 @@ def get_pl(ticker: str) -> pd.DataFrame:
     
     Returns:
         pd.DataFrame: DataFrame containing Profit & Loss data with columns:
-            - ticker: Company ticker
-            - year: Financial year
-            - revenue: Total revenue
-            - gross_profit: Gross profit
+            - ticker: Company ticker (company_id)
+            - year: Financial year (period)
+            - sales: Total sales
             - operating_profit: Operating profit
             - net_profit: Net profit
-            - ebitda: EBITDA
-            - interest_expense: Interest expense
-            - tax_expense: Tax expense
             - And other P&L line items
             
     Returns empty DataFrame if:
@@ -299,28 +298,26 @@ def get_pl(ticker: str) -> pd.DataFrame:
     
     try:
         with get_connection() as conn:
+            # Note: profit_loss table uses 'company_id' and 'period' columns
             query = """
                 SELECT 
-                    ticker,
-                    year,
-                    revenue,
-                    gross_profit,
+                    company_id as ticker,
+                    period as year,
+                    sales,
+                    expenses,
                     operating_profit,
-                    net_profit,
-                    ebitda,
-                    interest_expense,
-                    tax_expense,
-                    depreciation,
-                    amortization,
+                    opm_percentage,
                     other_income,
-                    exceptional_items,
-                    net_sales,
-                    cost_of_materials,
-                    employee_benefits,
-                    other_expenses
+                    interest,
+                    depreciation,
+                    profit_before_tax,
+                    tax_percentage,
+                    net_profit,
+                    eps,
+                    dividend_payout
                 FROM profit_loss
-                WHERE ticker = ?
-                ORDER BY year DESC
+                WHERE company_id = ?
+                ORDER BY period DESC
             """
             
             df = pd.read_sql_query(query, conn, params=[ticker])
@@ -352,15 +349,10 @@ def get_bs(ticker: str) -> pd.DataFrame:
     
     Returns:
         pd.DataFrame: DataFrame containing Balance Sheet data with columns:
-            - ticker: Company ticker
-            - year: Financial year
+            - ticker: Company ticker (company_id)
+            - year: Financial year (period)
             - total_assets: Total assets
             - total_liabilities: Total liabilities
-            - total_equity: Total equity
-            - current_assets: Current assets
-            - non_current_assets: Non-current assets
-            - current_liabilities: Current liabilities
-            - non_current_liabilities: Non-current liabilities
             - And other balance sheet items
             
     Returns empty DataFrame if:
@@ -383,31 +375,25 @@ def get_bs(ticker: str) -> pd.DataFrame:
     
     try:
         with get_connection() as conn:
+            # Note: balance_sheet table uses 'company_id' and 'period' columns
             query = """
                 SELECT 
-                    ticker,
-                    year,
-                    total_assets,
+                    company_id as ticker,
+                    period as year,
+                    share_capital,
+                    reserves,
+                    borrowings,
+                    other_liabilities,
                     total_liabilities,
-                    total_equity,
-                    current_assets,
-                    non_current_assets,
-                    current_liabilities,
-                    non_current_liabilities,
-                    cash_and_equivalents,
-                    inventory,
-                    accounts_receivable,
-                    property_plant_equipment,
-                    goodwill,
-                    intangible_assets,
-                    long_term_debt,
-                    short_term_debt,
-                    accounts_payable,
-                    retained_earnings,
-                    share_capital
+                    fixed_assets,
+                    cwip,
+                    investments,
+                    other_assets,
+                    total_assets,
+                    equity_capital
                 FROM balance_sheet
-                WHERE ticker = ?
-                ORDER BY year DESC
+                WHERE company_id = ?
+                ORDER BY period DESC
             """
             
             df = pd.read_sql_query(query, conn, params=[ticker])
@@ -439,14 +425,13 @@ def get_cf(ticker: str) -> pd.DataFrame:
     
     Returns:
         pd.DataFrame: DataFrame containing Cash Flow data with columns:
-            - ticker: Company ticker
-            - year: Financial year
-            - operating_cash_flow: Cash flow from operations
-            - investing_cash_flow: Cash flow from investing
-            - financing_cash_flow: Cash flow from financing
-            - net_cash_flow: Net change in cash
-            - capex: Capital expenditure
+            - ticker: Company ticker (company_id)
+            - year: Financial year (period)
+            - operating_activity: Cash from operating activities
+            - investing_activity: Cash from investing activities
+            - financing_activity: Cash from financing activities
             - free_cash_flow: Free cash flow
+            - net_cash_flow: Net change in cash
             - And other cash flow items
             
     Returns empty DataFrame if:
@@ -469,26 +454,22 @@ def get_cf(ticker: str) -> pd.DataFrame:
     
     try:
         with get_connection() as conn:
+            # Note: cash_flow table uses 'company_id' and 'period' columns
             query = """
                 SELECT 
-                    ticker,
-                    year,
-                    operating_cash_flow,
-                    investing_cash_flow,
-                    financing_cash_flow,
-                    net_cash_flow,
-                    capex,
+                    company_id as ticker,
+                    period as year,
+                    cash_from_operating_activity,
+                    cash_from_investing_activity,
+                    cash_from_financing_activity,
                     free_cash_flow,
-                    depreciation,
-                    working_capital_change,
-                    tax_paid,
-                    interest_paid,
-                    dividends_paid,
-                    debt_repayment,
-                    equity_issuance
+                    net_cash_flow,
+                    operating_activity,
+                    investing_activity,
+                    financing_activity
                 FROM cash_flow
-                WHERE ticker = ?
-                ORDER BY year DESC
+                WHERE company_id = ?
+                ORDER BY period DESC
             """
             
             df = pd.read_sql_query(query, conn, params=[ticker])
