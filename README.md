@@ -1,92 +1,162 @@
 # N100 Financial Intelligence Platform
 
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+![Streamlit](https://img.shields.io/badge/streamlit-1.28%2B-red)
 ![SQLite](https://img.shields.io/badge/sqlite-3.25%2B-green)
 ![License](https://img.shields.io/badge/license-MIT-orange)
+![Status](https://img.shields.io/badge/status-production_ready-success)
 
-A production-grade ETL pipeline and financial intelligence platform for analyzing Nifty 100 companies. This platform extracts financial data from Excel files, transforms it through a robust ETL pipeline, and loads it into a SQLite database for comprehensive financial analysis and KPI calculations.
+A production-grade financial intelligence platform for comprehensive analysis of Nifty 100 companies. This platform combines automated ETL pipelines, advanced financial analytics, peer comparison engines, and an interactive Streamlit dashboard to provide actionable investment insights.
 
 ## Table of Contents
 
+- [Problem Statement](#problem-statement)
 - [Features](#features)
-- [Architecture](#architecture)
+- [Technology Stack](#technology-stack)
+- [Project Architecture](#project-architecture)
 - [Folder Structure](#folder-structure)
 - [Installation](#installation)
-- [Usage](#usage)
-- [Database Schema](#database-schema)
-- [ETL Workflow](#etl-workflow)
-- [Testing](#testing)
-- [Documentation](#documentation)
-- [Troubleshooting](#troubleshooting)
-- [Sprint 1 Completion](#sprint-1-completion)
+- [Requirements](#requirements)
+- [How to Run](#how-to-run)
+- [ETL Pipeline](#etl-pipeline)
+- [Dashboard](#dashboard)
+- [Example Screenshots](#example-screenshots)
+- [Future Improvements](#future-improvements)
+- [Contributors](#contributors)
+- [License](#license)
+- [Acknowledgements](#acknowledgements)
+
+## Problem Statement
+
+Financial analysts and investors face significant challenges when analyzing Nifty 100 companies:
+
+1. **Data Fragmentation**: Financial data scattered across multiple Excel files with inconsistent formats
+2. **Manual Calculations**: Time-consuming manual calculation of 30+ financial KPIs and ratios
+3. **Peer Comparison Difficulty**: Lack of standardized peer group benchmarking tools
+4. **Limited Historical Analysis**: Difficulty tracking multi-year trends and sector performance
+5. **Valuation Complexity**: No integrated valuation framework with flagging mechanisms
+6. **Report Generation**: Manual report creation and data export processes
+
+The N100 Financial Intelligence Platform solves these problems by providing:
+
+- Automated ETL pipeline for 12 financial datasets
+- 30+ calculated financial KPIs and ratios
+- Peer comparison engine with radar charts
+- Sector analysis and trend tracking
+- Automated valuation with Excel exports
+- Interactive dashboard with 8 specialized pages
+- CSV/Excel export capabilities
 
 ## Features
 
-### Core Functionality
-- **Automated ETL Pipeline**: Extract, transform, and load financial data from Excel files
-- **Data Validation**: Comprehensive validation with missing value detection and duplicate checking
-- **Data Normalization**: Standardize company IDs, years, and financial metrics
-- **KPI Calculations**: 30+ financial KPIs including profitability, liquidity, leverage, and efficiency ratios
-- **Database Management**: SQLite database with proper schema design and indexing
-- **Quality Reports**: Automated data quality reporting in HTML and JSON formats
+### Core Analytics Engine
 
-### Financial Analysis
-- **Profit & Loss Analysis**: Revenue, expenses, profit margins, and growth metrics
-- **Balance Sheet Analysis**: Assets, liabilities, equity, and financial position
-- **Cash Flow Analysis**: Operating, investing, and financing cash flows
-- **Valuation Metrics**: P/E ratio, P/B ratio, market cap, and enterprise value
-- **Peer Group Analysis**: Benchmarking against industry peers
-- **Sector Analysis**: Sector-wise performance and distribution
+- **Financial Ratio Engine**: 30+ KPIs across profitability, liquidity, leverage, efficiency, and valuation
+- **Peer Comparison Engine**: Automatic peer group assignment and benchmarking
+- **Radar Charts**: Multi-dimensional company comparison visualization
+- **Screener Engine**: Advanced filtering with 94+ companies across 9 sectors
+- **Valuation Module**: Automated P/E, P/B, EV/EBITDA calculations with flagging
+- **Health Score Engine**: Composite financial health scoring system
 
-## Architecture
+### Dashboard Modules
+
+1. **Home Dashboard**: KPI overview, market summary, quick company search
+2. **Company Profile**: Detailed financial statements, ratios, and metrics
+3. **Stock Screener**: Filter companies by 20+ financial criteria
+4. **Peer Comparison**: Side-by-side analysis with radar charts
+5. **Trend Analysis**: 12-year historical performance tracking
+6. **Sector Analysis**: Sector-wise performance and distribution analysis
+7. **Capital Allocation**: Cash flow analysis and capital structure visualization
+8. **Annual Reports**: Comprehensive financial report generation
+
+### Data Management
+
+- **ETL Pipeline**: Automated extraction, transformation, and loading
+- **Data Validation**: Comprehensive quality checks and validation reports
+- **Database**: SQLite with 20+ tables and proper indexing
+- **Caching**: 10-minute cache TTL for optimal performance
+- **Export**: CSV and Excel export functionality
+
+## Technology Stack
+
+### Backend
+
+- **Language**: Python 3.8+
+- **Database**: SQLite 3.25+
+- **Data Processing**: Pandas 2.0+, NumPy 1.24+
+- **ETL**: Custom pipeline with validation and normalization
+
+### Frontend
+
+- **Framework**: Streamlit 1.28+
+- **Visualization**: Plotly 5.17+
+- **Charts**: Interactive bar, line, radar, treemap, waterfall, heatmap, gauge charts
+
+### Analytics
+
+- **KPI Engine**: Custom financial ratio calculator
+- **Peer Analysis**: Benchmarking and percentile calculations
+- **Valuation**: Automated valuation with Excel export
+- **Health Score**: Composite scoring system
+
+### Development
+
+- **Testing**: pytest, unittest
+- **Logging**: Comprehensive logging framework
+- **Configuration**: Centralized settings management
+- **Documentation**: Markdown-based documentation
+
+## Project Architecture
 
 ```
-┌─────────────────┐
-│   Excel Files   │ (Raw Data)
-│  (data/raw/)    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   Extraction    │ (src/etl/extract.py)
-│  (DataExtractor)│
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  Normalization  │ (src/etl/normalizer.py)
-│ (DataNormalizer)│
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   Validation    │ (src/etl/validator.py)
-│ (DataValidator) │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Transformation  │ (src/etl/transform.py)
-│(DataTransformer)│
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│     Loading     │ (src/etl/load.py)
-│  (DataLoader)   │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   SQLite DB     │ (data/database/n100.db)
-│  (14 Tables)    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  KPI Engine     │ (src/kpi_engine/)
-│  (30+ KPIs)     │
-└─────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                        Streamlit Dashboard                       │
+│                    (8 Specialized Pages)                         │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      Analytics Layer                             │
+│  ┌──────────────┬──────────────┬──────────────┬──────────────┐  │
+│  │ KPI Engine   │ Peer Engine  │ Valuation    │ Health Score │  │
+│  │ (30+ KPIs)   │ (13 Groups)  │ (92 Records) │ (Composite)  │  │
+│  └──────────────┴──────────────┴──────────────┴──────────────┘  │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Database Layer (SQLite)                       │
+│  ┌────────┬────────┬────────┬────────┬────────┬────────┐        │
+│  │Companies│Ratios  │ KPIs   │ Peers  │Sectors │Reports │        │
+│  │  (92)  │(1,065) │(1,164) │  (56)  │  (9)   │(1,585) │        │
+│  └────────┴────────┴────────┴────────┴────────┴────────┘        │
+│  Total: 20 Tables, 10,000+ Records, 2.18 MB                     │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      ETL Pipeline                                │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
+│  │ Extract  │→│Normalize │→│Validate  │→│Transform │        │
+│  │(12 Excel)│  │(Clean)   │  │(Quality) │  │(Rules)   │        │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘        │
+│                            │                                     │
+│                            ▼                                     │
+│                   ┌──────────────┐                               │
+│                   │    Load      │                               │
+│                   │  (Database)  │                               │
+│                   └──────────────┘                               │
+└─────────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Data Sources                                  │
+│         (12 Excel Files in data/raw/)                            │
+│  • companies.xlsx • profit_loss.xlsx • balance_sheet.xlsx       │
+│  • cash_flow.xlsx • ratios.xlsx • stock_prices.xlsx            │
+│  • market_cap.xlsx • sectors.xlsx • peer_groups.xlsx           │
+│  • documents.xlsx • pros_cons.xlsx • annual_reports.xlsx       │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## Folder Structure
@@ -94,38 +164,71 @@ A production-grade ETL pipeline and financial intelligence platform for analyzin
 ```
 N100_Financial_Intelligence_Platform/
 ├── data/
-│   ├── database/              # SQLite database storage
-│   │   └── n100.db           # Main database file
-│   └── raw/                   # Raw Excel files (12 datasets)
+│   ├── database/                    # SQLite database storage
+│   │   └── n100.db                 # Main database (2.18 MB, 20 tables)
+│   └── raw/                         # Raw Excel files (12 datasets)
 │       ├── companies.xlsx
 │       ├── profit_loss.xlsx
 │       ├── balance_sheet.xlsx
 │       ├── cash_flow.xlsx
-│       └── ... (8 more datasets)
+│       ├── ratios.xlsx
+│       ├── stock_prices.xlsx
+│       ├── market_cap.xlsx
+│       ├── sectors.xlsx
+│       ├── peer_groups.xlsx
+│       ├── documents.xlsx
+│       ├── pros_cons.xlsx
+│       └── annual_reports.xlsx
 │
-├── docs/                      # Documentation
+├── docs/                            # Documentation
+│   ├── User_Guide.md                # User documentation
+│   ├── Architecture.md              # Technical architecture
+│   ├── Project_Summary.md           # Project overview
+│   ├── Sprint4_Retrospective.md     # Sprint retrospective
+│   ├── screenshots/                 # Dashboard screenshots
 │   ├── manual_data_review.md
 │   ├── etl_validation_summary.md
-│   └── [Sprint 1 review docs]
+│   └── SPRINT1_REVIEW.md
 │
-├── logs/                      # Application logs
+├── logs/                            # Application logs
+│   └── dashboard.log
 │
-├── notebooks/                 # SQL queries and analysis
+├── notebooks/                       # SQL queries and analysis
 │   └── exploratory_queries.sql
 │
-├── reports/                   # Generated reports
-│   ├── data_quality_report_*.html
-│   ├── data_quality_report_*.json
-│   ├── load_audit.csv
-│   └── validation_failures.csv
+├── output/                          # Generated outputs
+│   ├── valuation_summary.xlsx       # Valuation Excel report
+│   ├── valuation_flags.csv          # Valuation flags
+│   ├── financial_health_scores.csv  # Health scores
+│   ├── peer_percentiles.csv         # Peer benchmarks
+│   ├── peer_reports/                # Peer comparison reports
+│   └── radar_charts/                # Radar chart visualizations
 │
-├── src/                       # Source code
-│   ├── config/                # Configuration
-│   │   └── column_mappings.py
-│   ├── database/              # Database operations
+├── pages/                           # Dashboard pages
+│   ├── 01_home.py                   # Home dashboard
+│   ├── 02_profile.py                # Company profile
+│   ├── 03_screener.py               # Stock screener
+│   ├── 04_peers.py                  # Peer comparison
+│   ├── 05_trends.py                 # Trend analysis
+│   ├── 06_sectors.py                # Sector analysis
+│   ├── 07_capital.py                # Capital allocation
+│   └── 08_reports.py                # Annual reports
+│
+├── reports/                         # Generated reports
+│   └── data_quality_report_*.html   # Data quality reports
+│
+├── src/                             # Source code
+│   ├── config/                      # Configuration
+│   │   ├── column_mappings.py
+│   │   ├── constants.py
+│   │   ├── logging_config.py
+│   │   └── settings.py
+│   ├── database/                    # Database operations
 │   │   ├── connection.py
-│   │   └── schema.py
-│   ├── etl/                   # ETL pipeline modules
+│   │   ├── models.py
+│   │   ├── schema.py
+│   │   └── seed.py
+│   ├── etl/                         # ETL pipeline
 │   │   ├── extract.py
 │   │   ├── normalizer.py
 │   │   ├── validator.py
@@ -133,7 +236,7 @@ N100_Financial_Intelligence_Platform/
 │   │   ├── load.py
 │   │   ├── pipeline.py
 │   │   └── data_quality.py
-│   ├── kpi_engine/            # KPI calculations
+│   ├── kpi_engine/                  # KPI calculations
 │   │   ├── calculator.py
 │   │   ├── profitability.py
 │   │   ├── liquidity.py
@@ -144,326 +247,614 @@ N100_Financial_Intelligence_Platform/
 │   │   ├── growth.py
 │   │   ├── validator.py
 │   │   └── formatter.py
-│   ├── tests/                 # Unit tests
-│   │   ├── test_etl.py
-│   │   ├── test_etl_comprehensive.py
-│   │   ├── test_database.py
-│   │   ├── test_kpi.py
-│   │   └── ... (more tests)
-│   └── [other modules]
+│   ├── analytics/                   # Advanced analytics
+│   │   ├── valuation.py
+│   │   ├── peer.py
+│   │   ├── radar.py
+│   │   ├── trends.py
+│   │   ├── sector.py
+│   │   └── ratio_engine.py
+│   ├── screener/                    # Stock screener
+│   │   ├── engine.py
+│   │   ├── filters.py
+│   │   ├── exporter.py
+│   │   └── presets.py
+│   ├── peer_analysis/               # Peer comparison
+│   │   ├── benchmarking.py
+│   │   ├── comparison.py
+│   │   ├── percentile.py
+│   │   └── radar.py
+│   ├── sector_analysis/             # Sector analysis
+│   │   ├── sector_summary.py
+│   │   ├── rankings.py
+│   │   └── visualization.py
+│   ├── health_score/                # Health scoring
+│   │   ├── engine.py
+│   │   ├── scoring.py
+│   │   ├── grading.py
+│   │   └── rules.py
+│   ├── reports/                     # Report generation
+│   │   ├── company_report.py
+│   │   ├── excel_export.py
+│   │   ├── pdf_export.py
+│   │   └── sector_report.py
+│   ├── visualization/               # Chart utilities
+│   │   ├── bar.py
+│   │   ├── line.py
+│   │   ├── radar.py
+│   │   ├── treemap.py
+│   │   ├── waterfall.py
+│   │   ├── heatmap.py
+│   │   └── gauges.py
+│   ├── alerts/                      # Alert system
+│   │   ├── alerts.py
+│   │   ├── rules.py
+│   │   ├── watchlist.py
+│   │   └── notification.py
+│   ├── utils/                       # Utilities
+│   │   ├── cache.py
+│   │   ├── formatter.py
+│   │   ├── helpers.py
+│   │   ├── logger.py
+│   │   └── parser.py
+│   ├── dashboard/                   # Dashboard framework
+│   │   ├── app.py                   # Main application
+│   │   ├── utils.py
+│   │   ├── components/
+│   │   ├── pages/
+│   │   └── utils/
+│   └── tests/                       # Unit tests
+│       ├── test_etl.py
+│       ├── test_database.py
+│       ├── test_kpi.py
+│       └── test_dashboard.py
 │
 ├── .gitignore
-├── README.md                  # This file
-├── run_etl.py                 # ETL pipeline runner
-└── populate_financial_kpis.py # KPI calculator script
+├── README.md                        # This file
+├── requirements.txt                 # Python dependencies
+├── requirements-dashboard.txt       # Dashboard dependencies
+├── run_etl.py                       # ETL pipeline runner
+├── populate_financial_kpis.py       # KPI calculator
+└── MODULE_*_COMPLETION_REPORT.md    # Sprint completion reports
 ```
 
 ## Installation
 
 ### Prerequisites
 
-- Python 3.8 or higher
-- pip package manager
-- SQLite 3.25 or higher (usually included with Python)
+- **Python**: 3.8 or higher (3.11+ recommended)
+- **pip**: Package manager
+- **SQLite**: 3.25 or higher (included with Python)
+- **Git**: For cloning the repository
 
 ### Setup Steps
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/santanumaity3155-spec/N100_Financial_Intelligence_Platform.git
    cd N100_Financial_Intelligence_Platform
    ```
 
 2. **Create virtual environment** (recommended)
    ```bash
-   python -m venv venv
-   
    # Windows
+   python -m venv venv
    venv\Scripts\activate
    
    # Linux/Mac
+   python -m venv venv
    source venv/bin/activate
    ```
 
 3. **Install dependencies**
    ```bash
    pip install -r requirements.txt
+   pip install -r requirements-dashboard.txt
    ```
 
-   **Required packages:**
-   - pandas
-   - openpyxl
-   - numpy
-   - sqlalchemy
+   **Core dependencies:**
+   - pandas >= 2.0.0
+   - numpy >= 1.24.0
+   - openpyxl >= 3.1.0
+   - sqlalchemy >= 2.0.0
+   - streamlit >= 1.28.0
+   - plotly >= 5.17.0
+   - python-dotenv >= 1.0.0
 
 4. **Prepare data**
-   - Place Excel files in `data/raw/` directory
-   - Ensure all 12 required datasets are present
+   - Place 12 Excel files in `data/raw/` directory
+   - Ensure files follow the standard N100 data format
+   - Run ETL pipeline to initialize database
 
-## Usage
+## Requirements
 
-### Running the ETL Pipeline
+### Python Version
 
-Execute the complete ETL pipeline:
+- **Minimum**: Python 3.8
+- **Recommended**: Python 3.11+
+- **Tested On**: Python 3.11
+
+### Dependencies
+
+See `requirements.txt` and `requirements-dashboard.txt` for complete lists.
+
+**Key Dependencies:**
+- **pandas**: Data manipulation and analysis
+- **numpy**: Numerical computations
+- **openpyxl**: Excel file reading/writing
+- **sqlalchemy**: Database ORM
+- **streamlit**: Dashboard framework
+- **plotly**: Interactive visualizations
+- **python-dotenv**: Environment configuration
+
+### Database
+
+- **Type**: SQLite
+- **Version**: 3.25+
+- **Location**: `data/database/n100.db`
+- **Size**: ~2.18 MB
+- **Tables**: 20
+- **Records**: 10,000+
+- **Indexes**: Optimized for query performance
+
+## How to Run
+
+### 1. Initialize Database (First Time Only)
+
+Run the ETL pipeline to extract data from Excel files and populate the database:
 
 ```bash
 python run_etl.py
 ```
 
 This will:
-1. Extract data from Excel files
-2. Normalize and clean data
-3. Validate data quality
-4. Transform data
-5. Load into SQLite database
-6. Generate quality reports
+- Extract data from 12 Excel files
+- Normalize and clean data
+- Validate data quality
+- Transform data according to business rules
+- Load into SQLite database
+- Generate quality reports
 
-### Running KPI Calculations
+**Expected Output:**
+- Database created at `data/database/n100.db`
+- Quality reports in `reports/`
+- Load audit in `output/`
 
-After ETL pipeline completes, calculate financial KPIs:
+### 2. Calculate Financial KPIs
+
+After ETL completes, calculate financial KPIs:
 
 ```bash
 python populate_financial_kpis.py
 ```
 
-### Running Tests
+**Expected Output:**
+- 1,164+ KPI records in database
+- Financial health scores in `output/financial_health_scores.csv`
 
-Execute the test suite:
+### 3. Launch Dashboard
 
-```bash
-# Run all tests
-python -m pytest src/tests/ -v
-
-# Run specific test file
-python -m pytest src/tests/test_etl_comprehensive.py -v
-
-# Run with unittest
-python -m unittest discover src/tests -v
-```
-
-### Exploratory Data Analysis
-
-Run exploratory SQL queries:
+Start the Streamlit dashboard:
 
 ```bash
-# Using SQLite CLI
-sqlite3 data/database/n100.db < notebooks/exploratory_queries.sql
-
-# Or open in SQLite browser
-sqlite3 data/database/n100.db
+streamlit run src/dashboard/app.py
 ```
 
-## Database Schema
+The dashboard will open in your default browser at `http://localhost:8501`
 
-### Core Tables
+### 4. Navigate Dashboard
 
-| Table | Records | Description |
-|-------|---------|-------------|
-| companies | 92 | Company master data |
-| profit_loss | 1,263 | Profit & Loss statements |
-| balance_sheet | 1,225 | Balance sheet data |
-| cash_flow | 1,164 | Cash flow statements |
-| sectors | 92 | Sector classifications |
-| stock_prices | 5,520 | Historical stock prices |
-| market_cap | 92 | Market capitalization |
-| financial_ratios | 1,065 | Financial ratios |
-| financial_kpis | 1,164 | Calculated KPIs |
-| peer_groups | 56 | Peer group assignments |
-| analysis | 5 | Analysis data |
-| documents | 1,585 | Document references |
-| pros_cons | 5 | Pros and cons analysis |
+Use the sidebar to navigate between 8 specialized pages:
+1. 🏠 Home - Dashboard overview
+2. 👤 Profile - Company profiles
+3. 🔍 Screener - Stock screening
+4. 👥 Peers - Peer comparison
+5. 📈 Trends - Trend analysis
+6. 🏭 Sectors - Sector analysis
+7. 💰 Capital - Capital allocation
+8. 📑 Reports - Annual reports
 
-### Key Relationships
+## ETL Pipeline
+
+### Pipeline Overview
+
+The ETL pipeline processes 12 Excel files through 5 stages:
 
 ```
-companies (1) ──────┬── (n) profit_loss
-                    ├── (n) balance_sheet
-                    ├── (n) cash_flow
-                    ├── (n) sectors
-                    ├── (n) stock_prices
-                    ├── (n) market_cap
-                    ├── (n) financial_ratios
-                    ├── (n) financial_kpis
-                    └── (n) peer_groups
+Excel Files → Extract → Normalize → Validate → Transform → Load → Database
 ```
 
-## ETL Workflow
+### Stage 1: Extraction
 
-### 1. Extraction
+**Module**: `src/etl/extract.py`
+
+**Functionality**:
 - Reads Excel files from `data/raw/`
 - Handles multiple sheet formats
 - Validates file existence and structure
+- Extracts data into pandas DataFrames
 
-### 2. Normalization
-- Standardizes company IDs (uppercase, removes special chars)
+**Input**: 12 Excel files
+**Output**: Raw DataFrames
+
+### Stage 2: Normalization
+
+**Module**: `src/etl/normalizer.py`
+
+**Functionality**:
+- Standardizes company IDs (uppercase, removes special characters)
 - Normalizes year formats (FY2024 → 2024-FY)
 - Cleans numeric columns (removes commas, handles negatives)
 - Removes duplicate records based on business keys
 
-### 3. Validation
+**Input**: Raw DataFrames
+**Output**: Cleaned DataFrames
+
+### Stage 3: Validation
+
+**Module**: `src/etl/validator.py`
+
+**Functionality**:
 - Checks required columns exist
 - Detects missing values with dataset-specific thresholds
 - Identifies duplicate records
 - Validates data types
-- Generates validation reports
+- Generates validation reports in HTML/JSON
 
-### 4. Transformation
+**Input**: Cleaned DataFrames
+**Output**: Validation reports, validated DataFrames
+
+### Stage 4: Transformation
+
+**Module**: `src/etl/transform.py`
+
+**Functionality**:
 - Applies business rules
 - Calculates derived metrics
 - Ensures data consistency
+- Prepares data for loading
 
-### 5. Loading
+**Input**: Validated DataFrames
+**Output**: Transformed DataFrames
+
+### Stage 5: Loading
+
+**Module**: `src/etl/load.py`
+
+**Functionality**:
 - Creates database tables with proper schema
 - Loads data with chunking for large datasets
 - Handles foreign key constraints
 - Verifies row counts
 - Generates load audit reports
 
-## Testing
+**Input**: Transformed DataFrames
+**Output**: SQLite database, load audit reports
 
-### Test Coverage
-
-The project includes comprehensive tests covering:
-
-- **DataLoader**: Table loading, verification, statistics
-- **DataValidator**: Column validation, missing values, duplicates, data types
-- **DataNormalizer**: Company ID normalization, year normalization, duplicate removal
-- **Database Operations**: Foreign keys, orphaned records, duplicates
-- **Edge Cases**: Empty DataFrames, None values, special characters, large datasets
-
-### Running Tests
+### Running the Pipeline
 
 ```bash
-# Run all tests
-python -m pytest src/tests/ -v --tb=short
+# Run complete pipeline
+python run_etl.py
 
-# Run with coverage
-python -m pytest src/tests/ --cov=src --cov-report=html
+# Monitor progress in console output
+# Check reports in reports/ directory
+# Verify database in data/database/n100.db
 ```
 
-## Documentation
+## Dashboard
 
-### Available Documentation
+### Dashboard Architecture
 
-- **README.md**: This file - project overview and quick start
-- **Database Schema**: See "Database Schema" section above
-- **ETL Workflow**: See "ETL Workflow" section above
-- **Exploratory Queries**: `notebooks/exploratory_queries.sql`
-- **Manual Data Review**: `docs/manual_data_review.md`
-- **ETL Validation Summary**: `docs/etl_validation_summary.md`
-- **Sprint 1 Review**: `docs/SPRINT1_REVIEW.md`
+The dashboard is built with Streamlit and consists of:
 
-### API Documentation
+- **Main Application**: `src/dashboard/app.py` - Entry point and navigation
+- **8 Specialized Pages**: Located in `pages/` directory
+- **Database Utils**: `src/dashboard/utils/db.py` - Data access layer
+- **Components**: Reusable UI components
+- **Caching**: 10-minute TTL for optimal performance
 
-Detailed API documentation is available in the source code docstrings. Key classes:
+### Dashboard Pages
 
-- `DataExtractor`: Excel file extraction
-- `DataNormalizer`: Data cleaning and normalization
-- `DataValidator`: Data quality validation
-- `DataTransformer`: Data transformation
-- `DataLoader`: Database loading
-- `ETLPipeline`: Pipeline orchestration
+#### 1. Home Dashboard (`pages/01_home.py`)
 
-## Troubleshooting
+**Features**:
+- Market overview with key metrics
+- Quick company search
+- Recent updates and alerts
+- Navigation guide
 
-### Common Issues
+**Data Sources**: companies, financial_kpis, market_cap
 
-#### 1. Database Locked Error
-**Solution**: Ensure no other connections are open to the database
-```python
-# Close all connections
-from src.database.connection import close_connection
-close_connection()
-```
+#### 2. Company Profile (`pages/02_profile.py`)
 
-#### 2. Missing Excel Files
-**Solution**: Verify all 12 Excel files are in `data/raw/` directory
+**Features**:
+- Detailed financial statements (P&L, Balance Sheet, Cash Flow)
+- 30+ financial ratios and KPIs
+- Historical performance charts
+- Peer comparison summary
+
+**Data Sources**: profit_loss, balance_sheet, cash_flow, financial_ratios, financial_kpis
+
+#### 3. Stock Screener (`pages/03_screener.py`)
+
+**Features**:
+- Filter by 20+ financial criteria
+- Pre-built screening presets
+- Sortable results table
+- CSV export functionality
+
+**Data Sources**: financial_ratios, financial_kpis, companies
+
+#### 4. Peer Comparison (`pages/04_peers.py`)
+
+**Features**:
+- Automatic peer group assignment
+- Radar chart comparison
+- Benchmark percentile rankings
+- Side-by-side metrics
+
+**Data Sources**: peer_groups, financial_ratios, financial_kpis
+
+#### 5. Trend Analysis (`pages/05_trends.py`)
+
+**Features**:
+- 12-year historical trends
+- Multi-metric line charts
+- Growth rate analysis
+- CAGR calculations
+
+**Data Sources**: financial_kpis, profit_loss, balance_sheet, cash_flow
+
+#### 6. Sector Analysis (`pages/06_sectors.py`)
+
+**Features**:
+- Sector-wise performance comparison
+- Bubble charts for market cap vs returns
+- Sector distribution analysis
+- Top performers ranking
+
+**Data Sources**: sectors, financial_ratios, market_cap
+
+#### 7. Capital Allocation (`pages/07_capital.py`)
+
+**Features**:
+- Cash flow analysis (Operating, Investing, Financing)
+- Treemap visualization
+- Capital structure metrics
+- Dividend and buyback analysis
+
+**Data Sources**: cash_flow, balance_sheet
+
+#### 8. Annual Reports (`pages/08_reports.py`)
+
+**Features**:
+- Comprehensive financial reports
+- Search and filter functionality
+- Report generation
+- Export to CSV/Excel
+
+**Data Sources**: documents, profit_loss, balance_sheet, cash_flow, ratios
+
+### Example Commands
+
 ```bash
-ls data/raw/*.xlsx
+# Launch dashboard
+streamlit run src/dashboard/app.py
+
+# Run with custom port
+streamlit run src/dashboard/app.py --server.port 8502
+
+# Run with custom theme
+streamlit run src/dashboard/app.py --theme.base dark
+
+# Run in headless mode
+streamlit run src/dashboard/app.py --server.headless true
 ```
 
-#### 3. Foreign Key Violations
-**Solution**: The ETL pipeline disables foreign key checks during loading. Run validation after loading:
-```sql
-PRAGMA foreign_key_check;
-```
+## Example Screenshots
 
-#### 4. Memory Issues with Large Datasets
-**Solution**: Adjust chunk size in DataLoader
-```python
-loader.load_table('table_name', df, chunksize=1000)
-```
+### Home Dashboard
 
-#### 5. Column Name Mismatches
-**Solution**: The loader automatically sanitizes column names. Check logs for details.
+![Home Dashboard](docs/screenshots/01_home.png)
 
-### Logging
+**Description**: The home dashboard provides an overview of the N100 Financial Intelligence Platform. It displays:
+- Welcome message and platform introduction
+- Key performance indicators (KPIs) for the platform
+- Quick company search functionality
+- Navigation guide to all 8 dashboard pages
+- Database connection status
+- Application version and module information
 
-Logs are stored in the `logs/` directory. Adjust log level in configuration:
+**Key Features**:
+- Market summary metrics
+- Quick access to company search
+- Visual navigation guide
+- Real-time database status
 
-```python
-from src.config.logging_config import get_logger
-logger = get_logger(__name__)
-logger.setLevel('DEBUG')  # For detailed logging
-```
+### Company Profile
 
-## Sprint 1 Completion
+![Company Profile](docs/screenshots/02_profile.png)
 
-### Completed Features
+**Description**: The company profile page provides comprehensive financial analysis for selected companies. It displays:
+- Company information and sector classification
+- Profit & Loss statement with revenue, expenses, and profit metrics
+- Balance sheet with assets, liabilities, and equity
+- Cash flow statement (Operating, Investing, Financing)
+- 30+ financial ratios and KPIs
+- Historical performance charts
+- Peer comparison summary
 
-✅ **Environment Setup**: Python environment, dependencies, project structure
-✅ **ETL Pipeline**: Complete extraction, normalization, validation, transformation, and loading
-✅ **Excel Extraction**: All 12 datasets successfully extracted
-✅ **Data Normalization**: Company IDs, years, and numeric columns normalized
-✅ **Data Transformation**: Business rules and calculations applied
-✅ **Database Schema**: 14 tables created with proper relationships and indexes
-✅ **Database Loading**: All 12 datasets loaded (5,520+ companies records)
-✅ **Validation Reports**: Automated quality reports generated
-✅ **Load Audit**: Complete audit trail maintained
-✅ **Exploratory Queries**: 20 professional SQL queries for analysis
-✅ **Manual Data Review**: 5 companies reviewed with detailed analysis
-✅ **ETL Validation**: Exit criteria verified and satisfied
-✅ **Unit Tests**: 35+ comprehensive tests covering all ETL components
-✅ **Documentation**: Complete README, schema docs, and workflow guides
-✅ **Sprint Review**: Comprehensive review document generated
+**Key Features**:
+- Multi-year financial statements
+- Interactive charts for trend visualization
+- Comprehensive ratio analysis
+- Export capabilities
 
-### Sprint 1 Statistics
+### Stock Screener
 
-- **Total Companies**: 92
-- **Total Tables**: 14
-- **Total Records**: 10,000+
-- **Test Coverage**: 35+ tests
-- **Documentation Files**: 5+
-- **Validation Checks**: 6 categories
-- **KPI Calculations**: 30+ metrics
+![Stock Screener](docs/screenshots/03_screener.png)
 
-### Exit Criteria Status
+**Description**: The stock screener allows users to filter and screen Nifty 100 companies based on financial criteria. It displays:
+- Filter panel with 20+ financial criteria
+- Real-time filtering results
+- Sortable results table with 94+ companies
+- Pre-built screening presets (Value, Growth, Quality, Dividend)
+- CSV export functionality
+- Column visibility toggles
 
-| Criteria | Status |
-|----------|--------|
-| Companies count > 0 | ✅ PASS |
-| No foreign key violations | ✅ PASS |
-| Load audit exists and successful | ✅ PASS |
-| Validation report exists | ✅ PASS |
-| All tables exist with data | ✅ PASS |
-| No critical data integrity issues | ✅ PASS |
+**Key Features**:
+- Multi-criteria filtering
+- Pre-built screening strategies
+- Real-time results update
+- Export to CSV
 
-**Sprint 1 Status: ✅ COMPLETE AND READY FOR SUBMISSION**
+### Peer Comparison
 
-## Contributing
+![Peer Comparison](docs/screenshots/04_peers.png)
 
-This is a Sprint 1 deliverable. For Sprint 2 enhancements, please refer to the project roadmap.
+**Description**: The peer comparison page enables benchmarking against industry peers. It displays:
+- Company selection and peer group assignment
+- Radar chart for multi-dimensional comparison
+- Side-by-side metrics table
+- Percentile rankings
+- Benchmark analysis
+
+**Key Features**:
+- 13 peer groups across sectors
+- Interactive radar charts
+- Comprehensive metrics comparison
+- Visual benchmarking
+
+### Trend Analysis
+
+![Trend Analysis](docs/screenshots/05_trends.png)
+
+**Description**: The trend analysis page shows historical performance over 12 years. It displays:
+- Multi-metric line charts
+- Year-over-year growth rates
+- CAGR calculations
+- Historical KPI trends
+- Comparative analysis
+
+**Key Features**:
+- 12 years of historical data
+- Multiple metric selection
+- Interactive zoom and pan
+- Growth rate calculations
+
+### Sector Analysis
+
+![Sector Analysis](docs/screenshots/06_sectors.png)
+
+**Description**: The sector analysis page provides sector-wide performance metrics. It displays:
+- Sector-wise performance comparison
+- Bubble charts (Market Cap vs Returns)
+- Sector distribution analysis
+- Top performers ranking
+- Sector rotation indicators
+
+**Key Features**:
+- 9 sector classifications
+- Interactive bubble charts
+- Sector benchmarking
+- Performance ranking
+
+### Capital Allocation
+
+![Capital Allocation](docs/screenshots/07_capital.png)
+
+**Description**: The capital allocation page analyzes cash flow and capital structure. It displays:
+- Cash flow statement (Operating, Investing, Financing)
+- Treemap visualization of cash flow allocation
+- Capital structure metrics (Debt/Equity)
+- Dividend and buyback analysis
+- Free cash flow trends
+
+**Key Features**:
+- Cash flow breakdown
+- Interactive treemap
+- Capital structure analysis
+- Shareholder return analysis
+
+### Annual Reports
+
+![Annual Reports](docs/screenshots/08_reports.png)
+
+**Description**: The annual reports page generates comprehensive financial reports. It displays:
+- Company search and selection
+- Comprehensive financial report generation
+- Report sections (Overview, P&L, Balance Sheet, Cash Flow, Ratios)
+- Search and filter functionality
+- Export to CSV/Excel
+
+**Key Features**:
+- Automated report generation
+- Multi-section reports
+- Search and filter
+- Export capabilities
+
+## Future Improvements
+
+### Planned Features
+
+1. **Enhanced Visualization**
+   - Candlestick charts for stock prices
+   - Correlation matrices
+   - Monte Carlo simulations
+   - Scenario analysis
+
+2. **Advanced Analytics**
+   - Machine learning predictions
+   - Sentiment analysis integration
+   - Alternative data sources
+   - Portfolio optimization
+
+3. **User Experience**
+   - Customizable dashboard layouts
+   - Saved filters and preferences
+   - Collaborative features
+   - Mobile-responsive design
+
+4. **Data Expansion**
+   - Real-time data feeds
+   - Global market coverage
+   - ESG metrics integration
+   - Analyst estimates
+
+5. **Performance**
+   - Database query optimization
+   - Advanced caching strategies
+   - Parallel processing
+   - Cloud deployment support
+
+## Contributors
+
+**Development Team**: Bluestock Financial Intelligence Platform Team
+
+**Sprint Completion**:
+- ✅ Sprint 1 - Data Foundation
+- ✅ Sprint 2 - Financial Ratio Engine
+- ✅ Sprint 3 - Screener Engine, Peer Engine, Radar Charts
+- ✅ Sprint 4 - Complete Dashboard and Analytics
 
 ## License
 
 MIT License - See LICENSE file for details
 
-## Contact
+## Acknowledgements
 
-For questions or issues, please contact the development team.
+- **Data Source**: Nifty 100 companies financial data
+- **Framework**: Streamlit for dashboard framework
+- **Visualization**: Plotly for interactive charts
+- **Database**: SQLite for data storage
+- **Analytics**: Pandas and NumPy for data processing
 
 ---
 
-**Last Updated**: 2025-07-15
-**Version**: 1.0.0
-**Sprint**: 1
+**Last Updated**: August 6, 2026  
+**Version**: 1.0.0  
+**Sprint**: 4 - Module 7 (Complete)  
+**Status**: Production Ready  
+**Platform**: N100 Financial Intelligence Platform  
+**Organization**: Bluestock
