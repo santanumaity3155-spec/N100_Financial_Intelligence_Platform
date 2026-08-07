@@ -281,7 +281,7 @@ class TestValidation:
         validated_df = validate_against_ratio_engine(parsed_df)
         row = validated_df.iloc[0]
         assert abs(row["difference_pct"]) <= 0.01
-        assert row["manual_review"] is False
+        assert row["manual_review"] == False  # noqa: E712
 
     def test_large_difference_flagged(self):
         # Parsed value deliberately differs > 5% from reference
@@ -297,7 +297,7 @@ class TestValidation:
         ])
         validated_df = validate_against_ratio_engine(parsed_df)
         row = validated_df.iloc[0]
-        assert row["manual_review"] is True
+        assert row["manual_review"] == True  # noqa: E712
         assert abs(row["difference_pct"]) > MANUAL_REVIEW_THRESHOLD
 
     def test_no_reference_no_flag(self):
@@ -314,7 +314,7 @@ class TestValidation:
         ])
         validated_df = validate_against_ratio_engine(parsed_df)
         row = validated_df.iloc[0]
-        assert row["manual_review"] is False
+        assert row["manual_review"] == False  # noqa: E712
         assert pd.isna(row["difference_pct"])
 
 

@@ -61,8 +61,10 @@ MANUAL_REVIEW_THRESHOLD: float = 5.0
 # Official Sprint regex pattern for "<N> Years: <value>%"
 # Group 1: number of years (integer)
 # Group 2: value (signed float, e.g. 21 or -2 or 17.6)
+# Note: \s* before :? allows "5 Year : 17.6%" style inputs
+# Note: \s* before % allows "21  %" style inputs
 PERIOD_REGEX: re.Pattern = re.compile(
-    r"(\d+)\s*Years?:?\s*([+-]?\d+(?:\.\d+)?)%",
+    r"(\d+)\s*Years?\s*:?\s*([+-]?\d+(?:\.\d+)?)\s*%",
     re.IGNORECASE,
 )
 
@@ -301,8 +303,25 @@ def parse_dataframe(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     start = time.time()
     logger.info("Parsing %d rows × %d metric columns...", len(df), len(TARGET_COLUMNS))
 
+    # Handle empty DataFrame gracefully
+    if df.empty:
+        logger.warning("Empty DataFrame provided — returning empty results")
+        empty_df = pd.DataFrame(columns=[
+            "company_id", "metric_type", "period_years", "value_pct",
+            "source_text", "parsed_success", "failure_reason",
+        ])
+        return empty_df, empty_df.copy()
+
     # Identify the metric columns actually present
     metric_cols = [c for c in TARGET_COLUMNS if c in df.columns]
+
+    if not metric_cols:
+        logger.warning("No target columns found in DataFrame")
+        empty_df = pd.DataFrame(columns=[
+            "company_id", "metric_type", "period_years", "value_pct",
+            "source_text", "parsed_success", "failure_reason",
+        ])
+        return empty_df, empty_df.copy()
 
     # Melt: wide → long
     id_vars = ["company_id"]
@@ -387,41 +406,42 @@ def _fetch_reference_values() -> Dict[str, Dict[str, float]]:
     try:
         conn = get_connection()
 
-        # --- financial_kpis: revenue_cagr, profit_cagr (TTM rows) ---
-        kpi_query = """
-            SELECT company_id, revenue_cagr, profit_cagr
-            FROM financial_kpis
-            WHERE period = 'TTM'
-              AND revenue_cagr IS NOT NULL
-        """
-        kpi_df = pd.read_sql_query(kpi_query, conn)
-        for _, row in kpi_df.iterrows():
-            cid = str(row["company_id"]).strip().upper()
-            if cid not in refs:
-                refs[cid] = {}
-            if pd.notna(row.get("revenue_cagr")):
-                refs[cid]["revenue_cagr"] = float(row["revenue_cagr"])
-            if pd.notna(row.get("profit_cagr")):
-                refs[cid]["profit_cagr"] = float(row["profit_cagr"])
+        # Use connection as context manager to keep it alive for both queries
+        with conn:
+            # --- financial_kpis: revenue_cagr, profit_cagr (TTM rows) ---
+            kpi_query = """
+                SELECT company_id, revenue_cagr, profit_cagr
+                FROM financial_kpis
+                WHERE period = 'TTM'
+                  AND revenue_cagr IS NOT NULL
+            """
+            kpi_df = pd.read_sql_query(kpi_query, conn)
+            for _, row in kpi_df.iterrows():
+                cid = str(row["company_id"]).strip().upper()
+                if cid not in refs:
+                    refs[cid] = {}
+                if pd.notna(row.get("revenue_cagr")):
+                    refs[cid]["revenue_cagr"] = float(row["revenue_cagr"])
+                if pd.notna(row.get("profit_cagr")):
+                    refs[cid]["profit_cagr"] = float(row["profit_cagr"])
 
-        # --- financial_ratios: roe (latest period per company) ---
-        ratios_query = """
-            SELECT company_id, period, roe
-            FROM financial_ratios
-            WHERE roe IS NOT NULL
-            ORDER BY company_id, period DESC
-        """
-        ratios_df = pd.read_sql_query(ratios_query, conn)
-        # Keep only the latest period per company
-        latest = ratios_df.groupby("company_id").first().reset_index()
-        for _, row in latest.iterrows():
-            cid = str(row["company_id"]).strip().upper()
-            if cid not in refs:
-                refs[cid] = {}
-            if pd.notna(row.get("roe")):
-                refs[cid]["roe"] = float(row["roe"])
+            # --- financial_ratios: roe (latest period per company) ---
+            ratios_query = """
+                SELECT company_id, period, roe
+                FROM financial_ratios
+                WHERE roe IS NOT NULL
+                ORDER BY company_id, period DESC
+            """
+            ratios_df = pd.read_sql_query(ratios_query, conn)
+            # Keep only the latest period per company
+            latest = ratios_df.groupby("company_id").first().reset_index()
+            for _, row in latest.iterrows():
+                cid = str(row["company_id"]).strip().upper()
+                if cid not in refs:
+                    refs[cid] = {}
+                if pd.notna(row.get("roe")):
+                    refs[cid]["roe"] = float(row["roe"])
 
-        conn.close()
     except Exception as exc:
         logger.warning("Failed to fetch reference values: %s", exc)
         return refs
