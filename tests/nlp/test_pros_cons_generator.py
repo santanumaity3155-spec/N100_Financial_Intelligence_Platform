@@ -558,11 +558,16 @@ class _DummyConRule(FinancialRule):
 class TestRuleRegistry:
     """Verify registries are empty by default and accept registrations."""
 
-    def test_registries_empty_by_default(self):
-        assert PRO_RULES == []
+    def test_registries_by_default(self):
+        # Module 2B registers the 12 Pro rules; the Con registry must stay empty.
+        assert len(PRO_RULES) == 12
+        assert [r.rule_id for r in PRO_RULES] == [
+            "PRO_01", "PRO_02", "PRO_03", "PRO_04", "PRO_05", "PRO_06",
+            "PRO_07", "PRO_08", "PRO_09", "PRO_10", "PRO_11", "PRO_12",
+        ]
         assert CON_RULES == []
         reg = get_registered_rules()
-        assert reg["pro"] == []
+        assert [r.rule_id for r in reg["pro"]] == [r.rule_id for r in PRO_RULES]
         assert reg["con"] == []
 
     def test_register_rule(self, monkeypatch):
@@ -582,9 +587,13 @@ class TestRuleRegistry:
         with pytest.raises(ValueError):
             register_con_rule(_DummyProRule())  # pro rule into con registry
 
-    def test_evaluate_empty_registry_returns_empty(self):
+    def test_evaluate_rules_returns_registered_results(self):
+        # Module 2B: evaluating a company returns one result per Pro rule.
         context = make_context()
-        assert evaluate_rules_for_company(context) == []
+        results = evaluate_rules_for_company(context)
+        assert len(results) == 12
+        assert all(isinstance(r, RuleResult) for r in results)
+        assert all(r.rule_type == TYPE_PRO for r in results)
 
     def test_concrete_rule_placeholder(self):
         context = make_context(company_id="X")

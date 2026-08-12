@@ -1333,20 +1333,6 @@ class FinancialRule(ABC):
 
 PRO_RULES: List[FinancialRule] = []
 CON_RULES: List[FinancialRule] = []
-# =============================================================================
-# MODULE 2B — PRO RULE REGISTRATION
-# =============================================================================
-# Pro rules are imported from the dedicated pro_rules module and registered here
-# so the existing evaluate_rules_for_company() engine can discover them.
-
-try:
-    from src.nlp.pro_rules import get_pro_rule_instances  # noqa: E402
-
-    for _pro_rule in get_pro_rule_instances():
-        register_pro_rule(_pro_rule)
-except Exception as _exc:  # pragma: no cover - defensive
-    logger.warning("Could not register Pro rules: %s", _exc)
-
 
 
 def register_pro_rule(rule: FinancialRule) -> None:
@@ -1373,6 +1359,27 @@ def register_con_rule(rule: FinancialRule) -> None:
         return
     CON_RULES.append(rule)
     logger.info("Registered con rule '%s' (%s)", rule.rule_id, rule.name or "-")
+
+
+# =============================================================================
+# MODULE 2B — PRO RULE REGISTRATION
+# =============================================================================
+# Pro rules are imported from the dedicated pro_rules module and registered here
+# so the existing evaluate_rules_for_company() engine can discover them.
+# (Placed after register_pro_rule/register_con_rule so the call resolves. The
+# pro_rules module also self-registers idempotently, so the registry is
+# populated regardless of import order.)
+
+try:
+    from src.nlp.pro_rules import get_pro_rule_instances  # noqa: E402
+
+    _registered_ids = {r.rule_id for r in PRO_RULES}
+    for _pro_rule in get_pro_rule_instances():
+        if _pro_rule.rule_id not in _registered_ids:
+            register_pro_rule(_pro_rule)
+            _registered_ids.add(_pro_rule.rule_id)
+except Exception as _exc:  # pragma: no cover - defensive
+    logger.warning("Could not register Pro rules: %s", _exc)
 
 
 def get_registered_rules() -> Dict[str, List[FinancialRule]]:
