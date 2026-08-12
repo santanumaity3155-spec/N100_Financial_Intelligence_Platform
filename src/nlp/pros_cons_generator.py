@@ -1333,6 +1333,20 @@ class FinancialRule(ABC):
 
 PRO_RULES: List[FinancialRule] = []
 CON_RULES: List[FinancialRule] = []
+# =============================================================================
+# MODULE 2B — PRO RULE REGISTRATION
+# =============================================================================
+# Pro rules are imported from the dedicated pro_rules module and registered here
+# so the existing evaluate_rules_for_company() engine can discover them.
+
+try:
+    from src.nlp.pro_rules import get_pro_rule_instances  # noqa: E402
+
+    for _pro_rule in get_pro_rule_instances():
+        register_pro_rule(_pro_rule)
+except Exception as _exc:  # pragma: no cover - defensive
+    logger.warning("Could not register Pro rules: %s", _exc)
+
 
 
 def register_pro_rule(rule: FinancialRule) -> None:
