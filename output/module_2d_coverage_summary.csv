@@ -1,0 +1,15 @@
+company_id,company_name,sector,latest_year,historical_years,pro_triggered,con_triggered,pro_eligible,con_eligible,coverage_status,fail_reason
+UNIONBANK,Union Bank of India,Unknown,2024,12,0,1,0,1,FAIL,No Pro signals >60
+BAJAJFINSV,Bajaj Finserv Ltd,Unknown,2024,12,4,0,4,0,FAIL,No Con signals >60
+BOSCHLTD,Bosch Ltd,Unknown,2024,12,4,0,4,0,FAIL,No Con signals >60
+COALINDIA,Coal India Ltd,Unknown,2024,12,5,0,5,0,FAIL,No Con signals >60
+DIVISLAB,Divis Laboratories Ltd,Unknown,2024,12,4,0,4,0,FAIL,No Con signals >60
+DMART,Avenue Supermarts Ltd,Unknown,2024,12,7,0,7,0,FAIL,No Con signals >60
+HDFCLIFE,HDFC Life Insurance Company Ltd,Unknown,2024,12,5,0,5,0,FAIL,No Con signals >60
+ICICIGI,ICICI Lombard General Insurance Company Ltd,Unknown,2024,12,5,0,5,0,FAIL,No Con signals >60
+ICICIPRULI,ICICI Prudential Life Insurance Company Ltd,Unknown,2024,12,3,0,3,0,FAIL,No Con signals >60
+INDIGO,Interglobe Aviation Ltd,Unknown,2024,12,5,0,5,0,FAIL,No Con signals >60
+IRCTC,Indian Railway Catering & Tourism Corporation Ltd,Unknown,2024,10,7,0,7,0,FAIL,No Con signals >60
+ITC,ITC Ltd,Unknown,2024,12,4,0,4,0,FAIL,No Con signals >60
+MARUTI,Maruti Suzuki India Ltd,Unknown,2024,12,3,0,3,0,FAIL,No Con signals >60
+PNB,Punjab National Bank,Unknown,2024,12,1,0,1,0,FAIL,No Con signals >60

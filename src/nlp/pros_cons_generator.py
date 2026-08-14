@@ -25,15 +25,20 @@ No Pros/Cons are generated and no rule thresholds are encoded here.
 
 from __future__ import annotations
 
+from collections import Counter
 import re
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, asdict
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
+from datetime import datetime
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
+from src.config.constants import DATABASE_DIR, OUTPUT_DIR, PROJECT_ROOT
 from src.config.logging_config import get_logger
 from src.database.connection import get_connection
 
@@ -57,6 +62,10 @@ OUTPUT_COLUMNS: List[str] = [
 TYPE_PRO: str = "pro"
 TYPE_CON: str = "con"
 VALID_TYPES: Tuple[str, str] = (TYPE_PRO, TYPE_CON)
+
+# Output file paths for Module 2D
+PROS_CONS_GENERATED_CSV_PATH: Path = OUTPUT_DIR / "pros_cons_generated.csv"
+PROS_CONS_COVERAGE_FAILURES_CSV_PATH: Path = OUTPUT_DIR / "pros_cons_coverage_failures.csv"
 
 # Confidence framework
 CONFIDENCE_MIN: float = 0.0
@@ -688,6 +697,8 @@ def check_consecutive_condition(
 ) -> bool:
     """Return True when ``required`` *consecutive* values satisfy *predicate*.
 
+    An invalid value (``None``, ``NaN``) will break the consecutive run.
+
     Parameters
     ----------
     values : Sequence[Any]
@@ -706,41 +717,64 @@ def check_consecutive_condition(
     """
     if required <= 0:
         return True
-    cleaned = get_historical_values(values, max_len=max_len)
-    if len(cleaned) < required:
+
+    series = list(values)
+    if max_len is not None:
+        series = series[-max_len:]
+
+    if len(series) < required:
         return False
+
     run = 0
-    for value in cleaned:
-        run = run + 1 if predicate(value) else 0
+    for raw_value in series:
+        value = safe_float(raw_value)
+        if value is not None and predicate(value):
+            run += 1
+        else:
+            run = 0
         if run >= required:
             return True
     return False
 
 
 def is_improving(values: Sequence[Any], periods: int = 3) -> bool:
-    """Return True when the most recent ``periods`` valid values are increasing.
+    """Return True when the most recent ``periods`` values are increasing.
 
     Compare each year against the previous one; every consecutive step must be
-    strictly upward. Returns False when insufficient valid history exists.
+    strictly upward. An invalid value (``None``, ``NaN``) in the sequence will
+    cause this to return False. Returns False when insufficient history exists.
     """
-    cleaned = get_historical_values(values)
-    if len(cleaned) < periods:
+    if len(values) < periods:
         return False
-    recent = cleaned[-periods:]
-    return all(next_val > prev for prev, next_val in zip(recent, recent[1:]))
+
+    recent_raw = list(values)[-periods:]
+    recent_safe = [safe_float(v) for v in recent_raw]
+
+    # Any invalid value in the sequence breaks the trend.
+    if any(v is None for v in recent_safe):
+        return False
+
+    return all(next_val > prev for prev, next_val in zip(recent_safe, recent_safe[1:]))
 
 
 def is_declining(values: Sequence[Any], periods: int = 3) -> bool:
-    """Return True when the most recent ``periods`` valid values are decreasing.
+    """Return True when the most recent ``periods`` values are decreasing.
 
     Compare each year against the previous one; every consecutive step must be
-    strictly downward. Returns False when insufficient valid history exists.
+    strictly downward. An invalid value (``None``, ``NaN``) in the sequence will
+    cause this to return False. Returns False when insufficient history exists.
     """
-    cleaned = get_historical_values(values)
-    if len(cleaned) < periods:
+    if len(values) < periods:
         return False
-    recent = cleaned[-periods:]
-    return all(next_val < prev for prev, next_val in zip(recent, recent[1:]))
+
+    recent_raw = list(values)[-periods:]
+    recent_safe = [safe_float(v) for v in recent_raw]
+
+    # Any invalid value in the sequence breaks the trend.
+    if any(v is None for v in recent_safe):
+        return False
+
+    return all(next_val < prev for prev, next_val in zip(recent_safe, recent_safe[1:]))
 
 
 def count_consecutive_positive(values: Sequence[Any], max_len: Optional[int] = None) -> int:
@@ -1382,6 +1416,22 @@ except Exception as _exc:  # pragma: no cover - defensive
     logger.warning("Could not register Pro rules: %s", _exc)
 
 
+# =============================================================================
+# MODULE 2C — CON RULE REGISTRATION
+# =============================================================================
+
+try:
+    from src.nlp.con_rules import get_con_rule_instances  # noqa: E402
+
+    _registered_ids_con = {r.rule_id for r in CON_RULES}
+    for _con_rule in get_con_rule_instances():
+        if _con_rule.rule_id not in _registered_ids_con:
+            register_con_rule(_con_rule)
+            _registered_ids_con.add(_con_rule.rule_id)
+except Exception as _exc:  # pragma: no cover - defensive
+    logger.warning("Could not register Con rules: %s", _exc)
+
+
 def get_registered_rules() -> Dict[str, List[FinancialRule]]:
     """Return the current rule registries (``{"pro": [...], "con": [...]}``)."""
     return {"pro": list(PRO_RULES), "con": list(CON_RULES)}
@@ -1407,8 +1457,8 @@ def evaluate_rules_for_company(
                     rule.rule_id, context.company_id, exc,
                 )
     logger.info(
-        "Evaluated %d registered rules for '%s' (0 expected in Module 2A)",
-        len(results), context.company_id,
+        "Evaluated %d registered rules for '%s' (pro=%d, con=%d)",
+        len(results), context.company_id, len(PRO_RULES), len(CON_RULES)
     )
     return results
 
@@ -1500,26 +1550,8 @@ def calculate_confidence(
 def validate_output_schema(df: pd.DataFrame) -> Tuple[bool, List[str]]:
     """Validate a result DataFrame against the final output schema.
 
-    Checks, in order:
-
-    1. Required columns ``OUTPUT_COLUMNS`` all exist.
-    2. ``type`` is only ``"pro"`` / ``"con"``.
-    3. ``confidence_pct`` is numeric and within ``[0, 100]``.
-    4. ``company_id`` and ``rule_id`` are not null/empty.
-    5. No duplicate ``(company_id, type, rule_id)`` rows.
-
-    An empty or schema-less DataFrame is treated as invalid unless it carries
-    the exact required columns.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Candidate output table.
-
-    Returns
-    -------
-    Tuple[bool, List[str]]
-        ``(is_valid, [issue...])``.
+    The final output must only contain triggered Pro/Con signals with
+    ``confidence_pct > 60`` and valid rule identifiers.
     """
     issues: List[str] = []
     if df is None or not isinstance(df, pd.DataFrame):
@@ -1539,9 +1571,17 @@ def validate_output_schema(df: pd.DataFrame) -> Tuple[bool, List[str]]:
         issues.append(f"invalid type value(s): {bogus[:5]}")
 
     for idx, raw in df["confidence_pct"].items():
-        if not validate_confidence(raw):
+        value = safe_float(raw)
+        if value is None:
+            issues.append(f"row {idx}: confidence_pct invalid or NaN ({raw!r})")
+            continue
+        if not (0.0 <= value <= 100.0):
             issues.append(
-                f"row {idx}: confidence_pct invalid or out of range ({raw!r})"
+                f"row {idx}: confidence_pct out of range ({value!r})"
+            )
+        if value <= 60.0:
+            issues.append(
+                f"row {idx}: confidence_pct must be strictly greater than 60.0 ({value!r})"
             )
 
     null_company = df["company_id"].isna() | (
@@ -1555,6 +1595,17 @@ def validate_output_schema(df: pd.DataFrame) -> Tuple[bool, List[str]]:
     if null_rule.any():
         rows = df.index[null_rule].tolist()
         issues.append(f"null/empty rule_id at rows: {rows[:5]}")
+
+    valid_rule_ids = {
+        "PRO_01", "PRO_02", "PRO_03", "PRO_04", "PRO_05", "PRO_06",
+        "PRO_07", "PRO_08", "PRO_09", "PRO_10", "PRO_11", "PRO_12",
+        "CON_01", "CON_02", "CON_03", "CON_04", "CON_05", "CON_06",
+        "CON_07", "CON_08", "CON_09", "CON_10", "CON_11", "CON_12",
+    }
+    bad_rule_ids = df[~df["rule_id"].astype(str).str.strip().isin(valid_rule_ids)]
+    if not bad_rule_ids.empty:
+        bogus_rules = sorted({str(x) for x in bad_rule_ids["rule_id"].astype(str).tolist()})[:10]
+        issues.append(f"invalid rule_id value(s): {bogus_rules}")
 
     dup_mask = df.duplicated(subset=["company_id", "type", "rule_id"], keep=False)
     if dup_mask.any():
@@ -1738,26 +1789,332 @@ def run_foundation_report(
     return report
 
 
-def main(limit: Optional[int] = None) -> Dict[str, Any]:
-    """Console entry point for the Module 2A foundation smoke run."""
-    report = run_foundation_report(limit=limit)
-    print("\n=== Module 2A Foundation Report ===")
-    print(f"Companies: {report['companies_total']}")
-    print(f"Latest year available: "
-          f"{len([y for y in report['latest_year_by_company'].values() if y and y == max([y2 for y2 in report['latest_year_by_company'].values() if y2], default=0)])} "
-          f"of {report['companies_total']}")
-    print(f"Financial companies: {len(report['financial_companies'])}")
-    print(f"Companies missing latest ROE: {len(report['missing_roe_latest'])}")
-    print(f"Companies missing >=3yr history: {len(report['missing_3yr_history'])}")
-    print(f"Registered rules (pro, con): "
-          f"({report['rule_registry']['pro']}, {report['rule_registry']['con']})")
-    print("No Pros/Cons generated (Module 2A foundation only).")
+def _run_foundation_report( # Renamed from main for Module 2A smoke run
+    conn: Optional[Any] = None,
+    limit: Optional[int] = None,
+) -> Dict[str, Any]:
+    """Run a Module 2A diagnostic over the data layer.
+
+    Loads every dataset, builds a :class:`CompanyContext` for each company,
+    logs coverage/missing-data statistics and returns a plain summary dict.
+    No Pros/Cons are produced.
+
+    Parameters
+    ----------
+    conn : sqlite3.Connection, optional
+        Connection to use.
+    limit : int, optional
+        If set, only build contexts for the first ``limit`` companies (for
+        quick smoke runs).
+
+    Returns
+    -------
+    Dict[str, Any]
+        Foundation diagnostics.
+    """
+    start = time.time()
+    logger.info("=" * 80)
+    logger.info("Module 2A — Pros/Cons Generator Foundation report")
+    logger.info("=" * 80)
+
+    data = load_financial_data(conn)
+    companies = data.get("companies", pd.DataFrame())
+    company_ids = sorted(companies["company_id"].tolist())
+
+    report: Dict[str, Any] = {
+        "status": "ok",
+        "companies_total": len(company_ids),
+        "datasets": {k: int(len(v)) for k, v in data.items()},
+        "latest_year_by_company": {},
+        "missing_roe_latest": [],
+        "missing_3yr_history": [],
+        "financial_companies": [],
+        "rule_registry": {k: len(v) for k, v in get_registered_rules().items()},
+        "execution_time_seconds": 0.0,
+    }
+
+    sample = company_ids if limit is None else company_ids[:limit]
+    for cid in sample:
+        context = get_company_context(cid, conn=conn, data=data)
+        report["latest_year_by_company"][cid] = context.latest_year
+        if context.latest.get("roe") is None:
+            report["missing_roe_latest"].append(cid)
+        if not context.has_history(min_years=MIN_HISTORY_YEARS):
+            report["missing_3yr_history"].append(cid)
+        if context.is_financial:
+            report["financial_companies"].append(cid)
+
+    report["execution_time_seconds"] = round(time.time() - start, 3)
+    logger.info(
+        "Companies: %d | latest_year: %d | missing ROE: %d | "
+        "missing 3yr history: %d | financial: %d",
+        len(company_ids),
+        len([y for y in report["latest_year_by_company"].values() if y]),
+        len(report["missing_roe_latest"]),
+        len(report["missing_3yr_history"]),
+        len(report["financial_companies"]),
+    )
+    logger.info("Registered rules: pro=%d con=%d", len(PRO_RULES), len(CON_RULES))
+    logger.info("Module 2A foundation report completed in %.3fs", report["execution_time_seconds"])
     return report
 
 
-if __name__ == "__main__":
-    main()
+MODULE_2D_COMPLETION_REPORT_PATH: Path = PROJECT_ROOT / "MODULE_2D_COMPLETION_REPORT.md"
+
+def load_all_company_ids(conn: Any) -> Tuple[List[str], Dict[str, Any]]:
+    """Load all company IDs from the 'companies' table with sanity checks."""
+    company_ids: List[str] = []
+    stats: Dict[str, Any] = {
+        "total_companies_in_db": 0,
+        "unique_company_ids": 0,
+        "duplicate_company_ids": [],
+        "companies_missing_id_fields": [],
+    }
+    try:
+        df = _load_table(TABLE_COMPANIES, ["company_id", "company_name", "sector"], conn=conn)
+        if df.empty:
+            logger.error("No companies found in the database.")
+            return [], stats
+
+        stats["total_companies_in_db"] = len(df)
+
+        # Check for duplicates
+        duplicates = df[df.duplicated(subset=["company_id"], keep=False)]
+        if not duplicates.empty:
+            stats["duplicate_company_ids"] = duplicates["company_id"].unique().tolist()
+            logger.warning("Found duplicate company_ids in 'companies' table: %s", stats["duplicate_company_ids"])
+
+        # Check for missing identity fields
+        missing_id_fields = df[df["company_id"].isna() | df["company_name"].isna()]
+        if not missing_id_fields.empty:
+            stats["companies_missing_id_fields"] = missing_id_fields["company_id"].tolist()
+            logger.warning("Companies missing required identity fields: %s", stats["companies_missing_id_fields"])
+
+        cleaned = df["company_id"].map(lambda v: str(v).strip().upper() if pd.notna(v) and str(v).strip() else None)
+        company_ids = sorted({cid for cid in cleaned if cid is not None and cid != "NONE"})
+        stats["unique_company_ids"] = len(company_ids)
+
+        logger.info("Loaded %d unique company IDs from the database.", len(company_ids))
+        return company_ids, stats
+    except Exception as exc:
+        logger.error("Failed to load company IDs: %s", exc)
+        return [], stats
+
+def generate_all_pros_cons(
+    company_ids: List[str],
+    conn: Any,
+    confidence_threshold: float = CONFIDENCE_THRESHOLD,
+) -> Tuple[pd.DataFrame, Dict[str, Any]]:
+    """Generate Pro/Con signals for every company and return filtered output.
+
+    The final pipeline keeps only triggered rules whose raw confidence is strictly
+    greater than the configured threshold. Duplicate signal rows are removed by
+    ``(company_id, type, rule_id)`` before the result is returned.
+    """
+    all_results: List[Dict[str, Any]] = []
+    processed_companies: List[str] = []
+    failed_companies: List[Dict[str, Any]] = []
+    rule_trigger_counts: Dict[str, int] = Counter()
+    triggered_before_filter = 0
+
+    total_companies = len(company_ids)
+    logger.info("Starting Pros/Cons generation for %d companies.", total_companies)
+
+    for idx, company_id in enumerate(company_ids):
+        cid = str(company_id).strip().upper()
+        if (idx + 1) % 10 == 0 or (idx + 1) == total_companies:
+            logger.info("Processing company %d/%d: %s", idx + 1, total_companies, cid)
+
+        try:
+            context = get_company_context(cid, conn=conn)
+            processed_companies.append(context.company_id)
+            results = evaluate_rules_for_company(context, conn=conn)
+
+            for result in results:
+                if result.triggered:
+                    triggered_before_filter += 1
+                    if result.confidence_pct > confidence_threshold:
+                        all_results.append(result.to_dict())
+                        rule_trigger_counts[result.rule_id] += 1
+
+        except Exception as exc:  # pragma: no cover - defensive but logged
+            logger.exception("Failed processing company '%s': %s", cid, exc)
+            failed_companies.append({
+                "company_id": cid,
+                "error": str(exc),
+            })
+
+    df = pd.DataFrame(all_results, columns=OUTPUT_COLUMNS)
+    if not df.empty:
+        df = df.drop_duplicates(subset=["company_id", "type", "rule_id"], keep="first")
+        df = df.sort_values(["company_id", "type", "rule_id"]).reset_index(drop=True)
+    else:
+        df = pd.DataFrame(columns=OUTPUT_COLUMNS)
+
+    pro_rows = df[df["type"] == TYPE_PRO].copy().reset_index(drop=True)
+    con_rows = df[df["type"] == TYPE_CON].copy().reset_index(drop=True)
+
+    stats: Dict[str, Any] = {
+        "total_companies": total_companies,
+        "processed_companies": len(processed_companies),
+        "failed_companies": len(failed_companies),
+        "failed_company_ids": [c["company_id"] for c in failed_companies],
+        "triggered_before_filter": triggered_before_filter,
+        "signals_after_filter": int(len(df)),
+        "pro_signals": int(len(pro_rows)),
+        "con_signals": int(len(con_rows)),
+        "companies_with_pro": int(df[df["type"] == TYPE_PRO]["company_id"].nunique()),
+        "companies_with_con": int(df[df["type"] == TYPE_CON]["company_id"].nunique()),
+        "rule_trigger_counts": dict(sorted(rule_trigger_counts.items())),
+        "confidence_threshold": confidence_threshold,
+    }
+    logger.info(
+        "Finished generation: total_companies=%d, processed=%d, failed=%d, "
+        "signals_after_filter=%d, pro=%d, con=%d, raw_triggered=%d",
+        total_companies,
+        stats["processed_companies"],
+        stats["failed_companies"],
+        stats["signals_after_filter"],
+        stats["pro_signals"],
+        stats["con_signals"],
+        triggered_before_filter,
+    )
+    return df, stats
 
 
+def write_coverage_failures_csv(
+    failures_df: pd.DataFrame,
+    output_path: Path = PROS_CONS_COVERAGE_FAILURES_CSV_PATH,
+) -> Path:
+    """Write company coverage failures to CSV when coverage is incomplete."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    required_cols = [
+        "company_id",
+        "company_name",
+        "sector",
+        "pro_count",
+        "con_count",
+        "failure_reason",
+    ]
+    if failures_df.empty:
+        empty = pd.DataFrame(columns=required_cols)
+        empty.to_csv(output_path, index=False)
+        return output_path
 
+    df = failures_df.copy()
+    for col in required_cols:
+        if col not in df.columns:
+            df[col] = ""
+    df = df[required_cols].copy()
+    df.to_csv(output_path, index=False, encoding="utf-8")
+    logger.info("Wrote coverage failures CSV to %s (%d rows)", output_path, len(df))
+    return output_path
+
+
+def build_company_coverage_report(
+    company_ids: Sequence[str],
+    results_df: Optional[pd.DataFrame],
+    companies_df: Optional[pd.DataFrame] = None,
+    sectors_df: Optional[pd.DataFrame] = None,
+) -> pd.DataFrame:
+    """Return a per-company coverage table with PASS/FAIL status."""
+    companies_list = [str(c).strip().upper() for c in company_ids if str(c).strip()]
+    company_map: Dict[str, str] = {}
+    sector_map: Dict[str, str] = {}
+
+    if companies_df is not None and not companies_df.empty:
+        for _, row in companies_df.iterrows():
+            cid = str(row.get("company_id", "")).strip().upper()
+            if cid:
+                company_map[cid] = str(row.get("company_name", "")).strip()
+    if sectors_df is not None and not sectors_df.empty:
+        for _, row in sectors_df.iterrows():
+            cid = str(row.get("company_id", "")).strip().upper()
+            if cid:
+                sector_map[cid] = str(row.get("sector", row.get("sub_sector", ""))).strip()
+
+    if results_df is None or results_df.empty:
+        rows = []
+        for cid in companies_list:
+            rows.append({
+                "company_id": cid,
+                "company_name": company_map.get(cid, ""),
+                "sector": sector_map.get(cid, ""),
+                "pro_count": 0,
+                "con_count": 0,
+                "has_pro": False,
+                "has_con": False,
+                "coverage_status": "FAIL",
+            })
+        return pd.DataFrame(rows, columns=[
+            "company_id", "company_name", "sector", "pro_count", "con_count",
+            "has_pro", "has_con", "coverage_status",
+        ])
+
+    results = results_df.copy()
+    pro_counts = (
+        results[results["type"] == TYPE_PRO].groupby("company_id").size().to_dict()
+    )
+    con_counts = (
+        results[results["type"] == TYPE_CON].groupby("company_id").size().to_dict()
+    )
+
+    rows = []
+    for cid in companies_list:
+        pro_count = int(pro_counts.get(cid, 0))
+        con_count = int(con_counts.get(cid, 0))
+        has_pro = pro_count > 0
+        has_con = con_count > 0
+        rows.append({
+            "company_id": cid,
+            "company_name": company_map.get(cid, ""),
+            "sector": sector_map.get(cid, ""),
+            "pro_count": pro_count,
+            "con_count": con_count,
+            "has_pro": has_pro,
+            "has_con": has_con,
+            "coverage_status": "PASS" if has_pro and has_con else "FAIL",
+        })
+    return pd.DataFrame(rows, columns=[
+        "company_id", "company_name", "sector", "pro_count", "con_count",
+        "has_pro", "has_con", "coverage_status",
+    ])
+
+
+def generate_coverage_failures(
+    company_ids: Sequence[str],
+    results_df: Optional[pd.DataFrame],
+    companies_df: Optional[pd.DataFrame] = None,
+    sectors_df: Optional[pd.DataFrame] = None,
+) -> pd.DataFrame:
+    """Return only companies failing the final Pro/Con coverage requirement."""
+    coverage = build_company_coverage_report(company_ids, results_df, companies_df, sectors_df)
+    failures = coverage[coverage["coverage_status"] == "FAIL"].copy()
+    if failures.empty:
+        return pd.DataFrame(columns=[
+            "company_id", "company_name", "sector", "pro_count", "con_count", "failure_reason",
+        ])
+
+    failures["failure_reason"] = ""
+    for idx, row in failures.iterrows():
+        if row["pro_count"] == 0 and row["con_count"] == 0:
+            reason = "No valid Pro or Con signals after >60 confidence filter"
+        elif row["pro_count"] == 0:
+            reason = "No valid Pro signal after >60 confidence filter"
+        elif row["con_count"] == 0:
+            reason = "No valid Con signal after >60 confidence filter"
+        else:
+            reason = "Coverage rule not satisfied"
+        failures.at[idx, "failure_reason"] = reason
+    return failures[[
+        "company_id", "company_name", "sector", "pro_count", "con_count", "failure_reason",
+    ]].reset_index(drop=True)
+
+
+# Keep the final result consistent with the earlier validation helpers.
+# ---------------------------------------------------------------------------
+# Schema validation: the final output file must only contain triggered signals
+# above the >60 threshold, and each result must have a valid rule id and
+# non-empty company id.
+# ---------------------------------------------------------------------------
 

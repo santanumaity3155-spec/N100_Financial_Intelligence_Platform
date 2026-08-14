@@ -26,6 +26,7 @@ from src.nlp.pros_cons_generator import (  # noqa: E402
     PRO_RULES,
     CompanyContext,
     RuleResult,
+    TYPE_CON,
     TYPE_PRO,
     evaluate_rules_for_company,
     get_registered_rules,
@@ -612,13 +613,14 @@ class TestRegistry:
         assert [r.rule_id for r in PRO_RULES] == EXPECTED_PRO_IDS
         assert all(r.rule_type == TYPE_PRO for r in PRO_RULES)
 
-    def test_con_registry_empty(self):
-        assert CON_RULES == []
+    def test_con_registry_has_12_rules(self):
+        assert len(CON_RULES) == 12
+        assert [r.rule_id for r in CON_RULES] == [f"CON_{i:02d}" for i in range(1, 13)]
 
     def test_registry_matches_instances(self):
         reg = get_registered_rules()
         assert [r.rule_id for r in reg["pro"]] == EXPECTED_PRO_IDS
-        assert reg["con"] == []
+        assert len(reg["con"]) == 12
 
     def test_instances_are_rule_classes(self):
         inst = get_pro_rule_instances()
@@ -629,10 +631,13 @@ class TestRegistry:
 
     def test_evaluate_rules_for_company(self):
         results = evaluate_rules_for_company(make_context())
-        assert len(results) == 12
+        assert len(results) == 24  # 12 Pro + 12 Con
+        pro_results = [r for r in results if r.rule_type == TYPE_PRO]
+        con_results = [r for r in results if r.rule_type == TYPE_CON]
+        assert len(pro_results) == 12
+        assert len(con_results) == 12
         for r in results:
             assert isinstance(r, RuleResult)
-            assert r.rule_type == TYPE_PRO
             assert validate_confidence(r.confidence_pct)
 
     def test_triggered_output_schema_valid(self):

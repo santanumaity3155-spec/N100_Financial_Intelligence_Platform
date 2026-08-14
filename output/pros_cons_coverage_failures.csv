@@ -1,0 +1,17 @@
+company_id,company_name,sector,pro_count,con_count,failure_reason
+BAJAJFINSV,Bajaj Finserv Ltd,Diversified Financials,4,0,No valid Con signal after >60 confidence filter
+BOSCHLTD,Bosch Ltd,Auto Ancillaries,4,0,No valid Con signal after >60 confidence filter
+COALINDIA,Coal India Ltd,Mining & Metals,5,0,No valid Con signal after >60 confidence filter
+DIVISLAB,Divis Laboratories Ltd,Pharmaceuticals,4,0,No valid Con signal after >60 confidence filter
+DMART,Avenue Supermarts Ltd,Retail,7,0,No valid Con signal after >60 confidence filter
+HDFCLIFE,HDFC Life Insurance Company Ltd,Life Insurance,5,0,No valid Con signal after >60 confidence filter
+ICICIGI,ICICI Lombard General Insurance Company Ltd,General Insurance,5,0,No valid Con signal after >60 confidence filter
+ICICIPRULI,ICICI Prudential Life Insurance Company Ltd,Life Insurance,3,0,No valid Con signal after >60 confidence filter
+INDIGO,Interglobe Aviation Ltd,Airlines,5,0,No valid Con signal after >60 confidence filter
+IRCTC,Indian Railway Catering & Tourism Corporation Ltd,Travel & Tourism,7,0,No valid Con signal after >60 confidence filter
+ITC,ITC Ltd,Diversified FMCG,4,0,No valid Con signal after >60 confidence filter
+MARUTI,Maruti Suzuki India Ltd,Automobiles,3,0,No valid Con signal after >60 confidence filter
+PNB,Punjab National Bank,Public Sector Banks,1,0,No valid Con signal after >60 confidence filter
+SBIN,State Bank of India,Public Sector Banks,0,0,No valid Pro or Con signals after >60 confidence filter
+ULTRACEMCO,UltraTech Cement,,0,0,No valid Pro or Con signals after >60 confidence filter
+UNIONBANK,Union Bank of India,,0,1,No valid Pro signal after >60 confidence filter

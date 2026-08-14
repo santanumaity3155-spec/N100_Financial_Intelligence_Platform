@@ -1,0 +1,80 @@
+=== OPM percentage sample ===
+TCS: [29.0, 31.0, 26.0, 28.0, 27.0]
+AXISBANK: [1353.0, 2307.0, 3097.0, 3466.0, -5715.0]
+HDFCBANK: [3534.0, 5602.0, 7214.0, 9037.0, 11374.0]
+INFY: [29.0, 27.0, 28.0, 27.0, 27.0]
+KOTAKBANK: [-1789.0, -1379.0, -3366.0, -2263.0, -3965.0]
+LT: [15.0, 17.0, 17.0, 15.0, 15.0]
+HINDUNILVR: [4220.0, 4759.0, 5412.0, 5910.0, 6328.0]
+
+=== Cash flow columns ===
+                            name
+0                             id
+1                     company_id
+2                         period
+3   cash_from_operating_activity
+4   cash_from_investing_activity
+5   cash_from_financing_activity
+6                 free_cash_flow
+7                  net_cash_flow
+8             operating_activity
+9             investing_activity
+10            financing_activity
+11                    created_at
+
+TCS cash_flow sample:
+     id company_id    period cash_from_operating_activity cash_from_investing_activity cash_from_financing_activity free_cash_flow  net_cash_flow  operating_activity  investing_activity  financing_activity created_at
+0  1098        TCS  Mar 2013                         None                         None                         None           None         -152.0             11615.0             -6038.0             -5729.0       None
+1  1099        TCS  Mar 2014                         None                         None                         None           None         -374.0             14751.0             -9452.0             -5673.0       None
+
+=== financial_kpis columns check ===
+Has net_debt: False, Has ebitda: False
+Has dividend_payout: False
+
+=== Companies with ICR < 2.0 (non-financial) ===
+Non-financial with ICR < 2: ['HINDALCO', 'HINDALCO', 'NAUKRI', 'BHEL', 'BHEL', 'NAUKRI', 'TRENT', 'BHEL', 'TATASTEEL', 'TRENT', 'TRENT', 'ADANIPOWER', 'TATAPOWER', 'TATAPOWER', 'TATASTEEL', 'TATAPOWER', 'DLF', 'DLF', 'BHEL', 'ADANIPOWER', 'ADANIPOWER', 'ADANIPOWER']
+
+=== Companies with dividend_payout > 100 ===
+    company_id  max_dp
+0         SBIN   859.0
+1         VEDL   357.0
+2   BHARTIARTL   244.0
+3    TATAPOWER   210.0
+4           MM   205.0
+5    BRITANNIA   204.0
+6    NESTLEIND   168.0
+7    AMBUJACEM   151.0
+8         BHEL   151.0
+9       NAUKRI   150.0
+10       TECHM   150.0
+11   COALINDIA   146.0
+12      INDIGO   123.0
+13  HINDUNILVR   119.0
+14         DLF   117.0
+15        BPCL   106.0
+16  TORNTPHARM   105.0
+17         ITC   101.0
+
+=== Companies with negative net_profit (latest) ===
+Count: 20
+    company_id  net_profit
+0   BHARTIARTL    -30664.0
+1   TATAMOTORS    -28724.0
+2         VEDL    -17862.0
+3   TATAMOTORS    -13395.0
+4   BHARTIARTL    -12364.0
+5          PNB    -12111.0
+6   TATAMOTORS    -11975.0
+7         VEDL    -11369.0
+8   TATAMOTORS    -11309.0
+9          PNB     -9550.0
+10   TATASTEEL     -7272.0
+11  ADANIPOWER     -6174.0
+12      INDIGO     -6171.0
+13   UNIONBANK     -5212.0
+14  BANKBARODA     -5033.0
+15   TATASTEEL     -4910.0
+16        VEDL     -4744.0
+17    UNITDSPR     -4489.0
+18   TATASTEEL     -4169.0
+19   TATASTEEL     -3939.0

@@ -556,44 +556,57 @@ class _DummyConRule(FinancialRule):
 
 
 class TestRuleRegistry:
-    """Verify registries are empty by default and accept registrations."""
+    """Verify registries are populated by default and accept registrations."""
 
     def test_registries_by_default(self):
-        # Module 2B registers the 12 Pro rules; the Con registry must stay empty.
+        # After Module 2C, both registries must be populated with 12 rules each.
         assert len(PRO_RULES) == 12
         assert [r.rule_id for r in PRO_RULES] == [
-            "PRO_01", "PRO_02", "PRO_03", "PRO_04", "PRO_05", "PRO_06",
-            "PRO_07", "PRO_08", "PRO_09", "PRO_10", "PRO_11", "PRO_12",
+            f"PRO_{i:02d}" for i in range(1, 13)
         ]
-        assert CON_RULES == []
+        assert len(CON_RULES) == 12
+        assert [r.rule_id for r in CON_RULES] == [
+            f"CON_{i:02d}" for i in range(1, 13)
+        ]
+
         reg = get_registered_rules()
+        assert len(reg["pro"]) == 12
+        assert len(reg["con"]) == 12
         assert [r.rule_id for r in reg["pro"]] == [r.rule_id for r in PRO_RULES]
-        assert reg["con"] == []
+        assert [r.rule_id for r in reg["con"]] == [r.rule_id for r in CON_RULES]
 
     def test_register_rule(self, monkeypatch):
-        monkeypatch.setattr(sys.modules[__name__], "PRO_RULES", [])
-        import src.nlp.pros_cons_generator as pcg
+        # Temporarily clear the registries for this test
+        monkeypatch.setattr("src.nlp.pros_cons_generator.PRO_RULES", [])
+        monkeypatch.setattr("src.nlp.pros_cons_generator.CON_RULES", [])
 
-        monkeypatch.setattr(pcg, "PRO_RULES", [])
-        rule = _DummyProRule()
-        register_pro_rule(rule)
+        pro_rule = _DummyProRule()
+        register_pro_rule(pro_rule)
         assert len(get_registered_rules()["pro"]) == 1
         assert get_registered_rules()["pro"][0].rule_id == "PRO_TEST_DUMMY"
 
-    def test_register_wrong_type(self, monkeypatch):
-        import src.nlp.pros_cons_generator as pcg
+        con_rule = _DummyConRule()
+        register_con_rule(con_rule)
+        assert len(get_registered_rules()["con"]) == 1
+        assert get_registered_rules()["con"][0].rule_id == "CON_TEST_DUMMY"
 
-        monkeypatch.setattr(pcg, "CON_RULES", [])
+    def test_register_wrong_type(self, monkeypatch):
+        monkeypatch.setattr("src.nlp.pros_cons_generator.CON_RULES", [])
         with pytest.raises(ValueError):
             register_con_rule(_DummyProRule())  # pro rule into con registry
 
     def test_evaluate_rules_returns_registered_results(self):
-        # Module 2B: evaluating a company returns one result per Pro rule.
+        # After Module 2C, evaluating a company returns 24 results.
         context = make_context()
         results = evaluate_rules_for_company(context)
-        assert len(results) == 12
+        assert len(results) == 24
         assert all(isinstance(r, RuleResult) for r in results)
-        assert all(r.rule_type == TYPE_PRO for r in results)
+
+        pro_results = [r for r in results if r.rule_type == TYPE_PRO]
+        con_results = [r for r in results if r.rule_type == TYPE_CON]
+
+        assert len(pro_results) == 12
+        assert len(con_results) == 12
 
     def test_concrete_rule_placeholder(self):
         context = make_context(company_id="X")

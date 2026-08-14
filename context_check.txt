@@ -1,0 +1,160 @@
+=== TCS ===
+is_financial: False
+sub_sector: IT Services
+latest_year: 2024
+history_years: [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
+latest metrics:
+  borrowings: 8021.0
+  debt_to_equity: 22.16
+  depreciation: 4985.0
+  dividend_payout: 58.0
+  ebitda: 69281.0
+  eps: 127.0
+  eps_cagr: None
+  interest_coverage: 83.64
+  investments: 31762.0
+  net_debt: -23741.0
+  net_profit: 46099.0
+  operating_profit: 64296.0
+  opm: 27.0
+  profit_cagr: None
+  reserves: 90127.0
+  revenue: 240893.0
+  revenue_cagr: None
+  roce: 44.73
+  roe: 12734.53
+  total_assets: 145472.0
+trailing metrics:
+  dividend_yield: 0.8
+  eps_cagr: 11.64
+  profit_cagr: 10.96
+  revenue_cagr: 12.25
+
+=== AXISBANK ===
+is_financial: True
+sub_sector: Private Banks
+latest_year: 2024
+history_years: [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
+latest metrics:
+  borrowings: 1295302.0
+  debt_to_equity: 2099.35
+  depreciation: 1334.0
+  dividend_payout: 1.0
+  ebitda: 39277.0
+  eps: 81.0
+  eps_cagr: None
+  interest_coverage: 2.69
+  investments: 332354.0
+  net_debt: 962948.0
+  net_profit: 24861.0
+  operating_profit: 37943.0
+  opm: 11952.0
+  profit_cagr: None
+  reserves: 156406.0
+  revenue: 109369.0
+  revenue_cagr: None
+  roce: 3.98
+  roe: 4029.34
+  total_assets: 1518239.0
+trailing metrics:
+  dividend_yield: 3.03
+  eps_cagr: 11.92
+  profit_cagr: 14.53
+  revenue_cagr: 13.22
+
+=== HDFCBANK ===
+is_financial: True
+sub_sector: Private Banks
+latest_year: 2024
+history_years: [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
+latest metrics:
+  borrowings: 3107503.0
+  debt_to_equity: 4088.82
+  depreciation: 3092.0
+  dividend_payout: 23.0
+  ebitda: 177288.0
+  eps: 84.0
+  eps_cagr: None
+  interest_coverage: 2.4
+  investments: 1005682.0
+  net_debt: 2101821.0
+  net_profit: 65446.0
+  operating_profit: 174196.0
+  opm: -44685.0
+  profit_cagr: None
+  reserves: 455636.0
+  revenue: 283649.0
+  revenue_cagr: None
+  roce: 7.41
+  roe: 8611.32
+  total_assets: 4030194.0
+trailing metrics:
+  dividend_yield: 3.49
+  eps_cagr: 16.88
+  profit_cagr: 21.6
+  revenue_cagr: 20.29
+
+=== INFY ===
+is_financial: False
+sub_sector: IT Services
+latest_year: 2024
+history_years: [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
+latest metrics:
+  borrowings: 8359.0
+  debt_to_equity: 4.04
+  depreciation: 4678.0
+  dividend_payout: None
+  ebitda: 41103.0
+  eps: 63.0
+  eps_cagr: None
+  interest_coverage: 78.5
+  investments: 24623.0
+  net_debt: -16264.0
+  net_profit: 26248.0
+  operating_profit: 36425.0
+  opm: 24.0
+  profit_cagr: None
+  reserves: 86045.0
+  revenue: 153670.0
+  revenue_cagr: None
+  roce: 27.12
+  roe: 1267.41
+  total_assets: 136020.0
+trailing metrics:
+  dividend_yield: 2.63
+  eps_cagr: 10.15
+  profit_cagr: 9.39
+  revenue_cagr: 12.16
+
+=== RELIANCE ===
+is_financial: False
+sub_sector: Conglomerates
+latest_year: 2024
+history_years: [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
+latest metrics:
+  borrowings: 458991.0
+  debt_to_equity: 67.84
+  depreciation: 50832.0
+  dividend_payout: 10.0
+  ebitda: 213330.0
+  eps: 51.0
+  eps_cagr: None
+  interest_coverage: 8.03
+  investments: 225672.0
+  net_debt: 233319.0
+  net_profit: 79020.0
+  operating_profit: 162498.0
+  opm: 18.0
+  profit_cagr: None
+  reserves: 786715.0
+  revenue: 899041.0
+  revenue_cagr: None
+  roce: 10.58
+  roe: 1167.9
+  total_assets: 1755048.0
+trailing metrics:
+  dividend_yield: 1.43
+  eps_cagr: 10.74
+  profit_cagr: 11.83
+  revenue_cagr: 7.47
+
