@@ -133,7 +133,10 @@ METRIC_SOURCES: Dict[str, List[Tuple[str, str]]] = {
         (TABLE_FINANCIAL_KPIS, "roce"),
         (TABLE_COMPANIES, "roce_percentage"),
     ],
-    "debt_to_equity": [(TABLE_FINANCIAL_KPIS, "debt_to_equity")],
+    "debt_to_equity": [
+        (TABLE_FINANCIAL_KPIS, "debt_to_equity"),
+        (TABLE_FINANCIAL_RATIOS, "debt_to_equity"),
+    ],
     "interest_coverage": [(TABLE_FINANCIAL_KPIS, "interest_coverage")],
     "free_cash_flow": [
         (TABLE_CASH_FLOW, "free_cash_flow"),
@@ -357,35 +360,74 @@ def load_cashflow_data(conn: Optional[Any] = None) -> pd.DataFrame:
 
 
 def load_ratio_data(conn: Optional[Any] = None) -> pd.DataFrame:
-    """Load the rich ratio/KPI table (``financial_kpis``).
+    """Load the rich ratio/KPI table, preferring ``financial_kpis`` but falling back to
+    ``financial_ratios`` for missing data.
 
     Provides ROE, ROCE, leverage, interest coverage, CAGR and dividend metrics
-    with per-period granularity. Falls back to the leaner ``financial_ratios``
-    table when ``financial_kpis`` is absent.
+    with per-period granularity.
     """
-    cols = [
+    # Target columns we want in the final dataframe
+    target_cols = [
         "company_id", "period", "roe", "roce", "roa", "debt_to_equity",
         "interest_coverage", "free_cash_flow", "operating_cash_flow",
         "dividend_yield", "revenue_cagr", "profit_cagr", "eps_cagr",
     ]
-    df = _load_table(TABLE_FINANCIAL_KPIS, cols, conn=conn)
-    if not df.empty:
-        df["company_id"] = df["company_id"].astype(str).str.strip().str.upper()
-        logger.info("Loaded %d financial_kpis records", len(df))
-        return df
 
-    # Fallback to the leaner financial_ratios table.
-    fallback_cols = [
-        "company_id", "period", "roe", "roa", "debt_to_equity",
-        "dividend_yield",
+    # Load financial_kpis with target columns (missing columns will be added as None)
+    df_kpis = _load_table(TABLE_FINANCIAL_KPIS, target_cols, conn=conn)
+    if not df_kpis.empty:
+        df_kpis["company_id"] = df_kpis["company_id"].astype(str).str.strip().str.upper()
+        # Ensure all target columns exist (they should, but safe)
+        for col in target_cols:
+            if col not in df_kpis.columns:
+                df_kpis[col] = None
+
+    # Load financial_ratios with its specific columns, then map to target columns
+    ratio_cols = [
+        "company_id", "period", "roe", "roa", "debt_to_equity", "dividend_yield"
     ]
-    df = _load_table(TABLE_FINANCIAL_RATIOS, fallback_cols, conn=conn)
-    if not df.empty:
-        df["company_id"] = df["company_id"].astype(str).str.strip().str.upper()
-        logger.info("Loaded %d financial_ratios (fallback) records", len(df))
+    df_ratios = _load_table(TABLE_FINANCIAL_RATIOS, ratio_cols, conn=conn)
+    if not df_ratios.empty:
+        df_ratios["company_id"] = df_ratios["company_id"].astype(str).str.strip().str.upper()
+        # Ensure all target columns exist, filling missing with None
+        for col in target_cols:
+            if col not in df_ratios.columns:
+                df_ratios[col] = None
+        # Keep only target columns (in case extra columns exists)
+        df_ratios = df_ratios[target_cols]
     else:
+        df_ratios = pd.DataFrame(columns=target_cols)
+
+    # Combine: prefer kpis rows, then ratios rows for missing (company_id, period)
+    if df_kpis.empty and df_ratios.empty:
         logger.warning("No ratio/KPI records loaded")
-    return df
+        return pd.DataFrame(columns=target_cols)
+
+    # Tag source for logging (optional)
+    if not df_kpis.empty:
+        df_kpis = df_kpis.assign(_source=0)
+    if not df_ratios.empty:
+        df_ratios = df_ratios.assign(_source=1)
+
+    # Concatenate and sort by source so kpis comes first
+    combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+    # Sort by company_id, period, and _source so that kpis (0) comes before ratios (1) for same key
+    combined = combined.sort_values(
+        ["company_id", "period", "_source"],
+        na_position='last'
+    ).reset_index(drop=True)
+    # Drop duplicates keeping the first (which is from kpis if available)
+    combined = combined.drop_duplicates(subset=["company_id", "period"], keep="first")
+    # Drop the helper column
+    combined = combined.drop(columns=["_source"], errors='ignore')
+
+    logger.info(
+        "Loaded ratio data: %d financial_kpis, %d financial_ratios, %d combined",
+        len(df_kpis) if not df_kpis.empty else 0,
+        len(df_ratios) if not df_ratios.empty else 0,
+        len(combined)
+    )
+    return combined
 
 
 def load_balance_sheet(conn: Optional[Any] = None) -> pd.DataFrame:

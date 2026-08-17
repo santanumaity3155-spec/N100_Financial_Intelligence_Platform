@@ -1,0 +1,556 @@
+﻿python : 2026-08-17 17:36:29,669 | INFO | src.nlp.pros_cons_generator | Registered pro rule 'PRO_01' (Sustained High 
+ROE)
+At line:1 char:302
++ ... tch {} } }; python diagnostic_module2d.py > diagnostic_output.txt 2>& ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (2026-08-17 17:3...ained High ROE):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+2026-08-17 17:36:29,669 | INFO | src.nlp.pros_cons_generator | Registered pro rule 'PRO_02' (Sustained Positive FCF)
+2026-08-17 17:36:29,670 | INFO | src.nlp.pros_cons_generator | Registered pro rule 'PRO_03' (Debt Free)
+2026-08-17 17:36:29,670 | INFO | src.nlp.pros_cons_generator | Registered pro rule 'PRO_04' (Strong Revenue Growth)
+2026-08-17 17:36:29,670 | INFO | src.nlp.pros_cons_generator | Registered pro rule 'PRO_05' (Strong Operating Margin)
+2026-08-17 17:36:29,670 | INFO | src.nlp.pros_cons_generator | Registered pro rule 'PRO_06' (Strong PAT Growth)
+2026-08-17 17:36:29,670 | INFO | src.nlp.pros_cons_generator | Registered pro rule 'PRO_07' (Strong Interest Coverage 
+/ Debt Free)
+2026-08-17 17:36:29,670 | INFO | src.nlp.pros_cons_generator | Registered pro rule 'PRO_08' (Dividend Quality)
+2026-08-17 17:36:29,670 | INFO | src.nlp.pros_cons_generator | Registered pro rule 'PRO_09' (Strong EPS Growth)
+2026-08-17 17:36:29,670 | INFO | src.nlp.pros_cons_generator | Registered pro rule 'PRO_10' (Improving ROE)
+2026-08-17 17:36:29,670 | INFO | src.nlp.pros_cons_generator | Registered pro rule 'PRO_11' (Operating Leverage)
+2026-08-17 17:36:29,670 | INFO | src.nlp.pros_cons_generator | Registered pro rule 'PRO_12' (Asset Growth + Declining 
+Debt)
+2026-08-17 17:36:29,672 | INFO | src.nlp.pros_cons_generator | Registered con rule 'CON_01' (High Debt-to-Equity)
+2026-08-17 17:36:29,672 | INFO | src.nlp.pros_cons_generator | Registered con rule 'CON_02' (Sustained Negative FCF)
+2026-08-17 17:36:29,672 | INFO | src.nlp.pros_cons_generator | Registered con rule 'CON_03' (Declining OPM)
+2026-08-17 17:36:29,673 | INFO | src.nlp.pros_cons_generator | Registered con rule 'CON_04' (Net Loss)
+2026-08-17 17:36:29,673 | INFO | src.nlp.pros_cons_generator | Registered con rule 'CON_05' (Revenue Decline)
+2026-08-17 17:36:29,673 | INFO | src.nlp.pros_cons_generator | Registered con rule 'CON_06' (Low Interest Coverage)
+2026-08-17 17:36:29,673 | INFO | src.nlp.pros_cons_generator | Registered con rule 'CON_07' (Excessive Dividend Payout)
+2026-08-17 17:36:29,673 | INFO | src.nlp.pros_cons_generator | Registered con rule 'CON_08' (Rising D/E)
+2026-08-17 17:36:29,673 | INFO | src.nlp.pros_cons_generator | Registered con rule 'CON_09' (Declining EPS)
+2026-08-17 17:36:29,673 | INFO | src.nlp.pros_cons_generator | Registered con rule 'CON_10' (Low ROCE)
+2026-08-17 17:36:29,673 | INFO | src.nlp.pros_cons_generator | Registered con rule 'CON_11' (High Net Debt / EBITDA)
+2026-08-17 17:36:29,673 | INFO | src.nlp.pros_cons_generator | Registered con rule 'CON_12' (Low Revenue Growth)
+2026-08-17 17:36:29,674 | INFO | src.database.connection | Foreign Keys Enabled
+2026-08-17 17:36:29,674 | INFO | src.database.connection | Connected to SQLite database: D:\New 
+Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\data\database\n100.db
+2026-08-17 17:36:29,678 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.004s
+2026-08-17 17:36:29,681 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:29,682 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.001s
+2026-08-17 17:36:29,683 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:29,688 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.005s
+2026-08-17 17:36:29,689 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:29,693 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.004s
+2026-08-17 17:36:29,694 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:29,698 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.003s
+2026-08-17 17:36:29,699 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:29,705 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.006s
+2026-08-17 17:36:29,710 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.004s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:29,729 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:29,730 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.001s
+2026-08-17 17:36:29,731 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:29,732 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.001s
+2026-08-17 17:36:29,732 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:29,741 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.001s
+2026-08-17 17:36:29,742 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:29,743 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.001s
+2026-08-17 17:36:29,744 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:29,749 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.004s
+2026-08-17 17:36:29,750 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:29,753 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.003s
+2026-08-17 17:36:29,755 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:29,759 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.004s
+2026-08-17 17:36:29,760 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:29,768 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.007s
+2026-08-17 17:36:29,773 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.004s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:29,799 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:29,800 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.001s
+2026-08-17 17:36:29,802 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:29,803 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.001s
+2026-08-17 17:36:29,804 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:29,941 | INFO | src.nlp.pros_cons_generator | Prepared history for 'BAJAJFINSV': 12 years (2013 .. 
+2024)
+2026-08-17 17:36:29,944 | INFO | src.nlp.pros_cons_generator | Built context for 'BAJAJFINSV' (latest year=2024, 12 
+history years, financial=True)
+2026-08-17 17:36:29,946 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.001s
+2026-08-17 17:36:29,947 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:29,947 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.000s
+2026-08-17 17:36:29,948 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:29,953 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.005s
+2026-08-17 17:36:29,954 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:29,957 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.003s
+2026-08-17 17:36:29,958 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:29,961 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.002s
+2026-08-17 17:36:29,962 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:29,966 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.004s
+2026-08-17 17:36:29,969 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.002s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:29,985 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:29,987 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.001s
+2026-08-17 17:36:29,987 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:29,988 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.001s
+2026-08-17 17:36:29,989 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:30,110 | INFO | src.nlp.pros_cons_generator | Prepared history for 'BOSCHLTD': 12 years (2012 .. 2024)
+2026-08-17 17:36:30,115 | INFO | src.nlp.pros_cons_generator | Built context for 'BOSCHLTD' (latest year=2024, 12 
+history years, financial=False)
+2026-08-17 17:36:30,118 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.002s
+2026-08-17 17:36:30,120 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:30,122 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.001s
+2026-08-17 17:36:30,123 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:30,131 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.008s
+2026-08-17 17:36:30,133 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:30,139 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.006s
+2026-08-17 17:36:30,141 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:30,147 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.005s
+2026-08-17 17:36:30,149 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:30,157 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.007s
+2026-08-17 17:36:30,162 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.004s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:30,190 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:30,191 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.001s
+2026-08-17 17:36:30,192 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:30,193 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.001s
+2026-08-17 17:36:30,193 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:30,319 | INFO | src.nlp.pros_cons_generator | Prepared history for 'COALINDIA': 12 years (2013 .. 
+2024)
+2026-08-17 17:36:30,323 | INFO | src.nlp.pros_cons_generator | Built context for 'COALINDIA' (latest year=2024, 12 
+history years, financial=False)
+2026-08-17 17:36:30,325 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.001s
+2026-08-17 17:36:30,326 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:30,327 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.001s
+2026-08-17 17:36:30,328 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:30,335 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.006s
+2026-08-17 17:36:30,336 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:30,340 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.004s
+2026-08-17 17:36:30,342 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:30,345 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.003s
+2026-08-17 17:36:30,347 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:30,352 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.005s
+2026-08-17 17:36:30,356 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.003s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:30,374 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:30,375 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.001s
+2026-08-17 17:36:30,377 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:30,379 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.001s
+2026-08-17 17:36:30,380 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:30,491 | INFO | src.nlp.pros_cons_generator | Prepared history for 'DIVISLAB': 12 years (2013 .. 2024)
+2026-08-17 17:36:30,494 | INFO | src.nlp.pros_cons_generator | Built context for 'DIVISLAB' (latest year=2024, 12 
+history years, financial=False)
+2026-08-17 17:36:30,496 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.001s
+2026-08-17 17:36:30,497 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:30,498 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.001s
+2026-08-17 17:36:30,498 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:30,503 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.004s
+2026-08-17 17:36:30,504 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:30,509 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.004s
+2026-08-17 17:36:30,510 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:30,512 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.002s
+2026-08-17 17:36:30,514 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:30,519 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.005s
+2026-08-17 17:36:30,523 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.003s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:30,539 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:30,540 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.001s
+2026-08-17 17:36:30,541 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:30,542 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.001s
+2026-08-17 17:36:30,543 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:30,655 | INFO | src.nlp.pros_cons_generator | Prepared history for 'DMART': 12 years (2013 .. 2024)
+2026-08-17 17:36:30,661 | INFO | src.nlp.pros_cons_generator | Built context for 'DMART' (latest year=2024, 12 history 
+years, financial=False)
+2026-08-17 17:36:30,662 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.001s
+2026-08-17 17:36:30,663 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:30,664 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.001s
+2026-08-17 17:36:30,664 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:30,669 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.005s
+2026-08-17 17:36:30,671 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:30,675 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.005s
+2026-08-17 17:36:30,677 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:30,679 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.002s
+2026-08-17 17:36:30,681 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:30,689 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.008s
+2026-08-17 17:36:30,693 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.003s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:30,711 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:30,712 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.001s
+2026-08-17 17:36:30,713 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:30,714 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.001s
+2026-08-17 17:36:30,714 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:30,867 | INFO | src.nlp.pros_cons_generator | Prepared history for 'HDFCLIFE': 12 years (2013 .. 2024)
+2026-08-17 17:36:30,872 | INFO | src.nlp.pros_cons_generator | Built context for 'HDFCLIFE' (latest year=2024, 12 
+history years, financial=True)
+2026-08-17 17:36:30,874 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.001s
+2026-08-17 17:36:30,877 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:30,879 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.002s
+2026-08-17 17:36:30,880 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:30,887 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.007s
+2026-08-17 17:36:30,891 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:30,897 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.006s
+2026-08-17 17:36:30,899 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:30,904 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.004s
+2026-08-17 17:36:30,906 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:30,914 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.008s
+2026-08-17 17:36:30,922 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.007s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:30,946 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:30,947 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.001s
+2026-08-17 17:36:30,948 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:30,948 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.001s
+2026-08-17 17:36:30,949 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:31,067 | INFO | src.nlp.pros_cons_generator | Prepared history for 'ICICIGI': 12 years (2013 .. 2024)
+2026-08-17 17:36:31,071 | INFO | src.nlp.pros_cons_generator | Built context for 'ICICIGI' (latest year=2024, 12 
+history years, financial=True)
+2026-08-17 17:36:31,073 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.001s
+2026-08-17 17:36:31,073 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:31,074 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.001s
+2026-08-17 17:36:31,075 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:31,080 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.005s
+2026-08-17 17:36:31,081 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:31,085 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.004s
+2026-08-17 17:36:31,087 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:31,089 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.002s
+2026-08-17 17:36:31,091 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:31,096 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.005s
+2026-08-17 17:36:31,101 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.002s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:31,120 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:31,121 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.001s
+2026-08-17 17:36:31,122 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:31,122 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.001s
+2026-08-17 17:36:31,123 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:31,260 | INFO | src.nlp.pros_cons_generator | Prepared history for 'ICICIPRULI': 12 years (2013 .. 
+2024)
+2026-08-17 17:36:31,266 | INFO | src.nlp.pros_cons_generator | Built context for 'ICICIPRULI' (latest year=2024, 12 
+history years, financial=True)
+2026-08-17 17:36:31,269 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.002s
+2026-08-17 17:36:31,271 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:31,272 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.001s
+2026-08-17 17:36:31,274 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:31,282 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.008s
+2026-08-17 17:36:31,283 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:31,290 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.007s
+2026-08-17 17:36:31,293 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:31,298 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.005s
+2026-08-17 17:36:31,301 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:31,310 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.009s
+2026-08-17 17:36:31,316 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.005s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:31,338 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:31,339 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.001s
+2026-08-17 17:36:31,341 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:31,342 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.001s
+2026-08-17 17:36:31,343 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:31,484 | INFO | src.nlp.pros_cons_generator | Prepared history for 'INDIGO': 12 years (2013 .. 2024)
+2026-08-17 17:36:31,487 | INFO | src.nlp.pros_cons_generator | Built context for 'INDIGO' (latest year=2024, 12 
+history years, financial=False)
+2026-08-17 17:36:31,489 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.001s
+2026-08-17 17:36:31,490 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:31,491 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.001s
+2026-08-17 17:36:31,492 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:31,498 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.006s
+2026-08-17 17:36:31,500 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:31,505 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.005s
+2026-08-17 17:36:31,507 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:31,510 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.003s
+2026-08-17 17:36:31,511 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:31,517 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.006s
+2026-08-17 17:36:31,521 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.004s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:31,538 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:31,539 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.001s
+2026-08-17 17:36:31,540 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:31,541 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.000s
+2026-08-17 17:36:31,542 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:31,634 | INFO | src.nlp.pros_cons_generator | Prepared history for 'IRCTC': 10 years (2015 .. 2024)
+2026-08-17 17:36:31,636 | INFO | src.nlp.pros_cons_generator | Built context for 'IRCTC' (latest year=2024, 10 history 
+years, financial=False)
+2026-08-17 17:36:31,638 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.001s
+2026-08-17 17:36:31,639 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:31,640 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.001s
+2026-08-17 17:36:31,641 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:31,646 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.006s
+2026-08-17 17:36:31,648 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:31,651 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.003s
+2026-08-17 17:36:31,652 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:31,655 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.002s
+2026-08-17 17:36:31,656 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:31,662 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.006s
+2026-08-17 17:36:31,665 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.002s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:31,682 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:31,683 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.001s
+2026-08-17 17:36:31,684 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:31,684 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.001s
+2026-08-17 17:36:31,685 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:31,828 | INFO | src.nlp.pros_cons_generator | Prepared history for 'ITC': 12 years (2013 .. 2024)
+2026-08-17 17:36:31,831 | INFO | src.nlp.pros_cons_generator | Built context for 'ITC' (latest year=2024, 12 history 
+years, financial=False)
+2026-08-17 17:36:31,835 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.002s
+2026-08-17 17:36:31,836 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:31,837 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.001s
+2026-08-17 17:36:31,838 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:31,844 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.006s
+2026-08-17 17:36:31,845 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:31,852 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.006s
+2026-08-17 17:36:31,853 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:31,857 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.004s
+2026-08-17 17:36:31,859 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:31,867 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.008s
+2026-08-17 17:36:31,874 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.004s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:31,895 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:31,897 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.001s
+2026-08-17 17:36:31,898 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:31,899 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.001s
+2026-08-17 17:36:31,899 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:32,037 | INFO | src.nlp.pros_cons_generator | Prepared history for 'MARUTI': 12 years (2013 .. 2024)
+2026-08-17 17:36:32,042 | INFO | src.nlp.pros_cons_generator | Built context for 'MARUTI' (latest year=2024, 12 
+history years, financial=False)
+2026-08-17 17:36:32,045 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.002s
+2026-08-17 17:36:32,047 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:32,049 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.001s
+2026-08-17 17:36:32,050 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:32,057 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.007s
+2026-08-17 17:36:32,058 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:32,064 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.005s
+2026-08-17 17:36:32,065 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:32,069 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.004s
+2026-08-17 17:36:32,071 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:32,079 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.007s
+2026-08-17 17:36:32,084 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.004s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:32,106 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:32,107 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.001s
+2026-08-17 17:36:32,109 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:32,110 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.001s
+2026-08-17 17:36:32,111 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:32,221 | INFO | src.nlp.pros_cons_generator | Prepared history for 'PNB': 12 years (2013 .. 2024)
+2026-08-17 17:36:32,224 | INFO | src.nlp.pros_cons_generator | Built context for 'PNB' (latest year=2024, 12 history 
+years, financial=True)
+2026-08-17 17:36:32,225 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.001s
+2026-08-17 17:36:32,226 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:32,227 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.001s
+2026-08-17 17:36:32,227 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:32,232 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.004s
+2026-08-17 17:36:32,233 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:32,237 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.004s
+2026-08-17 17:36:32,238 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:32,241 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.002s
+2026-08-17 17:36:32,242 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:32,247 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.006s
+2026-08-17 17:36:32,251 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.003s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:32,269 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:32,270 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.001s
+2026-08-17 17:36:32,271 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:32,272 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.001s
+2026-08-17 17:36:32,273 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:32,349 | INFO | src.nlp.pros_cons_generator | Prepared history for 'SBIN': 12 years (2013 .. 2024)
+2026-08-17 17:36:32,352 | INFO | src.nlp.pros_cons_generator | Built context for 'SBIN' (latest year=2024, 12 history 
+years, financial=True)
+2026-08-17 17:36:32,353 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.001s
+2026-08-17 17:36:32,355 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:32,356 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.001s
+2026-08-17 17:36:32,356 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:32,361 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.004s
+2026-08-17 17:36:32,363 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:32,368 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.005s
+2026-08-17 17:36:32,369 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:32,372 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.002s
+2026-08-17 17:36:32,373 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:32,379 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.006s
+2026-08-17 17:36:32,383 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.003s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:32,399 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:32,400 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.001s
+2026-08-17 17:36:32,401 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:32,402 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.001s
+2026-08-17 17:36:32,403 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:32,493 | INFO | src.nlp.pros_cons_generator | Prepared history for 'ULTRACEMCO': 12 years (2013 .. 
+2024)
+2026-08-17 17:36:32,496 | INFO | src.nlp.pros_cons_generator | Built context for 'ULTRACEMCO' (latest year=2024, 12 
+history years, financial=False)
+2026-08-17 17:36:32,498 | INFO | src.nlp.pros_cons_generator | Loaded 94 rows from 'companies' in 0.001s
+2026-08-17 17:36:32,498 | INFO | src.nlp.pros_cons_generator | Loaded 94 companies
+2026-08-17 17:36:32,499 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'sectors' in 0.001s
+2026-08-17 17:36:32,500 | INFO | src.nlp.pros_cons_generator | Loaded 92 sector records
+2026-08-17 17:36:32,506 | INFO | src.nlp.pros_cons_generator | Loaded 1263 rows from 'profit_loss' in 0.006s
+2026-08-17 17:36:32,508 | INFO | src.nlp.pros_cons_generator | Loaded 1263 profit & loss records
+2026-08-17 17:36:32,511 | INFO | src.nlp.pros_cons_generator | Loaded 1225 rows from 'balance_sheet' in 0.003s
+2026-08-17 17:36:32,512 | INFO | src.nlp.pros_cons_generator | Loaded 1225 balance-sheet records
+2026-08-17 17:36:32,515 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'cash_flow' in 0.003s
+2026-08-17 17:36:32,516 | INFO | src.nlp.pros_cons_generator | Loaded 1164 cash-flow records
+2026-08-17 17:36:32,522 | INFO | src.nlp.pros_cons_generator | Loaded 1164 rows from 'financial_kpis' in 0.006s
+2026-08-17 17:36:32,526 | INFO | src.nlp.pros_cons_generator | Loaded 1065 rows from 'financial_ratios' in 0.002s
+D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\src\nlp\pros_cons_generator.py:413: FutureWarning: The behavior of 
+DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude 
+empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries 
+before the concat operation.
+  combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
+2026-08-17 17:36:32,545 | INFO | src.nlp.pros_cons_generator | Loaded ratio data: 1164 financial_kpis, 1065 
+financial_ratios, 1188 combined
+2026-08-17 17:36:32,564 | INFO | src.nlp.pros_cons_generator | Loaded 92 rows from 'market_cap' in 0.002s
+2026-08-17 17:36:32,565 | INFO | src.nlp.pros_cons_generator | Loaded 92 market-cap records
+2026-08-17 17:36:32,567 | INFO | src.nlp.pros_cons_generator | Loaded 5 rows from 'analysis' in 0.001s
+2026-08-17 17:36:32,570 | INFO | src.nlp.pros_cons_generator | Loaded 5 analysis records (Module 1 source)
+2026-08-17 17:36:32,721 | INFO | src.nlp.pros_cons_generator | Prepared history for 'UNIONBANK': 12 years (2013 .. 
+2024)
+2026-08-17 17:36:32,724 | INFO | src.nlp.pros_cons_generator | Built context for 'UNIONBANK' (latest year=2024, 12 
+history years, financial=False)
+Total companies in DB: 94
+Missing Pro companies: ['SBIN', 'ULTRACEMCO', 'UNIONBANK']
+Missing Con companies: ['BAJAJFINSV', 'BOSCHLTD', 'COALINDIA', 'DIVISLAB', 'DMART', 'HDFCLIFE', 'ICICIGI', 'ICICIPRULI', 'INDIGO', 'IRCTC', 'ITC', 'MARUTI', 'PNB', 'SBIN', 'ULTRACEMCO']
+Loaded 12 PRO rules and 12 CON rules
+Processing 1/16: BAJAJFINSV
+Processing 11/16: ITC
+Diagnostic saved to D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence Platform\N100_Financial_Intelligence_Platform\output\module_2d_coverage_diagnostic.csv
+
+=== Summary for missing companies ===
+BAJAJFINSV: Pro eligible triggers: 4 (rule ids: ['PRO_01', 'PRO_04', 'PRO_05', 'PRO_11'])
+    Con eligible triggers: 0 (rule ids: [])
+    Best Con confidence: 0.0 (CON_01) - Company is in a financial sector.
+BOSCHLTD: Pro eligible triggers: 4 (rule ids: ['PRO_01', 'PRO_07', 'PRO_10', 'PRO_12'])
+    Con eligible triggers: 0 (rule ids: [])
+    Best Con confidence: 0.0 (CON_01) - D/E = 1.30 (<= 2.0)
+COALINDIA: Pro eligible triggers: 5 (rule ids: ['PRO_01', 'PRO_05', 'PRO_07', 'PRO_10', 'PRO_11'])
+    Con eligible triggers: 0 (rule ids: [])
+    Best Con confidence: 0.0 (CON_01) - D/E = 1.06 (<= 2.0)
+DIVISLAB: Pro eligible triggers: 4 (rule ids: ['PRO_01', 'PRO_05', 'PRO_07', 'PRO_11'])
+    Con eligible triggers: 0 (rule ids: [])
+    Best Con confidence: 0.0 (CON_01) - D/E = 0.06 (<= 2.0)
+DMART: Pro eligible triggers: 7 (rule ids: ['PRO_01', 'PRO_04', 'PRO_06', 'PRO_07', 'PRO_09', 'PRO_10', 'PRO_12'])
+    Con eligible triggers: 0 (rule ids: [])
+    Best Con confidence: 0.0 (CON_01) - D/E = 0.91 (<= 2.0)
+HDFCLIFE: Pro eligible triggers: 5 (rule ids: ['PRO_01', 'PRO_04', 'PRO_05', 'PRO_07', 'PRO_11'])
+    Con eligible triggers: 0 (rule ids: [])
+    Best Con confidence: 0.0 (CON_01) - Company is in a financial sector.
+ICICIGI: Pro eligible triggers: 5 (rule ids: ['PRO_01', 'PRO_04', 'PRO_05', 'PRO_07', 'PRO_09'])
+    Con eligible triggers: 0 (rule ids: [])
+    Best Con confidence: 0.0 (CON_01) - Company is in a financial sector.
+ICICIPRULI: Pro eligible triggers: 3 (rule ids: ['PRO_01', 'PRO_07', 'PRO_11'])
+    Con eligible triggers: 0 (rule ids: [])
+    Best Con confidence: 0.0 (CON_01) - Company is in a financial sector.
+INDIGO: Pro eligible triggers: 5 (rule ids: ['PRO_01', 'PRO_04', 'PRO_05', 'PRO_07', 'PRO_11'])
+    Con eligible triggers: 0 (rule ids: [])
+    Best Con confidence: 0.0 (CON_01) - D/E = 0.35 (<= 2.0)
+IRCTC: Pro eligible triggers: 7 (rule ids: ['PRO_01', 'PRO_04', 'PRO_05', 'PRO_06', 'PRO_07', 'PRO_10', 'PRO_12'])
+    Con eligible triggers: 0 (rule ids: [])
+    Best Con confidence: 0.0 (CON_01) - D/E = 0.38 (<= 2.0)
+ITC: Pro eligible triggers: 4 (rule ids: ['PRO_01', 'PRO_05', 'PRO_07', 'PRO_10'])
+    Con eligible triggers: 0 (rule ids: [])
+    Best Con confidence: 0.0 (CON_01) - D/E = 0.24 (<= 2.0)
+MARUTI: Pro eligible triggers: 3 (rule ids: ['PRO_01', 'PRO_07', 'PRO_09'])
+    Con eligible triggers: 0 (rule ids: [])
+    Best Con confidence: 0.0 (CON_01) - D/E = 0.76 (<= 2.0)
+PNB: Pro eligible triggers: 1 (rule ids: ['PRO_01'])
+    Con eligible triggers: 0 (rule ids: [])
+    Best Con confidence: 0.0 (CON_01) - Company is in a financial sector.
+SBIN: Pro eligible triggers: 0 (rule ids: [])
+    Con eligible triggers: 0 (rule ids: [])
+    Best Pro confidence: 0.0 (PRO_01) - Insufficient ROE history (0 valid years, need >= 3)
+    Best Con confidence: 0.0 (CON_01) - Company is in a financial sector.
+ULTRACEMCO: Pro eligible triggers: 0 (rule ids: [])
+    Con eligible triggers: 0 (rule ids: [])
+    Best Pro confidence: 0.0 (PRO_01) - ROE > 20% for only 0 consecutive year(s) (need >= 3)
+    Best Con confidence: 0.0 (CON_01) - D/E = 0.19 (<= 2.0)
+UNIONBANK: Pro eligible triggers: 1 (rule ids: ['PRO_10'])
+    Con eligible triggers: 2 (rule ids: ['CON_01', 'CON_11'])

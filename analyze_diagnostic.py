@@ -1,63 +1,127 @@
-#!/usr/bin/env python3
-"""Analyze diagnostic output to identify why Con signals are failing."""
-
 import pandas as pd
+import sys
+from pathlib import Path
 
-df = pd.read_csv('output/module_2d_coverage_diagnostic.csv')
+# Paths
+OUTPUT_DIR = Path(__file__).parent / "output"
+DIAGNOSTIC_CSV = OUTPUT_DIR / "module_2d_coverage_diagnostic.csv"
+EXISTING_CSV = OUTPUT_DIR / "pros_cons_generated.csv"
+COMPANIES_CSV = Path(__file__).parent / "data" / "companies.csv"  # Adjust if needed
 
-print('='*80)
-print('DIAGNOSTIC INSIGHT: WHY 13 COMPANIES HAVE NO VALID CON SIGNALS')
-print('='*80)
-print()
+def main():
+    # Load diagnostic data
+    df_diag = pd.read_csv(DIAGNOSTIC_CSV)
 
-# Get only Con rules that triggered
-con_triggered = df[(df['rule_type']=='con') & (df['triggered']==True)]
-print(f'Total Con rules triggered (any confidence): {len(con_triggered)}')
-print(f'Total Con rules eligible (>60 confidence): {len(df[(df["rule_type"]=="con") & (df["final_output_eligible"]==True)])}')
-print()
+    # Load existing generated CSV to see what signals exist
+    try:
+        df_existing = pd.read_csv(EXISTING_CSV)
+        existing_pro = set(df_existing[df_existing["type"] == "pro"]["company_id"])
+        existing_con = set(df_existing[df_existing["type"] == "con"]["company_id"])
+    except Exception as e:
+        print(f"Could not read existing CSV: {e}")
+        existing_pro = set()
+        existing_con = set()
 
-# Show which Con rules triggered but have low confidence
-con_triggered_low = con_triggered[con_triggered['confidence_pct'] <= 60.0]
-print(f'Con rules that triggered but have confidence <=60: {len(con_triggered_low)}')
-if len(con_triggered_low) > 0:
-    print()
-    print(con_triggered_low[['company_id', 'rule_id', 'confidence_pct', 'reason']].to_string())
+    # Load all companies from the companies table (if available) or from diagnostic
+    try:
+        companies_df = pd.read_csv(COMPANIES_CSV)
+        all_company_ids = set(companies_df["company_id"].astype(str).str.strip().str.upper())
+    except Exception:
+        # Fallback to unique company_ids in diagnostic
+        all_company_ids = set(df_diag["company_id"].unique())
 
-print()
-print('='*80)
-print('PRO RULES: Summary')
-print('='*80)
-pro_df = df[df['rule_type']=='pro']
-pro_summary = pro_df.groupby('company_id').agg({
-    'triggered': 'sum', 
-    'final_output_eligible': 'sum',
-    'confidence_pct': 'max'
-}).rename(columns={
-    'triggered': 'triggered_count',
-    'final_output_eligible': 'eligible_count',
-    'confidence_pct': 'max_confidence'
-})
-print(pro_summary)
+    missing_pro = all_company_ids - existing_pro
+    missing_con = all_company_ids - existing_con
 
-print()
-print('='*80)
-print('KEY FINDINGS: Why coverage fails')
-print('='*80)
+    print(f"Total companies: {len(all_company_ids)}")
+    print(f"Missing Pro companies ({len(missing_pro)}): {sorted(missing_pro)}")
+    print(f"Missing Con companies ({len(missing_con)}): {sorted(missing_con)}")
 
-for company in df['company_id'].unique():
-    company_df = df[df['company_id'] == company]
-    con_eligible = len(company_df[(company_df['rule_type']=='con') & (company_df['final_output_eligible']==True)])
-    pro_eligible = len(company_df[(company_df['rule_type']=='pro') & (company_df['final_output_eligible']==True)])
-    
-    if con_eligible == 0 or pro_eligible == 0:
-        reason = 'No Con >60' if con_eligible == 0 else 'No Pro >60'
-        
-        # Show which Con rules don't trigger
-        if con_eligible == 0:
-            con_rules = company_df[company_df['rule_type']=='con'].sort_values('rule_id')
-            con_not_triggered = con_rules[~con_rules['triggered']]
-            print(f"\n{company}: {reason}")
-            print(f"  Pro: {pro_eligible} eligible, Con: {con_eligible} eligible")
-            print("  Con rules NOT triggered (top reasons):")
-            for _, rule in con_not_triggered.head(3).iterrows():
-                print(f"    {rule['rule_id']}: {rule['reason']}")
+    # Focus on companies missing either Pro or Con
+    target_companies = missing_pro | missing_con
+
+    print("\n" + "="*80)
+    print("ANALYSIS PER MISSING COMPANY")
+    print("="*80)
+
+    for cid in sorted(target_companies):
+        print(f"\nCompany: {cid}")
+        sub = df_diag[df_diag["company_id"] == cid]
+
+        # Pro analysis
+        pro_sub = sub[sub["type"] == "pro"]
+        pro_eligible = pro_sub[pro_sub["eligible_after_threshold"] == True]
+        pro_triggered_not_eligible = pro_sub[(pro_sub["triggered"] == True) & (pro_sub["eligible_after_threshold"] == False)]
+        pro_not_triggered = pro_sub[pro_sub["triggered"] == False]
+
+        print(f"  PRO: Eligible triggers: {len(pro_eligible)}")
+        if len(pro_eligible) > 0:
+            print(f"    Rule IDs: {list(pro_eligible['rule_id'].unique())}")
+        print(f"  PRO: Triggered but not eligible (confidence <=60): {len(pro_triggered_not_eligible)}")
+        if len(pro_triggered_not_eligible) > 0:
+            for _, row in pro_triggered_not_eligible.iterrows():
+                print(f"    {row['rule_id']}: confidence={row['confidence_pct']}, reason='{row['reason']}'")
+        print(f"  PRO: Not triggered: {len(pro_not_triggered)}")
+        if len(pro_not_triggered) > 0 and len(pro_not_triggered) <= 5:  # Show first few reasons
+            for _, row in pro_not_triggered.head().iterrows():
+                print(f"    {row['rule_id']}: reason='{row['reason']}'")
+        elif len(pro_not_triggered) > 5:
+            print(f"    (showing first 5)")
+            for _, row in pro_not_triggered.head().iterrows():
+                print(f"    {row['rule_id']}: reason='{row['reason']}'")
+
+        # Con analysis
+        con_sub = sub[sub["type"] == "con"]
+        con_eligible = con_sub[con_sub["eligible_after_threshold"] == True]
+        con_triggered_not_eligible = con_sub[(con_sub["triggered"] == True) & (con_sub["eligible_after_threshold"] == False)]
+        con_not_triggered = con_sub[con_sub["triggered"] == False]
+
+        print(f"  CON: Eligible triggers: {len(con_eligible)}")
+        if len(con_eligible) > 0:
+            print(f"    Rule IDs: {list(con_eligible['rule_id'].unique())}")
+        print(f"  CON: Triggered but not eligible (confidence <=60): {len(con_triggered_not_eligible)}")
+        if len(con_triggered_not_eligible) > 0:
+            for _, row in con_triggered_not_eligible.iterrows():
+                print(f"    {row['rule_id']}: confidence={row['confidence_pct']}, reason='{row['reason']}'")
+        print(f"  CON: Not triggered: {len(con_not_triggered)}")
+        if len(con_not_triggered) > 0 and len(con_not_triggered) <= 5:
+            for _, row in con_not_triggered.head().iterrows():
+                print(f"    {row['rule_id']}: reason='{row['reason']}'")
+        elif len(con_not_triggered) > 5:
+            print(f"    (showing first 5)")
+            for _, row in con_not_triggered.head().iterrows():
+                print(f"    {row['rule_id']}: reason='{row['reason']}'")
+
+        # Summary for this company
+        print(f"  >>> SUMMARY: Pro eligible: {len(pro_eligible)}, Con eligible: {len(con_eligible)}")
+        if len(pro_eligible) == 0 and len(con_eligible) == 0:
+            print(f"      >>> NO ELIGIBLE SIGNALS FOR EITHER TYPE <<<")
+        elif len(pro_eligible) == 0:
+            print(f"      >>> MISSING PRO SIGNAL ONLY <<<")
+        elif len(con_eligible) == 0:
+            print(f"      >>> MISSING CON SIGNAL ONLY <<<")
+
+    print("\n" + "="*80)
+    print("OVERALL SUMMARY")
+    print("="*80)
+    print(f"Companies missing Pro but have Con: {len(missing_pro - missing_con)}")
+    print(f"Companies missing Con but have Pro: {len(missing_con - missing_pro)}")
+    print(f"Companies missing both Pro and Con: {len(missing_pro & missing_con)}")
+
+    # List companies missing both
+    both_missing = missing_pro & missing_con
+    if both_missing:
+        print(f"\nCompanies missing both Pro and Con ({len(both_missing)}): {sorted(both_missing)}")
+
+    # List companies missing only Pro
+    only_pro_missing = missing_pro - missing_con
+    if only_pro_missing:
+        print(f"\nCompanies missing only Pro ({len(only_pro_missing)}): {sorted(only_pro_missing)}")
+
+    # List companies missing only Con
+    only_con_missing = missing_con - missing_pro
+    if only_con_missing:
+        print(f"\nCompanies missing only Con ({len(only_con_missing)}): {sorted(only_con_missing)}")
+
+if __name__ == "__main__":
+    main()

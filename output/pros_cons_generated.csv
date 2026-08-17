@@ -1,67 +1,42 @@
-company_id,type,rule_id,text,confidence_pct
-ABB,con,CON_01,Debt-to-equity ratio of 3.95 is elevated for a non-financial company and warrants monitoring,79.5
+﻿company_id,type,rule_id,text,confidence_pct
 ABB,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 ABB,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 ABB,pro,PRO_09,Earnings per share growing above 15% CAGR indicates strong earnings quality and compounding,67.47
 ABB,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 ABB,pro,PRO_12,Growing asset base funded by internal accruals reflects self-sustaining growth,93.35
-ADANIENSOL,con,CON_01,Debt-to-equity ratio of 33.25 is elevated for a non-financial company and warrants monitoring,95.0
-ADANIENSOL,con,CON_03,Operating margins declining for 3 consecutive years suggest pricing or cost pressure,70.0
-ADANIENSOL,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
-ADANIENSOL,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,69.24
 ADANIENSOL,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 ADANIENSOL,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,66.0
-ADANIENT,con,CON_01,Debt-to-equity ratio of 572.89 is elevated for a non-financial company and warrants monitoring,95.0
-ADANIENT,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
-ADANIENT,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,60.16
-ADANIENT,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,64.63
 ADANIENT,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
-ADANIGREEN,con,CON_01,Debt-to-equity ratio of 40.95 is elevated for a non-financial company and warrants monitoring,95.0
-ADANIGREEN,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
-ADANIGREEN,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,79.35
 ADANIGREEN,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,75.0
 ADANIGREEN,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,95.0
 ADANIGREEN,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
 ADANIGREEN,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-ADANIPORTS,con,CON_01,Debt-to-equity ratio of 114.51 is elevated for a non-financial company and warrants monitoring,95.0
 ADANIPORTS,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 ADANIPORTS,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,65.79
 ADANIPORTS,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
 ADANIPORTS,pro,PRO_09,Earnings per share growing above 15% CAGR indicates strong earnings quality and compounding,60.72
 ADANIPORTS,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,68.55
-ADANIPOWER,con,CON_01,Debt-to-equity ratio of 8.97 is elevated for a non-financial company and warrants monitoring,95.0
 ADANIPOWER,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,79.0
 ADANIPOWER,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,66.18
 ADANIPOWER,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,73.2
 ADANIPOWER,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 ADANIPOWER,pro,PRO_12,Growing asset base funded by internal accruals reflects self-sustaining growth,84.79
-AMBUJACEM,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
 AMBUJACEM,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 AMBUJACEM,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,77.03
 AMBUJACEM,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 AMBUJACEM,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,63.21
-APOLLOHOSP,con,CON_01,Debt-to-equity ratio of 74.07 is elevated for a non-financial company and warrants monitoring,95.0
 APOLLOHOSP,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 APOLLOHOSP,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,60.21
 APOLLOHOSP,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,68.4
-ASIANPAINT,con,CON_01,Debt-to-equity ratio of 25.77 is elevated for a non-financial company and warrants monitoring,95.0
-ASIANPAINT,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
 ASIANPAINT,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 ASIANPAINT,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,93.6
-ATGL,con,CON_01,Debt-to-equity ratio of 14.15 is elevated for a non-financial company and warrants monitoring,95.0
-ATGL,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
 ATGL,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,91.0
 ATGL,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,66.99
 ATGL,pro,PRO_06,Net profit compounding at above 20% over 5 years creates significant shareholder value,63.64
 ATGL,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,61.14
 ATGL,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-AXISBANK,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
-AXISBANK,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,72.04
-AXISBANK,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,95.0
 AXISBANK,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 AXISBANK,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
-BAJAJAUTO,con,CON_01,Debt-to-equity ratio of 6.85 is elevated for a non-financial company and warrants monitoring,95.0
-BAJAJAUTO,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
 BAJAJAUTO,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 BAJAJAUTO,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 BAJAJAUTO,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
@@ -70,15 +45,11 @@ BAJAJFINSV,pro,PRO_01,Consistently high return on equity above 20% demonstrates 
 BAJAJFINSV,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,76.17
 BAJAJFINSV,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,74.4
 BAJAJFINSV,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,82.65
-BAJAJHLDNG,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,75.2
 BAJAJHLDNG,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 BAJAJHLDNG,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
 BAJAJHLDNG,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 BAJAJHLDNG,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 BAJAJHLDNG,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,66.9
-BAJFINANCE,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
-BAJFINANCE,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,71.42
-BAJFINANCE,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,95.0
 BAJFINANCE,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 BAJFINANCE,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,79.08
 BAJFINANCE,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
@@ -86,46 +57,30 @@ BAJFINANCE,pro,PRO_06,Net profit compounding at above 20% over 5 years creates s
 BAJFINANCE,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 BAJFINANCE,pro,PRO_09,Earnings per share growing above 15% CAGR indicates strong earnings quality and compounding,82.48
 BAJFINANCE,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-BANKBARODA,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
-BANKBARODA,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,71.8
-BANKBARODA,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,95.0
 BANKBARODA,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,87.0
 BANKBARODA,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
 BANKBARODA,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-BEL,con,CON_01,Debt-to-equity ratio of 3.91 is elevated for a non-financial company and warrants monitoring,79.1
 BEL,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 BEL,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 BEL,pro,PRO_09,Earnings per share growing above 15% CAGR indicates strong earnings quality and compounding,61.65
 BEL,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-BHARTIARTL,con,CON_01,Debt-to-equity ratio of 74.94 is elevated for a non-financial company and warrants monitoring,95.0
 BHARTIARTL,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,91.0
 BHARTIARTL,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,92.4
 BHARTIARTL,pro,PRO_09,Earnings per share growing above 15% CAGR indicates strong earnings quality and compounding,60.39
-BHEL,con,CON_01,Debt-to-equity ratio of 12.72 is elevated for a non-financial company and warrants monitoring,95.0
-BHEL,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,74.86
-BHEL,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,89.79
-BHEL,con,CON_12,Revenue growing at below 5% over 5 years lags inflation and suggests limited business momentum,90.54
 BHEL,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,75.0
 BHEL,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,95.0
 BOSCHLTD,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 BOSCHLTD,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 BOSCHLTD,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 BOSCHLTD,pro,PRO_12,Growing asset base funded by internal accruals reflects self-sustaining growth,85.1
-BPCL,con,CON_01,Debt-to-equity ratio of 25.56 is elevated for a non-financial company and warrants monitoring,95.0
 BPCL,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 BPCL,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,61.94
 BPCL,pro,PRO_09,Earnings per share growing above 15% CAGR indicates strong earnings quality and compounding,65.88
-BRITANNIA,con,CON_01,Debt-to-equity ratio of 86.04 is elevated for a non-financial company and warrants monitoring,95.0
 BRITANNIA,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 BRITANNIA,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,72.37
 BRITANNIA,pro,PRO_09,Earnings per share growing above 15% CAGR indicates strong earnings quality and compounding,66.05
-CANBK,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,70.26
-CANBK,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,95.0
 CANBK,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,79.0
 CANBK,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-CHOLAFIN,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
-CHOLAFIN,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,72.8
-CHOLAFIN,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,95.0
 CHOLAFIN,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 CHOLAFIN,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,67.23
 CHOLAFIN,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
@@ -133,7 +88,6 @@ CHOLAFIN,pro,PRO_06,Net profit compounding at above 20% over 5 years creates sig
 CHOLAFIN,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,74.54
 CHOLAFIN,pro,PRO_09,Earnings per share growing above 15% CAGR indicates strong earnings quality and compounding,71.36
 CHOLAFIN,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-CIPLA,con,CON_01,Debt-to-equity ratio of 3.47 is elevated for a non-financial company and warrants monitoring,74.7
 CIPLA,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 CIPLA,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
 CIPLA,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,91.56
@@ -145,17 +99,12 @@ COALINDIA,pro,PRO_05,Operating profit margin above 25% indicates strong pricing 
 COALINDIA,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,62.69
 COALINDIA,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 COALINDIA,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,60.99
-DABUR,con,CON_01,Debt-to-equity ratio of 7.71 is elevated for a non-financial company and warrants monitoring,95.0
-DABUR,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
 DABUR,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 DABUR,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,72.42
 DIVISLAB,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 DIVISLAB,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,63.6
 DIVISLAB,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 DIVISLAB,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,67.62
-DLF,con,CON_01,Debt-to-equity ratio of 9.77 is elevated for a non-financial company and warrants monitoring,95.0
-DLF,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,71.6
-DLF,con,CON_12,Revenue growing at below 5% over 5 years lags inflation and suggests limited business momentum,77.61
 DLF,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,91.0
 DLF,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,69.6
 DLF,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
@@ -166,49 +115,34 @@ DMART,pro,PRO_07,Very high interest coverage ratio reflects negligible financial
 DMART,pro,PRO_09,Earnings per share growing above 15% CAGR indicates strong earnings quality and compounding,80.82
 DMART,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 DMART,pro,PRO_12,Growing asset base funded by internal accruals reflects self-sustaining growth,86.8
-DRREDDY,con,CON_01,Debt-to-equity ratio of 24.12 is elevated for a non-financial company and warrants monitoring,95.0
 DRREDDY,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 DRREDDY,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,63.6
 DRREDDY,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 DRREDDY,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-EICHERMOT,con,CON_01,Debt-to-equity ratio of 15.52 is elevated for a non-financial company and warrants monitoring,95.0
 EICHERMOT,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 EICHERMOT,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,61.2
 EICHERMOT,pro,PRO_06,Net profit compounding at above 20% over 5 years creates significant shareholder value,60.12
 EICHERMOT,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 EICHERMOT,pro,PRO_09,Earnings per share growing above 15% CAGR indicates strong earnings quality and compounding,73.25
 EICHERMOT,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-GAIL,con,CON_01,Debt-to-equity ratio of 3.31 is elevated for a non-financial company and warrants monitoring,73.1
-GAIL,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
 GAIL,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 GAIL,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,73.09
 GAIL,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,60.27
-GODREJCP,con,CON_01,Debt-to-equity ratio of 31.59 is elevated for a non-financial company and warrants monitoring,95.0
-GODREJCP,con,CON_04,Company reported a net loss in the most recent financial year,75.0
 GODREJCP,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 GODREJCP,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,60.65
-GRASIM,con,CON_01,Debt-to-equity ratio of 1031.24 is elevated for a non-financial company and warrants monitoring,95.0
-GRASIM,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,62.3
 GRASIM,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 GRASIM,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,81.0
-HAL,con,CON_01,Debt-to-equity ratio of 24.60 is elevated for a non-financial company and warrants monitoring,95.0
-HAL,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
 HAL,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 HAL,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,68.4
 HAL,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 HAL,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-HAVELLS,con,CON_01,Debt-to-equity ratio of 4.81 is elevated for a non-financial company and warrants monitoring,88.1
 HAVELLS,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 HAVELLS,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,76.07
 HAVELLS,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,65.01
-HCLTECH,con,CON_01,Debt-to-equity ratio of 10.60 is elevated for a non-financial company and warrants monitoring,95.0
 HCLTECH,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 HCLTECH,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 HCLTECH,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 HCLTECH,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,61.8
-HDFCBANK,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
-HDFCBANK,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,65.18
-HDFCBANK,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,95.0
 HDFCBANK,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 HDFCBANK,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,67.94
 HDFCBANK,pro,PRO_06,Net profit compounding at above 20% over 5 years creates significant shareholder value,62.4
@@ -219,25 +153,17 @@ HDFCLIFE,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects stro
 HDFCLIFE,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
 HDFCLIFE,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 HDFCLIFE,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,77.43
-HEROMOTOCO,con,CON_01,Debt-to-equity ratio of 15.15 is elevated for a non-financial company and warrants monitoring,95.0
-HEROMOTOCO,con,CON_12,Revenue growing at below 5% over 5 years lags inflation and suggests limited business momentum,62.16
 HEROMOTOCO,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 HEROMOTOCO,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
 HEROMOTOCO,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
-HINDALCO,con,CON_01,Debt-to-equity ratio of 253.86 is elevated for a non-financial company and warrants monitoring,95.0
 HINDALCO,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 HINDALCO,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
 HINDALCO,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 HINDALCO,pro,PRO_12,Growing asset base funded by internal accruals reflects self-sustaining growth,73.28
-HINDUNILVR,con,CON_01,Debt-to-equity ratio of 6.31 is elevated for a non-financial company and warrants monitoring,95.0
-HINDUNILVR,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
 HINDUNILVR,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 HINDUNILVR,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
 HINDUNILVR,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 HINDUNILVR,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-ICICIBANK,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
-ICICIBANK,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,65.1
-ICICIBANK,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,85.59
 ICICIBANK,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 ICICIBANK,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 ICICIGI,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
@@ -253,21 +179,14 @@ INDIGO,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong
 INDIGO,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
 INDIGO,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,76.32
 INDIGO,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,62.19
-INDUSINDBK,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
-INDUSINDBK,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,69.5
-INDUSINDBK,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,95.0
 INDUSINDBK,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 INDUSINDBK,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,63.95
 INDUSINDBK,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
 INDUSINDBK,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-INFY,con,CON_01,Debt-to-equity ratio of 4.04 is elevated for a non-financial company and warrants monitoring,80.4
-INFY,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
 INFY,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 INFY,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 INFY,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 INFY,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,68.31
-IOC,con,CON_01,Debt-to-equity ratio of 9.63 is elevated for a non-financial company and warrants monitoring,95.0
-IOC,con,CON_12,Revenue growing at below 5% over 5 years lags inflation and suggests limited business momentum,62.22
 IOC,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,91.0
 IOC,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,60.72
 IRCTC,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
@@ -277,8 +196,6 @@ IRCTC,pro,PRO_06,Net profit compounding at above 20% over 5 years creates signif
 IRCTC,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 IRCTC,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 IRCTC,pro,PRO_12,Growing asset base funded by internal accruals reflects self-sustaining growth,95.0
-IRFC,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,60.78
-IRFC,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,95.0
 IRFC,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,91.0
 IRFC,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
 IRFC,pro,PRO_06,Net profit compounding at above 20% over 5 years creates significant shareholder value,65.17
@@ -287,50 +204,34 @@ ITC,pro,PRO_01,Consistently high return on equity above 20% demonstrates excepti
 ITC,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,74.4
 ITC,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 ITC,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-JINDALSTEL,con,CON_01,Debt-to-equity ratio of 164.72 is elevated for a non-financial company and warrants monitoring,95.0
 JINDALSTEL,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,79.0
 JINDALSTEL,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,70.32
-JIOFIN,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,77.84
 JIOFIN,pro,PRO_03,Debt-free balance sheet provides financial flexibility and eliminates interest burden,90.0
 JIOFIN,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,95.0
 JIOFIN,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
 JIOFIN,pro,PRO_06,Net profit compounding at above 20% over 5 years creates significant shareholder value,95.0
 JIOFIN,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,90.0
-JSWENERGY,con,CON_01,Debt-to-equity ratio of 19.24 is elevated for a non-financial company and warrants monitoring,95.0
-JSWENERGY,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
-JSWENERGY,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,62.49
-JSWENERGY,con,CON_12,Revenue growing at below 5% over 5 years lags inflation and suggests limited business momentum,68.61
 JSWENERGY,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,87.0
 JSWENERGY,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,86.4
-JSWSTEEL,con,CON_01,Debt-to-equity ratio of 288.47 is elevated for a non-financial company and warrants monitoring,95.0
-JSWSTEEL,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
 JSWSTEEL,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 JSWSTEEL,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,66.27
-KOTAKBANK,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
-KOTAKBANK,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,73.63
 KOTAKBANK,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 KOTAKBANK,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,61.44
 KOTAKBANK,pro,PRO_06,Net profit compounding at above 20% over 5 years creates significant shareholder value,61.83
 KOTAKBANK,pro,PRO_09,Earnings per share growing above 15% CAGR indicates strong earnings quality and compounding,65.0
 KOTAKBANK,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-LICI,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,78.76
 LICI,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,87.0
 LICI,pro,PRO_03,Debt-free balance sheet provides financial flexibility and eliminates interest burden,90.0
 LICI,pro,PRO_06,Net profit compounding at above 20% over 5 years creates significant shareholder value,95.0
 LICI,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,90.0
 LICI,pro,PRO_09,Earnings per share growing above 15% CAGR indicates strong earnings quality and compounding,95.0
-LODHA,con,CON_01,Debt-to-equity ratio of 7.74 is elevated for a non-financial company and warrants monitoring,95.0
-LODHA,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,66.66
 LODHA,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,87.0
 LODHA,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,62.23
 LODHA,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,61.2
 LODHA,pro,PRO_06,Net profit compounding at above 20% over 5 years creates significant shareholder value,60.97
 LODHA,pro,PRO_12,Growing asset base funded by internal accruals reflects self-sustaining growth,93.32
-LT,con,CON_01,Debt-to-equity ratio of 69.03 is elevated for a non-financial company and warrants monitoring,95.0
-LT,con,CON_03,Operating margins declining for 3 consecutive years suggest pricing or cost pressure,70.0
 LT,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 LT,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,61.38
-LTIM,con,CON_01,Debt-to-equity ratio of 69.03 is elevated for a non-financial company and warrants monitoring,95.0
 LTIM,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 LTIM,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,68.67
 LTIM,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,83.72
@@ -339,139 +240,94 @@ LTIM,pro,PRO_11,Revenue growing slower than profits shows improving operating le
 MARUTI,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 MARUTI,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 MARUTI,pro,PRO_09,Earnings per share growing above 15% CAGR indicates strong earnings quality and compounding,60.24
-MM,con,CON_01,Debt-to-equity ratio of 195.06 is elevated for a non-financial company and warrants monitoring,95.0
 MM,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,91.0
 MM,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-MOTHERSON,con,CON_01,Debt-to-equity ratio of 29.38 is elevated for a non-financial company and warrants monitoring,95.0
 MOTHERSON,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 MOTHERSON,pro,PRO_06,Net profit compounding at above 20% over 5 years creates significant shareholder value,60.34
 MOTHERSON,pro,PRO_09,Earnings per share growing above 15% CAGR indicates strong earnings quality and compounding,61.65
-NAUKRI,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,75.86
 NAUKRI,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,60.77
 NAUKRI,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,63.6
 NAUKRI,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,73.57
-NESTLEIND,con,CON_01,Debt-to-equity ratio of 3.59 is elevated for a non-financial company and warrants monitoring,75.9
 NESTLEIND,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 NESTLEIND,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 NESTLEIND,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-NHPC,con,CON_01,Debt-to-equity ratio of 3.24 is elevated for a non-financial company and warrants monitoring,72.4
-NHPC,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
-NHPC,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,68.4
-NHPC,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,71.78
-NHPC,con,CON_12,Revenue growing at below 5% over 5 years lags inflation and suggests limited business momentum,64.38
 NHPC,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 NHPC,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,90.0
 NHPC,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,66.24
-NTPC,con,CON_01,Debt-to-equity ratio of 24.45 is elevated for a non-financial company and warrants monitoring,95.0
-NTPC,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
-NTPC,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,61.35
 NTPC,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 NTPC,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,64.8
 NTPC,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 NTPC,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,69.93
-ONGC,con,CON_01,Debt-to-equity ratio of 24.35 is elevated for a non-financial company and warrants monitoring,95.0
 ONGC,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 ONGC,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,61.31
 ONGC,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,82.68
-PFC,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,62.38
-PFC,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,95.0
 PFC,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 PFC,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,60.84
 PFC,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,74.4
-PIDILITIND,con,CON_01,Debt-to-equity ratio of 7.49 is elevated for a non-financial company and warrants monitoring,95.0
 PIDILITIND,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 PIDILITIND,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 PIDILITIND,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 PIDILITIND,pro,PRO_12,Growing asset base funded by internal accruals reflects self-sustaining growth,86.54
 PNB,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,83.0
-POWERGRID,con,CON_01,Debt-to-equity ratio of 13.28 is elevated for a non-financial company and warrants monitoring,95.0
 POWERGRID,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 POWERGRID,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
-RECLTD,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,90.94
 RECLTD,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 RECLTD,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,95.0
-RELIANCE,con,CON_01,Debt-to-equity ratio of 67.84 is elevated for a non-financial company and warrants monitoring,95.0
-RELIANCE,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
 RELIANCE,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 RELIANCE,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-SBILIFE,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,79.88
 SBILIFE,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 SBILIFE,pro,PRO_03,Debt-free balance sheet provides financial flexibility and eliminates interest burden,90.0
 SBILIFE,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,67.22
 SBILIFE,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,90.0
 SBILIFE,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 SBILIFE,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,83.94
-SHREECEM,con,CON_01,Debt-to-equity ratio of 46.00 is elevated for a non-financial company and warrants monitoring,95.0
 SHREECEM,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 SHREECEM,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,70.21
 SHREECEM,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,80.28
-SHRIRAMFIN,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
-SHRIRAMFIN,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,95.0
 SHRIRAMFIN,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 SHRIRAMFIN,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,60.88
 SHRIRAMFIN,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,64.8
 SHRIRAMFIN,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-SIEMENS,con,CON_01,Debt-to-equity ratio of 3.93 is elevated for a non-financial company and warrants monitoring,79.3
 SIEMENS,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 SIEMENS,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 SIEMENS,pro,PRO_09,Earnings per share growing above 15% CAGR indicates strong earnings quality and compounding,61.72
 SIEMENS,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-SUNPHARMA,con,CON_01,Debt-to-equity ratio of 13.64 is elevated for a non-financial company and warrants monitoring,95.0
 SUNPHARMA,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 SUNPHARMA,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,63.6
 SUNPHARMA,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 SUNPHARMA,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 SUNPHARMA,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,69.6
-TATACONSUM,con,CON_01,Debt-to-equity ratio of 36.60 is elevated for a non-financial company and warrants monitoring,95.0
-TATACONSUM,con,CON_10,Return on capital employed below 10% suggests the business is not generating sufficient returns on invested capital,63.0
 TATACONSUM,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 TATACONSUM,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,80.7
-TATAMOTORS,con,CON_01,Debt-to-equity ratio of 140.03 is elevated for a non-financial company and warrants monitoring,95.0
 TATAMOTORS,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,87.0
 TATAMOTORS,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 TATAMOTORS,pro,PRO_12,Growing asset base funded by internal accruals reflects self-sustaining growth,84.84
-TATAPOWER,con,CON_01,Debt-to-equity ratio of 167.78 is elevated for a non-financial company and warrants monitoring,95.0
-TATAPOWER,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
 TATAPOWER,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 TATAPOWER,pro,PRO_06,Net profit compounding at above 20% over 5 years creates significant shareholder value,82.11
 TATAPOWER,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-TATASTEEL,con,CON_01,Debt-to-equity ratio of 69.83 is elevated for a non-financial company and warrants monitoring,95.0
-TATASTEEL,con,CON_04,Company reported a net loss in the most recent financial year,75.0
-TATASTEEL,con,CON_05,Revenue contraction over 2 consecutive years indicates demand weakness or market share loss,68.0
-TATASTEEL,con,CON_12,Revenue growing at below 5% over 5 years lags inflation and suggests limited business momentum,62.37
 TATASTEEL,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,87.0
-TCS,con,CON_01,Debt-to-equity ratio of 22.16 is elevated for a non-financial company and warrants monitoring,95.0
 TCS,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 TCS,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,62.4
 TCS,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,95.0
 TCS,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 TCS,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,63.87
-TECHM,con,CON_01,Debt-to-equity ratio of 5.75 is elevated for a non-financial company and warrants monitoring,95.0
-TECHM,con,CON_07,"Dividend payout ratio above 100% means the company is paying dividends from reserves, which is unsustainable",85.0
 TECHM,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 TECHM,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,65.19
 TECHM,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,62.99
 TECHM,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,87.66
-TITAN,con,CON_01,Debt-to-equity ratio of 174.47 is elevated for a non-financial company and warrants monitoring,95.0
-TITAN,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
 TITAN,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 TITAN,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,60.08
 TITAN,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
 TITAN,pro,PRO_11,Revenue growing slower than profits shows improving operating leverage and scale benefits,65.25
-TORNTPHARM,con,CON_01,Debt-to-equity ratio of 23.80 is elevated for a non-financial company and warrants monitoring,95.0
 TORNTPHARM,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 TORNTPHARM,pro,PRO_05,Operating profit margin above 25% indicates strong pricing power and cost discipline,67.2
 TORNTPHARM,pro,PRO_07,Very high interest coverage ratio reflects negligible financial stress from debt servicing,60.61
-TRENT,con,CON_01,Debt-to-equity ratio of 48.69 is elevated for a non-financial company and warrants monitoring,95.0
 TRENT,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,87.0
 TRENT,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,64.0
 TRENT,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-TVSMOTOR,con,CON_01,Debt-to-equity ratio of 541.79 is elevated for a non-financial company and warrants monitoring,95.0
-TVSMOTOR,con,CON_08,Rising debt-to-equity ratio over 3 years suggests increasing financial leverage risk,72.0
-TVSMOTOR,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,64.21
 TVSMOTOR,pro,PRO_01,Consistently high return on equity above 20% demonstrates exceptional capital efficiency,95.0
 TVSMOTOR,pro,PRO_04,Revenue growing at above 15% CAGR over 5 years reflects strong business momentum,60.95
 TVSMOTOR,pro,PRO_06,Net profit compounding at above 20% over 5 years creates significant shareholder value,62.58
 TVSMOTOR,pro,PRO_09,Earnings per share growing above 15% CAGR indicates strong earnings quality and compounding,69.97
 TVSMOTOR,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,95.0
-UNIONBANK,con,CON_11,Net debt exceeding 3 times EBITDA is a high leverage ratio and limits financial flexibility,95.0
+UNIONBANK,pro,PRO_10,Return on equity improving for 3 consecutive years shows strengthening business quality,79.44
