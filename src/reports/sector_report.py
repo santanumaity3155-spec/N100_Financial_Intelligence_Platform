@@ -232,7 +232,8 @@ class SectorReportGenerator:
         Generate Sector PDF report.
         """
         if output_path is None:
-            clean_name = re.sub(r"[^\w\s-]", "", self.sector_name).strip().replace(" ", "_")
+            clean_name = re.sub(r"[^\w\s-]", "", self.sector_name)
+            clean_name = re.sub(r"\s+", "_", clean_name.strip())
             output_path = SECTOR_REPORTS_DIR / f"{clean_name}_sector_report.pdf"
             
         output_path = Path(output_path)
