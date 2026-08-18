@@ -6,7 +6,9 @@ Day 38 — Module 6C API Server Scaffold.
 """
 
 import time
-from fastapi import FastAPI, APIRouter, Request
+from fastapi import FastAPI, APIRouter, Request, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.config.settings import APP_NAME, VERSION
@@ -33,6 +35,19 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_url="/openapi.json",
 )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """
+    Convert RequestValidationError to HTTP 400 Bad Request.
+    """
+    logger.warning(f"Request validation failed for {request.url.path}: {exc.errors()}")
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={"detail": "Invalid parameter values or query parameters", "errors": str(exc.errors())},
+    )
+
 
 # -----------------------------------------------------------------------------
 # CORS Middleware Configuration (Allow all origins for internal API service)
