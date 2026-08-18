@@ -1,0 +1,531 @@
+﻿python : 2026-08-18 20:48:36,830 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=120.00%, capex_intensity=40.00%)
+At line:1 char:302
++ ... catch {} } }; python validate_module4.py > validation_output.txt 2>&1
++                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (2026-08-18 20:4...tensity=40.00%):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+2026-08-18 20:48:36,831 | INFO | src.database.connection | Foreign Keys Enabled
+2026-08-18 20:48:36,831 | INFO | src.database.connection | Connected to SQLite database: D:\New 
+Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\data\database\n100.db
+2026-08-18 20:48:36,841 | INFO | src.analytics.capital_allocation_distribution | Latest Capital Allocation year 
+dynamically determined: 2024
+2026-08-18 20:48:36,855 | INFO | src.database.connection | Foreign Keys Enabled
+2026-08-18 20:48:36,855 | INFO | src.database.connection | Connected to SQLite database: D:\New 
+Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence 
+Platform\N100_Financial_Intelligence_Platform\data\database\n100.db
+2026-08-18 20:48:36,882 | INFO | src.analytics.capital_allocation_distribution | Latest Capital Allocation year 
+dynamically determined: 2024
+2026-08-18 20:48:36,884 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=66.36%)
+2026-08-18 20:48:36,885 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=91.56%)
+2026-08-18 20:48:36,885 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-8455.0, OCF=10312.0)
+2026-08-18 20:48:36,886 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-13347.0, OCF=7713.0)
+2026-08-18 20:48:36,886 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=101.80%, capex_intensity=45.07%)
+2026-08-18 20:48:36,886 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=51.32%)
+2026-08-18 20:48:36,888 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-3295.0, OCF=5646.0)
+2026-08-18 20:48:36,889 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=40.96%)
+2026-08-18 20:48:36,890 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=63.98%)
+2026-08-18 20:48:36,891 | WARNING | src.analytics.capital_allocation_distribution | Company ATGL (Adani Total Gas Ltd) 
+has missing cash flow data for year 2024
+2026-08-18 20:48:36,892 | WARNING | src.analytics.cashflow_kpis | Capital allocation classification: Missing FCF or 
+OCF data
+2026-08-18 20:48:36,892 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-14556.0, OCF=-5555.0)
+2026-08-18 20:48:36,893 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=84.15%)
+2026-08-18 20:48:36,893 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-79634.0, OCF=-68674.0)
+2026-08-18 20:48:36,894 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=19.95%)
+2026-08-18 20:48:36,895 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-79931.0, OCF=-72760.0)
+2026-08-18 20:48:36,895 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-7559.0, OCF=-6274.0)
+2026-08-18 20:48:36,896 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-1265.0, OCF=4659.0)
+2026-08-18 20:48:36,897 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=324.95%)
+2026-08-18 20:48:36,898 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-5044.0, OCF=-3713.0)
+2026-08-18 20:48:36,900 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=38.96%)
+2026-08-18 20:48:36,901 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=94.62%)
+2026-08-18 20:48:36,902 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=98.22%)
+2026-08-18 20:48:36,903 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=86.33%)
+2026-08-18 20:48:36,904 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-38538.0, OCF=-35683.0)
+2026-08-18 20:48:36,904 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=27.73%)
+2026-08-18 20:48:36,905 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=36.44%)
+2026-08-18 20:48:36,905 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=57.54%)
+2026-08-18 20:48:36,906 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=62.00%)
+2026-08-18 20:48:36,906 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=37.08%)
+2026-08-18 20:48:36,907 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=10.96%)
+2026-08-18 20:48:36,907 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=9.13%)
+2026-08-18 20:48:36,907 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=22.24%)
+2026-08-18 20:48:36,908 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=44.03%)
+2026-08-18 20:48:36,908 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-1365.0, OCF=2070.0)
+2026-08-18 20:48:36,909 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-33833.0, OCF=-10719.0)
+2026-08-18 20:48:36,910 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=23.88%)
+2026-08-18 20:48:36,910 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=26.36%)
+2026-08-18 20:48:36,911 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=100.83%, capex_intensity=29.44%)
+2026-08-18 20:48:36,912 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=3.77%)
+2026-08-18 20:48:36,913 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-2893.0, OCF=10721.0)
+2026-08-18 20:48:36,914 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=82.71%)
+2026-08-18 20:48:36,914 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=96.40%)
+2026-08-18 20:48:36,915 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=98.67%)
+2026-08-18 20:48:36,916 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=27.23%)
+2026-08-18 20:48:36,917 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=25.33%)
+2026-08-18 20:48:36,918 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-14735.0, OCF=-7315.0)
+2026-08-18 20:48:36,919 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=115.39%)
+2026-08-18 20:48:36,920 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-17468.0, OCF=-16843.0)
+2026-08-18 20:48:36,920 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=76.64%)
+2026-08-18 20:48:36,921 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=91.83%)
+2026-08-18 20:48:36,922 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=60.04%)
+2026-08-18 20:48:36,923 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=123.30%, capex_intensity=0.10%)
+2026-08-18 20:48:36,924 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=75.25%)
+2026-08-18 20:48:36,925 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-2336.0, OCF=6008.0)
+2026-08-18 20:48:36,925 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-2119.0, OCF=-678.0)
+2026-08-18 20:48:36,926 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-1963.0, OCF=6234.0)
+2026-08-18 20:48:36,927 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-2389.0, OCF=12078.0)
+2026-08-18 20:48:36,928 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=37.15%)
+2026-08-18 20:48:36,929 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=2.08%)
+2026-08-18 20:48:36,929 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-435.0, OCF=2512.0)
+2026-08-18 20:48:36,930 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=103.47%, capex_intensity=11.93%)
+2026-08-18 20:48:36,932 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=38.21%)
+2026-08-18 20:48:36,933 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=36.60%)
+2026-08-18 20:48:36,933 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-11245.0, OCF=-5630.0)
+2026-08-18 20:48:36,935 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=30.63%)
+2026-08-18 20:48:36,935 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-150.0, OCF=702.0)
+2026-08-18 20:48:36,937 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=74.70%)
+2026-08-18 20:48:36,939 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=24.08%)
+2026-08-18 20:48:36,940 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=40.52%)
+2026-08-18 20:48:36,941 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=73.66%)
+2026-08-18 20:48:36,942 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-101229.0, OCF=-97820.0)
+2026-08-18 20:48:36,942 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=54.67%)
+2026-08-18 20:48:36,944 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-29445.0, OCF=-27939.0)
+2026-08-18 20:48:36,945 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=155.24%, capex_intensity=35.17%)
+2026-08-18 20:48:36,945 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-59554.0, OCF=-57723.0)
+2026-08-18 20:48:36,946 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=57.21%)
+2026-08-18 20:48:36,948 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-2099.0, OCF=29122.0)
+2026-08-18 20:48:36,949 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=26.11%)
+2026-08-18 20:48:36,949 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=111.31%, capex_intensity=42.37%)
+2026-08-18 20:48:36,950 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-31359.0, OCF=-31101.0)
+2026-08-18 20:48:36,951 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=42.97%)
+2026-08-18 20:48:36,952 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=118.34%, capex_intensity=6.29%)
+2026-08-18 20:48:36,952 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=2.14%)
+2026-08-18 20:48:36,953 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=141.90%, capex_intensity=33.54%)
+2026-08-18 20:48:36,954 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=83.39%)
+2026-08-18 20:48:36,954 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=-123.18%)
+2026-08-18 20:48:36,955 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=82.97%)
+2026-08-18 20:48:36,955 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=211.01%, capex_intensity=20.67%)
+2026-08-18 20:48:36,956 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=43.08%)
+2026-08-18 20:48:36,957 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=187.56%, capex_intensity=4.90%)
+2026-08-18 20:48:36,957 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=56.94%)
+2026-08-18 20:48:36,958 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-2254.0, OCF=-1253.0)
+2026-08-18 20:48:36,959 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=30.11%)
+2026-08-18 20:48:36,960 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=134.35%, capex_intensity=6.99%)
+2026-08-18 20:48:36,963 | INFO | src.analytics.capital_allocation_pattern_changes | Available years: [2024, 2023, 
+2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011]
+2026-08-18 20:48:36,979 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=66.36%)
+2026-08-18 20:48:36,980 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=91.56%)
+2026-08-18 20:48:36,981 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-8455.0, OCF=10312.0)
+2026-08-18 20:48:36,982 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-13347.0, OCF=7713.0)
+2026-08-18 20:48:36,982 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=101.80%, capex_intensity=45.07%)
+2026-08-18 20:48:36,983 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=51.32%)
+2026-08-18 20:48:36,984 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-3295.0, OCF=5646.0)
+2026-08-18 20:48:36,985 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=40.96%)
+2026-08-18 20:48:36,985 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=63.98%)
+2026-08-18 20:48:36,986 | WARNING | src.analytics.capital_allocation_pattern_changes | Company ATGL (Adani Total Gas 
+Ltd) has missing cash flow data for year 2024
+2026-08-18 20:48:36,986 | WARNING | src.analytics.cashflow_kpis | Capital allocation classification: Missing FCF or 
+OCF data
+2026-08-18 20:48:36,987 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-14556.0, OCF=-5555.0)
+2026-08-18 20:48:36,987 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=84.15%)
+2026-08-18 20:48:36,988 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-79634.0, OCF=-68674.0)
+2026-08-18 20:48:36,988 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=19.95%)
+2026-08-18 20:48:36,989 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-79931.0, OCF=-72760.0)
+2026-08-18 20:48:36,990 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-7559.0, OCF=-6274.0)
+2026-08-18 20:48:36,990 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-1265.0, OCF=4659.0)
+2026-08-18 20:48:36,990 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=324.95%)
+2026-08-18 20:48:36,991 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-5044.0, OCF=-3713.0)
+2026-08-18 20:48:36,992 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=38.96%)
+2026-08-18 20:48:36,993 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=94.62%)
+2026-08-18 20:48:36,996 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=98.22%)
+2026-08-18 20:48:36,998 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=86.33%)
+2026-08-18 20:48:37,000 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-38538.0, OCF=-35683.0)
+2026-08-18 20:48:37,001 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=27.73%)
+2026-08-18 20:48:37,003 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=36.44%)
+2026-08-18 20:48:37,004 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=57.54%)
+2026-08-18 20:48:37,005 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=62.00%)
+2026-08-18 20:48:37,005 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=37.08%)
+2026-08-18 20:48:37,006 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=10.96%)
+2026-08-18 20:48:37,007 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=9.13%)
+2026-08-18 20:48:37,009 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=22.24%)
+2026-08-18 20:48:37,010 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=44.03%)
+2026-08-18 20:48:37,012 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-1365.0, OCF=2070.0)
+2026-08-18 20:48:37,014 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-33833.0, OCF=-10719.0)
+2026-08-18 20:48:37,015 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=23.88%)
+2026-08-18 20:48:37,016 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=26.36%)
+2026-08-18 20:48:37,017 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=100.83%, capex_intensity=29.44%)
+2026-08-18 20:48:37,018 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=3.77%)
+2026-08-18 20:48:37,019 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-2893.0, OCF=10721.0)
+2026-08-18 20:48:37,019 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=82.71%)
+2026-08-18 20:48:37,020 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=96.40%)
+2026-08-18 20:48:37,021 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=98.67%)
+2026-08-18 20:48:37,022 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=27.23%)
+2026-08-18 20:48:37,023 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=25.33%)
+2026-08-18 20:48:37,023 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-14735.0, OCF=-7315.0)
+2026-08-18 20:48:37,023 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=115.39%)
+2026-08-18 20:48:37,024 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-17468.0, OCF=-16843.0)
+2026-08-18 20:48:37,024 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=76.64%)
+2026-08-18 20:48:37,025 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=91.83%)
+2026-08-18 20:48:37,025 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=60.04%)
+2026-08-18 20:48:37,025 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=123.30%, capex_intensity=0.10%)
+2026-08-18 20:48:37,026 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=75.25%)
+2026-08-18 20:48:37,026 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-2336.0, OCF=6008.0)
+2026-08-18 20:48:37,027 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-2119.0, OCF=-678.0)
+2026-08-18 20:48:37,027 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-1963.0, OCF=6234.0)
+2026-08-18 20:48:37,028 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-2389.0, OCF=12078.0)
+2026-08-18 20:48:37,029 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=37.15%)
+2026-08-18 20:48:37,030 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=2.08%)
+2026-08-18 20:48:37,031 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-435.0, OCF=2512.0)
+2026-08-18 20:48:37,031 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=103.47%, capex_intensity=11.93%)
+2026-08-18 20:48:37,032 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=38.21%)
+2026-08-18 20:48:37,033 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=36.60%)
+2026-08-18 20:48:37,035 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-11245.0, OCF=-5630.0)
+2026-08-18 20:48:37,035 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=30.63%)
+2026-08-18 20:48:37,036 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-150.0, OCF=702.0)
+2026-08-18 20:48:37,037 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=74.70%)
+2026-08-18 20:48:37,038 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=24.08%)
+2026-08-18 20:48:37,039 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=40.52%)
+2026-08-18 20:48:37,040 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=73.66%)
+2026-08-18 20:48:37,040 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-101229.0, OCF=-97820.0)
+2026-08-18 20:48:37,041 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=54.67%)
+2026-08-18 20:48:37,042 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-29445.0, OCF=-27939.0)
+2026-08-18 20:48:37,042 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=155.24%, capex_intensity=35.17%)
+2026-08-18 20:48:37,043 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-59554.0, OCF=-57723.0)
+2026-08-18 20:48:37,043 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=57.21%)
+2026-08-18 20:48:37,044 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-2099.0, OCF=29122.0)
+2026-08-18 20:48:37,044 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=26.11%)
+2026-08-18 20:48:37,045 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=111.31%, capex_intensity=42.37%)
+2026-08-18 20:48:37,045 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-31359.0, OCF=-31101.0)
+2026-08-18 20:48:37,046 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=42.97%)
+2026-08-18 20:48:37,046 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=118.34%, capex_intensity=6.29%)
+2026-08-18 20:48:37,046 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=2.14%)
+2026-08-18 20:48:37,047 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=141.90%, capex_intensity=33.54%)
+2026-08-18 20:48:37,047 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=83.39%)
+2026-08-18 20:48:37,048 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=-123.18%)
+2026-08-18 20:48:37,048 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: GOOD 
+(conversion=82.97%)
+2026-08-18 20:48:37,049 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=211.01%, capex_intensity=20.67%)
+2026-08-18 20:48:37,049 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=43.08%)
+2026-08-18 20:48:37,050 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=187.56%, capex_intensity=4.90%)
+2026-08-18 20:48:37,051 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: MODERATE 
+(conversion=56.94%)
+2026-08-18 20:48:37,051 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: DISTRESSED 
+(FCF=-2254.0, OCF=-1253.0)
+2026-08-18 20:48:37,052 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: WEAK 
+(conversion=30.11%)
+2026-08-18 20:48:37,052 | INFO | src.analytics.cashflow_kpis | Capital allocation classification: EXCELLENT 
+(conversion=134.35%, capex_intensity=6.99%)
+2026-08-18 20:48:37,053 | INFO | src.analytics.capital_allocation_pattern_changes | Computed classifications for year 
+2024: 94 companies
+============================================================
+MODULE 4 FINAL VALIDATION
+============================================================
+
+--- Sub-Module 4A Validation ---
+============================================================
+MODULE 4A VALIDATION
+============================================================
+N100 Financial Intelligence Platform
+
+Database                       PASS
+  Found at data\database\n100.db (2.3 MB)
+
+Companies Table                PASS
+  Found 94 companies
+
+Authoritative Company Count    PASS
+  Authoritative companies: 94
+
+Capital Allocation Inputs      PASS
+  Input completeness: 99.9%
+
+Duplicate Records              PASS
+  No duplicate company/period records found
+
+Existing Rating Values         PASS
+  Valid ratings found: ['DISTRESSED', 'EXCELLENT', 'GOOD', 'MODERATE', 'WEAK']
+
+Engine Import                  PASS
+  Engine imports successfully
+
+Engine Evaluation              PASS
+  Engine evaluation works (EXCELLENT case)
+
+Pattern Mapping                PASS
+  Pattern mapping found in capital.py
+
+============================================================
+VALIDATION SUMMARY
+============================================================
+Database: PASS
+Companies Table: PASS
+Authoritative Company Count: PASS
+Capital Allocation Inputs: PASS
+Duplicate Records: PASS
+Existing Rating Values: PASS
+Engine Import: PASS
+Engine Evaluation: PASS
+Pattern Mapping: PASS
+
+Overall: 9/9 checks passed
+FINAL STATUS: PASS
+
+--- Sub-Module 4B Validation ---
+============================================================
+MODULE 4B VALIDATION
+============================================================
+
+Latest Year: 2024
+Valid Companies: 94
+Patterns Expected: 8
+Patterns Found: 8
+
+Company Count Sum: 94
+Expected Company Count: 94
+
+Percentage Sum: 100.00%
+
+Missing Patterns: []
+Unexpected Patterns: []
+
+Distribution Output: PASS
+Pattern Coverage: PASS
+Count Validation: PASS
+Percentage Validation: PASS
+Data Integrity: PASS
+
+FINAL STATUS: PASS
+============================================================
+
+--- Sub-Module 4C Validation ---
+============================================================
+MODULE 4C VALIDATION
+============================================================
+Loaded 44 rows from pattern_changes.csv
+Required Columns              PASS
+Company IDs (44 valid) PASS
+Pattern Validity              PASS
+Year Ordering (prev < latest) PASS
+Pattern Change Logic (0 invalid) PASS
+Duplicate Check (0 duplicates) PASS
+Output Readability (3531 bytes) PASS
+============================================================
+VALIDATION SUMMARY
+============================================================
+Required Columns              : PASS
+Company IDs                   : PASS
+Pattern Validity              : PASS
+Year Ordering                 : PASS
+Pattern Change Logic          : PASS
+Duplicate Check               : PASS
+Output Readability            : PASS
+============================================================
+FINAL STATUS: PASS
+============================================================
+
+--- Cross-Module & Integration Checks ---
+Saved cross-module diagnostic to module4_cross_validation.csv
+
+============================================================
+MODULE 4 FINAL VALIDATION
+============================================================
+Module 4A: PASS
+Module 4B: PASS
+Module 4C: PASS
+
+Company Coverage: PASS
+Pattern Set: PASS
+Distribution: PASS
+Pattern Changes: PASS
+Cross-Module Consistency: PASS
+Output Integrity: PASS
+Duplicate Check: PASS
+Year Ordering: PASS
+============================================================
+FINAL STATUS: PASS
+============================================================

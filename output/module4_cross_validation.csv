@@ -1,0 +1,95 @@
+company_id,module4b_pattern,module4c_latest_pattern,match
+ABB,Mixed,Mixed,True
+ADANIENSOL,Shareholder Returns,Shareholder Returns,True
+ADANIENT,Distress Signal,Distress Signal,True
+ADANIGREEN,Distress Signal,Distress Signal,True
+ADANIPORTS,Reinvestor,Reinvestor,True
+ADANIPOWER,Mixed,Mixed,True
+AMBUJACEM,Distress Signal,Distress Signal,True
+APOLLOHOSP,Cash Accumulator,Cash Accumulator,True
+ASIANPAINT,Mixed,Mixed,True
+ATGL,Distress Signal,Distress Signal,True
+AXISBANK,Distress Signal,Distress Signal,True
+BAJAJAUTO,Shareholder Returns,Shareholder Returns,True
+BAJAJFINSV,Distress Signal,Distress Signal,True
+BAJAJHLDNG,Cash Accumulator,Cash Accumulator,True
+BAJFINANCE,Distress Signal,Distress Signal,True
+BANKBARODA,Distress Signal,Distress Signal,True
+BEL,Distress Signal,Distress Signal,True
+BHARTIARTL,Shareholder Returns,Shareholder Returns,True
+BHEL,Distress Signal,Distress Signal,True
+BOSCHLTD,Cash Accumulator,Cash Accumulator,True
+BPCL,Shareholder Returns,Shareholder Returns,True
+BRITANNIA,Shareholder Returns,Shareholder Returns,True
+CANBK,Shareholder Returns,Shareholder Returns,True
+CHOLAFIN,Distress Signal,Distress Signal,True
+CIPLA,Cash Accumulator,Cash Accumulator,True
+COALINDIA,Cash Accumulator,Cash Accumulator,True
+DABUR,Mixed,Mixed,True
+DIVISLAB,Mixed,Mixed,True
+DLF,Cash Accumulator,Cash Accumulator,True
+DMART,Cash Accumulator,Cash Accumulator,True
+DRREDDY,Cash Accumulator,Cash Accumulator,True
+EICHERMOT,Cash Accumulator,Cash Accumulator,True
+GAIL,Cash Accumulator,Cash Accumulator,True
+GODREJCP,Distress Signal,Distress Signal,True
+GRASIM,Distress Signal,Distress Signal,True
+HAL,Cash Accumulator,Cash Accumulator,True
+HAVELLS,Cash Accumulator,Cash Accumulator,True
+HCLTECH,Reinvestor,Reinvestor,True
+HDFCBANK,Cash Accumulator,Cash Accumulator,True
+HDFCLIFE,Distress Signal,Distress Signal,True
+HEROMOTOCO,Shareholder Returns,Shareholder Returns,True
+HINDALCO,Shareholder Returns,Shareholder Returns,True
+HINDUNILVR,Shareholder Returns,Shareholder Returns,True
+ICICIBANK,Cash Accumulator,Cash Accumulator,True
+ICICIGI,Cash Accumulator,Cash Accumulator,True
+ICICIPRULI,Distress Signal,Distress Signal,True
+INDIGO,Shareholder Returns,Shareholder Returns,True
+INDUSINDBK,Distress Signal,Distress Signal,True
+INFY,Mixed,Mixed,True
+IOC,Shareholder Returns,Shareholder Returns,True
+IRCTC,Mixed,Mixed,True
+IRFC,Reinvestor,Reinvestor,True
+ITC,Mixed,Mixed,True
+JINDALSTEL,Distress Signal,Distress Signal,True
+JIOFIN,Distress Signal,Distress Signal,True
+JSWENERGY,Distress Signal,Distress Signal,True
+JSWSTEEL,Distress Signal,Distress Signal,True
+KOTAKBANK,Cash Accumulator,Cash Accumulator,True
+LICI,Cash Accumulator,Cash Accumulator,True
+LODHA,Distress Signal,Distress Signal,True
+LT,Reinvestor,Reinvestor,True
+LTIM,Cash Accumulator,Cash Accumulator,True
+MARUTI,Cash Accumulator,Cash Accumulator,True
+MM,Distress Signal,Distress Signal,True
+MOTHERSON,Cash Accumulator,Cash Accumulator,True
+NAUKRI,Distress Signal,Distress Signal,True
+NESTLEIND,Mixed,Mixed,True
+NHPC,Cash Accumulator,Cash Accumulator,True
+NTPC,Cash Accumulator,Cash Accumulator,True
+ONGC,Mixed,Mixed,True
+PFC,Distress Signal,Distress Signal,True
+PIDILITIND,Mixed,Mixed,True
+PNB,Distress Signal,Distress Signal,True
+POWERGRID,Reinvestor,Reinvestor,True
+RECLTD,Distress Signal,Distress Signal,True
+RELIANCE,Mixed,Mixed,True
+SBILIFE,Distress Signal,Distress Signal,True
+SBIN,Cash Accumulator,Cash Accumulator,True
+SHREECEM,Reinvestor,Reinvestor,True
+SHRIRAMFIN,Distress Signal,Distress Signal,True
+SIEMENS,Cash Accumulator,Cash Accumulator,True
+SUNPHARMA,Reinvestor,Reinvestor,True
+TATACONSUM,Cash Accumulator,Cash Accumulator,True
+TATAMOTORS,Reinvestor,Reinvestor,True
+TATAPOWER,Shareholder Returns,Shareholder Returns,True
+TATASTEEL,Cash Accumulator,Cash Accumulator,True
+TCS,Shareholder Returns,Shareholder Returns,True
+TECHM,Reinvestor,Reinvestor,True
+TITAN,Cash Accumulator,Cash Accumulator,True
+TORNTPHARM,Reinvestor,Reinvestor,True
+TRENT,Mixed,Mixed,True
+TVSMOTOR,Distress Signal,Distress Signal,True
+ULTRACEMCO,Cash Accumulator,Cash Accumulator,True
+UNIONBANK,Reinvestor,Reinvestor,True

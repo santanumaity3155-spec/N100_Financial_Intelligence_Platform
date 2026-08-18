@@ -46,6 +46,12 @@ class DatabaseConnection:
         sqlite3.Connection
         """
 
+        if self.connection is not None:
+            try:
+                self.connection.execute("SELECT 1")
+            except (sqlite3.ProgrammingError, sqlite3.OperationalError):
+                self.connection = None
+
         if self.connection is None:
 
             try:
