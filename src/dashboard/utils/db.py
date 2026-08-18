@@ -1016,3 +1016,271 @@ def clear_cache():
     st.cache_data.clear()
     
     logger.info("Cache cleared successfully")
+
+
+# =============================================================================
+# MODULE 5B - COMPANY INTELLIGENCE HELPERS
+# =============================================================================
+
+
+@st.cache_data(ttl=600)
+def get_raw_statement(ticker: str, table_name: str) -> pd.DataFrame:
+    """
+    Retrieve raw statement data (profit_loss, balance_sheet, cash_flow, etc.)
+    with original column names for exact business logic consumption.
+    """
+    if not ticker or not isinstance(ticker, str):
+        return pd.DataFrame()
+    ticker = ticker.strip().upper()
+    valid_tables = {
+        "profit_loss",
+        "balance_sheet",
+        "cash_flow",
+        "financial_kpis",
+        "financial_ratios",
+        "companies",
+        "financial_health_scores",
+        "peer_percentiles",
+        "market_cap",
+    }
+    if table_name not in valid_tables:
+        logger.warning(f"Invalid table name requested: {table_name}")
+        return pd.DataFrame()
+
+    try:
+        with get_connection() as conn:
+            query = f"SELECT * FROM {table_name} WHERE company_id = ? ORDER BY period DESC"
+            return pd.read_sql_query(query, conn, params=[ticker])
+    except Exception as e:
+        logger.error(f"Error fetching raw statement {table_name} for {ticker}: {str(e)}")
+        return pd.DataFrame()
+
+
+@st.cache_data(ttl=600)
+def get_company_financial_health(ticker: str) -> Optional[Dict[str, Any]]:
+    """
+    Retrieve financial health score for a company from database or CSV output.
+    Does NOT recalculate health scores.
+    """
+    if not ticker or not isinstance(ticker, str):
+        return None
+    ticker = ticker.strip().upper()
+
+    try:
+        with get_connection() as conn:
+            query = """
+                SELECT * FROM financial_health_scores
+                WHERE company_id = ?
+                ORDER BY period DESC LIMIT 1
+            """
+            df = pd.read_sql_query(query, conn, params=[ticker])
+            if not df.empty:
+                return df.iloc[0].to_dict()
+    except Exception as e:
+        logger.warning(f"Database lookup failed for health score of {ticker}: {str(e)}")
+
+    # Fallback to output CSV if DB table is empty/missing
+    try:
+        csv_path = Path("output/financial_health_scores.csv")
+        if csv_path.exists():
+            df_csv = pd.read_csv(csv_path)
+            if "company_id" in df_csv.columns:
+                match = df_csv[df_csv["company_id"].str.upper() == ticker]
+                if not match.empty:
+                    return match.iloc[0].to_dict()
+    except Exception as e:
+        logger.error(f"CSV fallback error for health score of {ticker}: {str(e)}")
+
+    return None
+
+
+@st.cache_data(ttl=600)
+def get_company_pros_cons_signals(ticker: str) -> Dict[str, List[Dict[str, Any]]]:
+    """
+    Retrieve Module 2D generated pros and cons for a company.
+    Consumes outputs from pros_cons_generated.csv or pros_cons DB table.
+    """
+    if not ticker or not isinstance(ticker, str):
+        return {"pros": [], "cons": []}
+    ticker = ticker.strip().upper()
+
+    pros: List[Dict[str, Any]] = []
+    cons: List[Dict[str, Any]] = []
+
+    # Check output CSV first (authoritative Module 2D output)
+    try:
+        csv_path = Path("output/pros_cons_generated.csv")
+        if csv_path.exists():
+            df = pd.read_csv(csv_path)
+            if "company_id" in df.columns:
+                match = df[df["company_id"].str.upper() == ticker]
+                for _, row in match.iterrows():
+                    item = {
+                        "rule_id": str(row.get("rule_id", "N/A")),
+                        "text": str(row.get("text", "")),
+                        "confidence_pct": row.get("confidence_pct", None),
+                        "type": str(row.get("type", "")).lower()
+                    }
+                    if item["type"] == "pro":
+                        pros.append(item)
+                    elif item["type"] == "con":
+                        cons.append(item)
+                return {"pros": pros, "cons": cons}
+    except Exception as e:
+        logger.error(f"Error reading pros_cons_generated.csv for {ticker}: {str(e)}")
+
+    # Fallback to database pros_cons table if available
+    try:
+        with get_connection() as conn:
+            query = "SELECT * FROM pros_cons WHERE company_id = ?"
+            df = pd.read_sql_query(query, conn, params=[ticker])
+            if not df.empty:
+                row = df.iloc[0]
+                p_text = row.get("pros")
+                c_text = row.get("cons")
+                if p_text and not pd.isna(p_text) and str(p_text).lower() != "nan":
+                    pros.append({"rule_id": "DB_PRO", "text": str(p_text), "confidence_pct": None, "type": "pro"})
+                if c_text and not pd.isna(c_text) and str(c_text).lower() != "nan":
+                    cons.append({"rule_id": "DB_CON", "text": str(c_text), "confidence_pct": None, "type": "con"})
+    except Exception as e:
+        logger.error(f"Error querying pros_cons DB table for {ticker}: {str(e)}")
+
+    return {"pros": pros, "cons": cons}
+
+
+@st.cache_data(ttl=600)
+def get_company_capital_allocation_detail(ticker: str) -> Dict[str, Any]:
+    """
+    Retrieve Module 4 capital allocation classification and pattern history.
+    """
+    if not ticker or not isinstance(ticker, str):
+        return {}
+    ticker = ticker.strip().upper()
+
+    res = {
+        "rating": None,
+        "pattern": None,
+        "latest_year": None,
+        "previous_pattern": None,
+        "changed": False
+    }
+
+    try:
+        latest_csv = Path("output/capital_allocation_latest_year.csv")
+        if latest_csv.exists():
+            df = pd.read_csv(latest_csv)
+            if "company_id" in df.columns:
+                m = df[df["company_id"].str.upper() == ticker]
+                if not m.empty:
+                    row = m.iloc[0]
+                    res["rating"] = row.get("capital_allocation_rating")
+                    res["pattern"] = row.get("capital_allocation_pattern")
+                    res["latest_year"] = row.get("latest_year")
+
+        pattern_csv = Path("output/pattern_changes.csv")
+        if pattern_csv.exists():
+            df_p = pd.read_csv(pattern_csv)
+            if "company_id" in df_p.columns:
+                m_p = df_p[df_p["company_id"].str.upper() == ticker]
+                if not m_p.empty:
+                    r_p = m_p.iloc[0]
+                    res["previous_pattern"] = r_p.get("previous_pattern")
+                    res["changed"] = bool(r_p.get("changed", False))
+    except Exception as e:
+        logger.error(f"Error retrieving capital allocation detail for {ticker}: {str(e)}")
+
+    return res
+
+
+@st.cache_data(ttl=600)
+def get_company_valuation_detail(ticker: str) -> Dict[str, Any]:
+    """
+    Retrieve Module 4 valuation metrics and flags for a company.
+    """
+    if not ticker or not isinstance(ticker, str):
+        return {}
+    ticker = ticker.strip().upper()
+
+    res = {
+        "pe": None,
+        "pb": None,
+        "ps": None,
+        "ev_ebitda": None,
+        "dividend_yield": None,
+        "sector_median_pe": None,
+        "pe_vs_sector_median_pct": None,
+        "valuation_flag": None,
+        "difference_pct": None
+    }
+
+    # Query DB market_cap or financial_ratios table first
+    try:
+        with get_connection() as conn:
+            query = """
+                SELECT * FROM market_cap
+                WHERE company_id = ?
+                ORDER BY period DESC LIMIT 1
+            """
+            df = pd.read_sql_query(query, conn, params=[ticker])
+            if not df.empty:
+                row = df.iloc[0]
+                res["pe"] = row.get("pe_ratio")
+                res["pb"] = row.get("pb_ratio")
+                res["ev_ebitda"] = row.get("ev_ebitda")
+                res["dividend_yield"] = row.get("dividend_yield")
+    except Exception as e:
+        logger.error(f"Error querying market_cap for valuation of {ticker}: {str(e)}")
+
+    # Check valuation_flags.csv
+    try:
+        vf_csv = Path("output/valuation_flags.csv")
+        if vf_csv.exists():
+            df_vf = pd.read_csv(vf_csv)
+            if "Ticker" in df_vf.columns:
+                m_vf = df_vf[df_vf["Ticker"].str.upper() == ticker]
+                if not m_vf.empty:
+                    r_vf = m_vf.iloc[0]
+                    res["pe"] = r_vf.get("PE", res["pe"])
+                    res["sector_median_pe"] = r_vf.get("Sector Median PE")
+                    res["pe_vs_sector_median_pct"] = r_vf.get("PE vs Sector Median %")
+                    res["valuation_flag"] = r_vf.get("Valuation Flag")
+                    res["difference_pct"] = r_vf.get("Difference %")
+    except Exception as e:
+        logger.error(f"Error reading valuation_flags.csv for {ticker}: {str(e)}")
+
+    return res
+
+
+@st.cache_data(ttl=600)
+def get_company_peer_percentiles(ticker: str) -> pd.DataFrame:
+    """
+    Retrieve peer percentile rankings for a company.
+    """
+    if not ticker or not isinstance(ticker, str):
+        return pd.DataFrame()
+    ticker = ticker.strip().upper()
+
+    try:
+        with get_connection() as conn:
+            query = """
+                SELECT * FROM peer_percentiles
+                WHERE company_id = ?
+                ORDER BY period DESC, metric ASC
+            """
+            df = pd.read_sql_query(query, conn, params=[ticker])
+            if not df.empty:
+                return df
+    except Exception as e:
+        logger.error(f"Error querying peer_percentiles for {ticker}: {str(e)}")
+
+    # Fallback to output CSV
+    try:
+        csv_path = Path("output/peer_percentiles.csv")
+        if csv_path.exists():
+            df_csv = pd.read_csv(csv_path)
+            if "company_id" in df_csv.columns:
+                return df_csv[df_csv["company_id"].str.upper() == ticker].copy()
+    except Exception as e:
+        logger.error(f"CSV fallback error for peer percentiles of {ticker}: {str(e)}")
+
+    return pd.DataFrame()

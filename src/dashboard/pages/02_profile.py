@@ -1,20 +1,15 @@
 """
-Company Profile Screen - N100 Financial Intelligence Platform
-Module 2 Implementation
+Company Intelligence Dashboard - N100 Financial Intelligence Platform
+Module 5B Implementation
 
-This page provides detailed company profiles with financial metrics,
-charts, and analysis for individual Nifty 100 companies.
+This page provides a comprehensive financial intelligence view for individual
+Nifty 100 companies, integrating financial performance, health scores, cash flow
+intelligence, pros/cons signals, capital allocation patterns, valuation metrics,
+peer positioning, and multi-year historical trends.
+
+Usage:
+    streamlit run src/dashboard/app.py
 """
-
-import logging
-from typing import Optional, Dict, Any, List, Tuple
-
-import pandas as pd
-import numpy as np
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import streamlit as st
 
 import sys
 from pathlib import Path
@@ -24,775 +19,767 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+import logging
+from typing import Any, Dict, List, Optional, Tuple
+
+import numpy as np
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import streamlit as st
+
 from src.dashboard.utils.db import (
     get_companies,
     get_ratios,
     get_pl,
     get_bs,
     get_cf,
+    get_raw_statement,
+    get_company_financial_health,
+    get_company_pros_cons_signals,
+    get_company_capital_allocation_detail,
+    get_company_valuation_detail,
+    get_company_peer_percentiles,
+    get_peers,
+)
+from src.analytics.cashflow_intelligence import (
+    compute_cfo_quality,
+    compute_capex_intensity,
+    compute_fcf_cagr_5yr,
+    compute_fcf_conversion,
+    compute_distress_flag,
+    compute_deleveraging_flag,
+    compute_capital_allocation_label,
 )
 from src.config.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-# CONSTANTS
-# =============================================================================
-
-# KPI metrics to display
-KPI_METRICS = [
-    ("ROE", "roe", "%"),
-    ("ROCE", "roce", "%"),
-    ("Net Profit Margin", "net_profit_margin", "%"),
-    ("Debt-to-Equity", "debt_to_equity", ""),
-    ("Revenue CAGR 5Y", "revenue_cagr_5yr", "%"),
-    ("Latest FCF", "free_cash_flow", "₹ Cr"),
-]
 
 # =============================================================================
-# DATA RETRIEVAL FUNCTIONS
+# DATA RETRIEVAL HELPERS (Cached)
 # =============================================================================
 
-@st.cache_data(ttl=600)
-def get_company_list() -> pd.DataFrame:
+@st.cache_data(ttl=600, show_spinner=False)
+def load_company_master_list() -> pd.DataFrame:
     """
-    Get list of all companies for search/autocomplete.
+    Retrieve authoritative company master data for company selector.
 
     Returns
     -------
     pd.DataFrame
-        DataFrame with ticker and company name
+        DataFrame with columns: ticker, name, sector, industry.
     """
     try:
-        companies_df = get_companies()
-
-        if companies_df.empty:
+        df = get_companies()
+        if df.empty:
+            logger.warning("Company master table is empty")
             return pd.DataFrame()
-
-        # Select relevant columns
-        if "ticker" in companies_df.columns and "name" in companies_df.columns:
-            result = companies_df[["ticker", "name"]].copy()
-            result = result.sort_values("ticker")
-            return result
-
-        return pd.DataFrame()
-
+        # Drop duplicates and fill missing labels safely
+        df = df.drop_duplicates(subset=["ticker"]).copy()
+        df["name"] = df["name"].fillna("Unknown Name")
+        df["sector"] = df["sector"].fillna("Unclassified Sector")
+        return df.sort_values("ticker")
     except Exception as e:
-        logger.error(f"Error getting company list: {str(e)}", exc_info=True)
+        logger.error(f"Error loading company master list: {str(e)}", exc_info=True)
         return pd.DataFrame()
 
 
-@st.cache_data(ttl=600)
-def get_company_profile(ticker: str) -> Optional[Dict[str, Any]]:
+@st.cache_data(ttl=600, show_spinner=False)
+def load_company_full_intelligence(ticker: str) -> Dict[str, Any]:
     """
-    Get company profile information.
+    Load and aggregate all company financial intelligence across modules.
 
     Parameters
     ----------
     ticker : str
-        Company ticker symbol
+        Company ticker / company_id
 
     Returns
     -------
-    Optional[Dict[str, Any]]
-        Dictionary with company profile data
+    Dict[str, Any]
+        Dictionary containing all intelligence datasets for the company.
     """
-    logger.info(f"Getting company profile for {ticker}")
+    if not ticker or not isinstance(ticker, str):
+        return {}
+
+    ticker = ticker.strip().upper()
+    logger.info(f"Loading full financial intelligence for {ticker}")
+
+    res: Dict[str, Any] = {
+        "ticker": ticker,
+        "profile": None,
+        "health": None,
+        "ratios_df": pd.DataFrame(),
+        "pl_df": pd.DataFrame(),
+        "bs_df": pd.DataFrame(),
+        "cf_df": pd.DataFrame(),
+        "raw_pl_df": pd.DataFrame(),
+        "raw_bs_df": pd.DataFrame(),
+        "raw_cf_df": pd.DataFrame(),
+        "cashflow_intel": {},
+        "pros_cons": {"pros": [], "cons": []},
+        "capital_allocation": {},
+        "valuation": {},
+        "peer_percentiles_df": pd.DataFrame(),
+    }
 
     try:
-        companies_df = get_companies()
+        # 1. Company profile info
+        comps = load_company_master_list()
+        if not comps.empty:
+            m = comps[comps["ticker"].str.upper() == ticker]
+            if not m.empty:
+                res["profile"] = m.iloc[0].to_dict()
 
-        if companies_df.empty:
-            return None
+        # 2. Statements & Ratios
+        res["ratios_df"] = get_ratios(ticker)
+        res["pl_df"] = get_pl(ticker)
+        res["bs_df"] = get_bs(ticker)
+        res["cf_df"] = get_cf(ticker)
 
-        # Filter by ticker (case-insensitive)
-        company_data = companies_df[
-            companies_df["ticker"].str.upper() == ticker.upper()
-        ]
+        # Raw statements for Module 3 Cash Flow functions
+        res["raw_pl_df"] = get_raw_statement(ticker, "profit_loss")
+        res["raw_bs_df"] = get_raw_statement(ticker, "balance_sheet")
+        res["raw_cf_df"] = get_raw_statement(ticker, "cash_flow")
 
-        if company_data.empty:
-            return None
+        # 3. Financial Health
+        res["health"] = get_company_financial_health(ticker)
 
-        # Convert to dictionary
-        profile = company_data.iloc[0].to_dict()
+        # 4. Cash Flow Intelligence (Module 3)
+        raw_cf = res["raw_cf_df"]
+        raw_pl = res["raw_pl_df"]
+        raw_bs = res["raw_bs_df"]
 
-        # Clean up NaN values
-        for key, value in profile.items():
-            if pd.isna(value):
-                profile[key] = None
+        if not raw_cf.empty and not raw_pl.empty:
+            res["cashflow_intel"] = {
+                "cfo_quality": compute_cfo_quality(raw_cf, raw_pl),
+                "capex_intensity": compute_capex_intensity(raw_cf, raw_pl),
+                "fcf_cagr_5yr": compute_fcf_cagr_5yr(raw_cf),
+                "fcf_conversion": compute_fcf_conversion(raw_cf, raw_pl),
+                "distress": compute_distress_flag(raw_cf),
+                "deleveraging": compute_deleveraging_flag(raw_cf, raw_bs),
+                "capital_allocation_label": compute_capital_allocation_label(raw_cf, raw_pl),
+            }
 
-        return profile
+        # 5. Pros & Cons (Module 2D)
+        res["pros_cons"] = get_company_pros_cons_signals(ticker)
 
-    except Exception as e:
-        logger.error(f"Error getting company profile for {ticker}: {str(e)}", exc_info=True)
-        return None
+        # 6. Capital Allocation (Module 4)
+        res["capital_allocation"] = get_company_capital_allocation_detail(ticker)
 
+        # 7. Valuation (Module 4/Master)
+        res["valuation"] = get_company_valuation_detail(ticker)
 
-@st.cache_data(ttl=600)
-def get_company_kpis(ticker: str) -> Dict[str, Optional[float]]:
-    """
-    Get latest KPIs for a company.
-
-    Parameters
-    ----------
-    ticker : str
-        Company ticker symbol
-
-    Returns
-    -------
-    Dict[str, Optional[float]]
-        Dictionary with KPI values
-    """
-    logger.info(f"Getting KPIs for {ticker}")
-
-    kpis = {metric[0]: None for metric in KPI_METRICS}
-
-    try:
-        ratios_df = get_ratios(ticker=ticker)
-
-        if ratios_df.empty:
-            return kpis
-
-        # Get latest year data
-        latest_year = ratios_df["year"].max() if "year" in ratios_df.columns else None
-
-        if latest_year is not None:
-            latest_ratios = ratios_df[ratios_df["year"] == latest_year].iloc[0]
-        else:
-            latest_ratios = ratios_df.iloc[0]
-
-        # Extract KPIs
-        for display_name, column_name, _ in KPI_METRICS:
-            if column_name in latest_ratios:
-                value = latest_ratios[column_name]
-                # Handle NaN/None
-                if pd.isna(value):
-                    kpis[display_name] = None
-                else:
-                    kpis[display_name] = float(value)
-
-        return kpis
+        # 8. Peer Percentiles
+        res["peer_percentiles_df"] = get_company_peer_percentiles(ticker)
 
     except Exception as e:
-        logger.error(f"Error getting KPIs for {ticker}: {str(e)}", exc_info=True)
-        return kpis
+        logger.error(f"Error compiling intelligence for {ticker}: {str(e)}", exc_info=True)
 
-
-@st.cache_data(ttl=600)
-def get_revenue_data(ticker: str) -> pd.DataFrame:
-    """
-    Get revenue and profit data for last 10 years.
-
-    Parameters
-    ----------
-    ticker : str
-        Company ticker symbol
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame with year, revenue, and net profit
-    """
-    logger.info(f"Getting revenue data for {ticker}")
-
-    try:
-        pl_df = get_pl(ticker=ticker)
-
-        if pl_df.empty:
-            return pd.DataFrame()
-
-        # Select relevant columns
-        required_cols = ["year", "revenue", "net_profit"]
-
-        if not all(col in pl_df.columns for col in required_cols):
-            logger.warning(f"Required columns not found in P&L data for {ticker}")
-            return pd.DataFrame()
-
-        # Select and sort
-        revenue_df = pl_df[required_cols].copy()
-        revenue_df = revenue_df.sort_values("year", ascending=True)
-
-        # Take last 10 years
-        revenue_df = revenue_df.tail(10)
-
-        # Clean up NaN values
-        revenue_df = revenue_df.fillna(0)
-
-        return revenue_df
-
-    except Exception as e:
-        logger.error(f"Error getting revenue data for {ticker}: {str(e)}", exc_info=True)
-        return pd.DataFrame()
-
-
-@st.cache_data(ttl=600)
-def get_roe_roce_data(ticker: str) -> pd.DataFrame:
-    """
-    Get ROE and ROCE data for last 10 years.
-
-    Parameters
-    ----------
-    ticker : str
-        Company ticker symbol
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame with year, ROE, and ROCE
-    """
-    logger.info(f"Getting ROE/ROCE data for {ticker}")
-
-    try:
-        ratios_df = get_ratios(ticker=ticker)
-
-        if ratios_df.empty:
-            return pd.DataFrame()
-
-        # Select relevant columns
-        required_cols = ["year", "roe", "roce"]
-
-        if not all(col in ratios_df.columns for col in required_cols):
-            logger.warning(f"Required columns not found in ratios data for {ticker}")
-            return pd.DataFrame()
-
-        # Select and sort
-        roe_roce_df = ratios_df[required_cols].copy()
-        roe_roce_df = roe_roce_df.sort_values("year", ascending=True)
-
-        # Take last 10 years
-        roe_roce_df = roe_roce_df.tail(10)
-
-        return roe_roce_df
-
-    except Exception as e:
-        logger.error(f"Error getting ROE/ROCE data for {ticker}: {str(e)}", exc_info=True)
-        return pd.DataFrame()
-
-
-@st.cache_data(ttl=600)
-def get_pros_cons(ticker: str) -> Tuple[List[str], List[str]]:
-    """
-    Get pros and cons for a company.
-
-    Parameters
-    ----------
-    ticker : str
-        Company ticker symbol
-
-    Returns
-    -------
-    Tuple[List[str], List[str]]
-        Tuple of (pros_list, cons_list)
-    """
-    logger.info(f"Getting pros/cons for {ticker}")
-
-    pros = []
-    cons = []
-
-    try:
-        # Try to get from pros_cons table
-        # For now, generate based on available data
-        ratios_df = get_ratios(ticker=ticker)
-
-        if ratios_df.empty:
-            return pros, cons
-
-        # Get latest ratios
-        latest = ratios_df.iloc[0]
-
-        # Analyze pros
-        if latest.get("roe", 0) and latest.get("roe", 0) > 15:
-            pros.append("Strong ROE (>15%)")
-
-        if latest.get("roce", 0) and latest.get("roce", 0) > 15:
-            pros.append("Excellent ROCE (>15%)")
-
-        if latest.get("revenue_cagr_5yr", 0) and latest.get("revenue_cagr_5yr", 0) > 10:
-            pros.append("High revenue growth (CAGR >10%)")
-
-        if latest.get("debt_equity", 1) == 0:
-            pros.append("Debt-free company")
-        elif latest.get("debt_equity", 1) < 0.5:
-            pros.append("Low debt levels")
-
-        if latest.get("net_profit_margin", 0) and latest.get("net_profit_margin", 0) > 10:
-            pros.append("Healthy profit margins")
-
-        if latest.get("free_cash_flow", 0) and latest.get("free_cash_flow", 0) > 0:
-            pros.append("Positive free cash flow")
-
-        # Analyze cons
-        if latest.get("roe", 100) and latest.get("roe", 100) < 10:
-            cons.append("Low ROE (<10%)")
-
-        if latest.get("debt_equity", 0) and latest.get("debt_equity", 0) > 2:
-            cons.append("High debt-to-equity ratio")
-
-        if latest.get("revenue_cagr_5yr", 100) and latest.get("revenue_cagr_5yr", 100) < 0:
-            cons.append("Negative revenue growth")
-
-        if latest.get("net_profit_margin", 100) and latest.get("net_profit_margin", 100) < 5:
-            cons.append("Low profit margins")
-
-        if latest.get("free_cash_flow", 0) and latest.get("free_cash_flow", 0) < 0:
-            cons.append("Negative free cash flow")
-
-        return pros, cons
-
-    except Exception as e:
-        logger.error(f"Error getting pros/cons for {ticker}: {str(e)}", exc_info=True)
-        return pros, cons
+    return res
 
 
 # =============================================================================
-# UI RENDERING FUNCTIONS
+# FORMATTING UTILITIES
 # =============================================================================
 
-def render_company_search() -> Optional[str]:
+def format_currency(val: Any) -> str:
+    """Format numeric value as currency in ₹ Crores."""
+    if val is None or pd.isna(val):
+        return "Data unavailable"
+    try:
+        fval = float(val)
+        return f"₹{fval:,.2f} Cr"
+    except (ValueError, TypeError):
+        return "Data unavailable"
+
+
+def format_pct(val: Any) -> str:
+    """Format numeric value as percentage."""
+    if val is None or pd.isna(val):
+        return "Data unavailable"
+    try:
+        fval = float(val)
+        return f"{fval:.2f}%"
+    except (ValueError, TypeError):
+        return "Data unavailable"
+
+
+def format_num(val: Any, decimals: int = 2) -> str:
+    """Format numeric value with fixed decimals."""
+    if val is None or pd.isna(val):
+        return "Data unavailable"
+    try:
+        fval = float(val)
+        return f"{fval:.{decimals}f}"
+    except (ValueError, TypeError):
+        return "Data unavailable"
+
+
+# =============================================================================
+# SECTION RENDERERS
+# =============================================================================
+
+def render_company_selector(companies_df: pd.DataFrame) -> Optional[str]:
     """
-    Render company search with autocomplete.
+    Render robust company selector dropdown in sidebar.
 
     Returns
     -------
     Optional[str]
-        Selected company ticker or None
+        Selected company ticker symbol.
     """
-    st.sidebar.header("🔍 Company Search")
-
-    # Get company list
-    companies_df = get_company_list()
+    st.sidebar.markdown("### 🔍 Company Selector")
 
     if companies_df.empty:
-        st.sidebar.warning("No companies available in database")
+        st.sidebar.error("❌ No companies available in database.")
         return None
 
-    # Create search options
-    search_options = companies_df.apply(
-        lambda row: f"{row['ticker']} - {row['name']}", axis=1
-    ).tolist()
+    # Handle duplicates and create clear selection options
+    companies_clean = companies_df.drop_duplicates(subset=["ticker"]).copy()
+    options_map = {}
+    options_list = []
 
-    # Search input
-    search_query = st.sidebar.text_input(
-        "Search by Ticker or Company Name",
-        placeholder="Type to search...",
-        help="Search is case-insensitive"
-    ).strip()
+    for _, row in companies_clean.iterrows():
+        t = str(row["ticker"]).strip().upper()
+        n = str(row["name"]).strip()
+        s = str(row.get("sector", "N/A")).strip()
+        label = f"{t} - {n} ({s})"
+        options_map[label] = t
+        options_list.append(label)
 
-    # Filter options based on search
-    if search_query:
-        filtered_options = [
-            opt for opt in search_options
-            if search_query.upper() in opt.upper()
-        ]
-    else:
-        filtered_options = search_options
+    # Maintain selected ticker in session state
+    default_idx = 0
+    if "selected_ticker" in st.session_state:
+        current = st.session_state["selected_ticker"]
+        for idx, opt_label in enumerate(options_list):
+            if options_map[opt_label] == current:
+                default_idx = idx
+                break
 
-    if not filtered_options:
-        st.sidebar.info("No companies found matching your search")
-        return None
-
-    # Selectbox with filtered options
-    selected_option = st.sidebar.selectbox(
-        "Select Company",
-        options=filtered_options,
-        help="Select a company to view its profile"
+    selected_label = st.sidebar.selectbox(
+        "Select Company:",
+        options=options_list,
+        index=default_idx,
+        help="Select a company to view company intelligence",
+        key="company_intelligence_selector",
     )
 
-    if selected_option:
-        # Extract ticker from selection
-        ticker = selected_option.split(" - ")[0].strip()
-        return ticker
+    if selected_label and selected_label in options_map:
+        selected_ticker = options_map[selected_label]
+        st.session_state["selected_ticker"] = selected_ticker
+        return selected_ticker
 
     return None
 
 
-def render_company_card(profile: Dict[str, Any]) -> None:
-    """
-    Render company information card.
-
-    Parameters
-    ----------
-    profile : Dict[str, Any]
-        Company profile data
-    """
-    st.header("🏢 Company Information")
-    st.markdown("---")
+def render_section_1_header(profile: Optional[Dict[str, Any]], ticker: str) -> None:
+    """Render Section 1 — Company Header."""
+    st.markdown("## 🏢 Company Intelligence Header")
 
     if not profile:
-        st.warning("No company information available")
+        st.warning(f"⚠️ Company details for **{ticker}** could not be loaded from company master records.")
         return
 
-    col1, col2, col3 = st.columns([1, 2, 1])
+    name = profile.get("name", ticker)
+    sector = profile.get("sector", "N/A")
+    industry = profile.get("industry", "N/A")
+    isin = profile.get("isin", "N/A")
+    listed_date = profile.get("listed_date", "N/A")
+
+    col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        # Company logo placeholder
-        st.markdown("### 🖼️ Logo")
-        st.info("Logo placeholder\n\nCompany logo will be displayed here")
+        st.metric(label="Company Name", value=str(name)[:25])
+        st.caption(f"**Ticker:** `{ticker}`")
 
     with col2:
-        # Company details
-        st.markdown("### 📋 Company Details")
-
-        # Create info grid
-        info_items = [
-            ("Company Name", profile.get("name", "N/A")),
-            ("Ticker", profile.get("ticker", "N/A")),
-            ("Sector", profile.get("sector", "N/A")),
-            ("Sub-sector", profile.get("sub_sector", profile.get("industry", "N/A"))),
-            ("Industry", profile.get("industry", "N/A")),
-            ("Broad Sector", profile.get("broad_sector", "N/A")),
-        ]
-
-        for label, value in info_items:
-            if value and value != "N/A":
-                st.markdown(f"**{label}:** {value}")
-
-        # Market Cap
-        market_cap = profile.get("market_cap")
-        if market_cap and not pd.isna(market_cap):
-            st.markdown(f"**Market Cap:** ₹{market_cap:,.2f} Cr")
-        else:
-            st.markdown("**Market Cap:** N/A")
+        st.metric(label="Sector", value=str(sector)[:25])
+        st.caption(f"**Industry:** {industry}")
 
     with col3:
-        # About section
-        st.markdown("### ℹ️ About")
-        about = profile.get("about_company", profile.get("description", "No description available"))
-        if about and about != "N/A":
-            st.markdown(about[:500] + "..." if len(str(about)) > 500 else about)
-        else:
-            st.info("No company description available")
+        st.metric(label="ISIN", value=str(isin))
+        st.caption(f"**Listed:** {listed_date}")
 
-
-def render_kpi_cards(kpis: Dict[str, Optional[float]]) -> None:
-    """
-    Render KPI cards section.
-
-    Parameters
-    ----------
-    kpis : Dict[str, Optional[float]]
-        Dictionary with KPI values
-    """
-    st.header("📈 Key Financial Metrics")
-    st.markdown("---")
-
-    cols = st.columns(3)
-
-    for idx, (display_name, _, unit) in enumerate(KPI_METRICS):
-        col_idx = idx % 3
-        value = kpis.get(display_name)
-
-        with cols[col_idx]:
-            if value is not None:
-                # Format value based on metric
-                if display_name == "Latest FCF":
-                    formatted_value = f"₹{value:,.0f} Cr"
-                elif display_name in ["ROE", "ROCE", "Net Profit Margin", "Revenue CAGR 5Y"]:
-                    formatted_value = f"{value:.2f}%"
-                else:
-                    formatted_value = f"{value:.2f}"
-
-                st.metric(
-                    label=display_name,
-                    value=formatted_value,
-                    help=f"{display_name} metric"
-                )
-            else:
-                st.metric(
-                    label=display_name,
-                    value="N/A",
-                    help=f"{display_name} data not available"
-                )
+    with col4:
+        st.metric(label="Analysis Period", value="FY2024 / Latest")
+        st.caption("Status: Authoritative Data")
 
     st.markdown("---")
 
 
-def render_revenue_chart(revenue_df: pd.DataFrame, ticker: str) -> None:
-    """
-    Render revenue and profit chart.
+def render_section_2_health(health: Optional[Dict[str, Any]]) -> None:
+    """Render Section 2 — Financial Health Score."""
+    st.markdown("## 🎯 Financial Health")
 
-    Parameters
-    ----------
-    revenue_df : pd.DataFrame
-        DataFrame with revenue and profit data
-    ticker : str
-        Company ticker symbol
-    """
-    st.header("💰 Revenue & Profit Trend")
-    st.markdown("---")
-
-    if revenue_df.empty:
-        st.warning("No revenue data available")
-        return
-
-    col1, col2 = st.columns([3, 1])
-
-    with col1:
-        # Create grouped bar chart
-        fig = go.Figure()
-
-        # Revenue bars
-        fig.add_trace(
-            go.Bar(
-                x=revenue_df["year"],
-                y=revenue_df["revenue"],
-                name="Revenue",
-                marker_color="rgb(55, 83, 109)",
-                hovertemplate="<b>%{x}</b><br>" +
-                             "Revenue: ₹%{y:,.0f} Cr<br>" +
-                             "<extra></extra>"
-            )
-        )
-
-        # Net Profit bars
-        fig.add_trace(
-            go.Bar(
-                x=revenue_df["year"],
-                y=revenue_df["net_profit"],
-                name="Net Profit",
-                marker_color="rgb(26, 118, 255)",
-                hovertemplate="<b>%{x}</b><br>" +
-                             "Net Profit: ₹%{y:,.0f} Cr<br>" +
-                             "<extra></extra>"
-            )
-        )
-
-        # Update layout
-        fig.update_layout(
-            title=f"{ticker} - Revenue & Net Profit (Last 10 Years)",
-            xaxis_title="Year",
-            yaxis_title="Amount (₹ Crores)",
-            barmode="group",
-            hovermode="x unified",
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=1.02,
-                xanchor="right",
-                x=1
-            ),
-            height=400,
-            margin=dict(l=20, r=20, t=40, b=20)
-        )
-
-        st.plotly_chart(fig, use_container_width=True)
-
-    with col2:
-        st.subheader("Summary")
+    if not health:
+        st.info("ℹ️ Financial Health Score data unavailable for this company.")
         st.markdown("---")
-
-        # Calculate totals
-        total_revenue = revenue_df["revenue"].sum()
-        total_profit = revenue_df["net_profit"].sum()
-        avg_margin = (total_profit / total_revenue * 100) if total_revenue > 0 else 0
-
-        st.metric(
-            label="Total Revenue",
-            value=f"₹{total_revenue:,.0f} Cr",
-            help="Sum of revenue over displayed years"
-        )
-
-        st.metric(
-            label="Total Net Profit",
-            value=f"₹{total_profit:,.0f} Cr",
-            help="Sum of net profit over displayed years"
-        )
-
-        st.metric(
-            label="Avg Profit Margin",
-            value=f"{avg_margin:.1f}%",
-            help="Average net profit margin"
-        )
-
-
-def render_roe_roce_chart(roe_roce_df: pd.DataFrame, ticker: str) -> None:
-    """
-    Render ROE and ROCE dual-axis line chart.
-
-    Parameters
-    ----------
-    roe_roce_df : pd.DataFrame
-        DataFrame with ROE and ROCE data
-    ticker : str
-        Company ticker symbol
-    """
-    st.header("📊 ROE & ROCE Trend")
-    st.markdown("---")
-
-    if roe_roce_df.empty:
-        st.warning("No ROE/ROCE data available")
         return
 
-    # Create dual-axis line chart
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    overall_score = health.get("overall_score")
+    rating = health.get("rating", "Unrated")
+    period = health.get("period", "N/A")
+    remarks = health.get("remarks", "No remarks available.")
 
-    # ROE line
-    fig.add_trace(
-        go.Scatter(
-            x=roe_roce_df["year"],
-            y=roe_roce_df["roe"],
-            name="ROE",
-            mode="lines+markers",
-            line=dict(color="rgb(55, 83, 109)", width=3),
-            marker=dict(size=8),
-            hovertemplate="<b>%{x}</b><br>" +
-                         "ROE: %{y:.2f}%<br>" +
-                         "<extra></extra>"
-        ),
-        secondary_y=False,
-    )
+    # Main Health Score Banner
+    col_score, col_rating, col_period = st.columns([1, 1, 2])
 
-    # ROCE line
-    fig.add_trace(
-        go.Scatter(
-            x=roe_roce_df["year"],
-            y=roe_roce_df["roce"],
-            name="ROCE",
-            mode="lines+markers",
-            line=dict(color="rgb(26, 118, 255)", width=3),
-            marker=dict(size=8),
-            hovertemplate="<b>%{x}</b><br>" +
-                         "ROCE: %{y:.2f}%<br>" +
-                         "<extra></extra>"
-        ),
-        secondary_y=True,
-    )
+    with col_score:
+        if overall_score is not None and not pd.isna(overall_score):
+            st.metric(label="Overall Health Score", value=f"{overall_score:.1f} / 100")
+        else:
+            st.metric(label="Overall Health Score", value="Data unavailable")
 
-    # Update layout
-    fig.update_layout(
-        title=f"{ticker} - ROE & ROCE Trend (Last 10 Years)",
-        hovermode="x unified",
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
-        ),
-        height=400,
-        margin=dict(l=20, r=20, t=40, b=20)
-    )
+    with col_rating:
+        st.metric(label="Health Rating", value=str(rating))
 
-    # Update axes
-    fig.update_xaxes(title_text="Year")
-    fig.update_yaxes(title_text="ROE (%)", secondary_y=False)
-    fig.update_yaxes(title_text="ROCE (%)", secondary_y=True)
+    with col_period:
+        st.metric(label="Health Period", value=str(period))
+        st.caption(f"**Remarks:** {remarks}")
 
-    st.plotly_chart(fig, use_container_width=True)
+    # Sub-component Breakdown
+    st.markdown("#### Component Scores")
+    c1, c2, c3, c4, c5 = st.columns(5)
 
+    comp_scores = [
+        ("Profitability", health.get("profitability_score"), c1),
+        ("Growth", health.get("growth_score"), c2),
+        ("Cash Flow", health.get("cashflow_score"), c3),
+        ("Leverage", health.get("leverage_score"), c4),
+        ("Efficiency", health.get("efficiency_score"), c5),
+    ]
 
-def render_pros_cons(pros: List[str], cons: List[str]) -> None:
-    """
-    Render pros and cons section.
+    for label, score, col in comp_scores:
+        with col:
+            if score is not None and not pd.isna(score):
+                col.metric(label=label, value=f"{float(score):.1f}")
+            else:
+                col.metric(label=label, value="Data unavailable")
 
-    Parameters
-    ----------
-    pros : List[str]
-        List of pros
-    cons : List[str]
-        List of cons
-    """
-    st.header("✅ Pros & ❌ Cons")
     st.markdown("---")
+
+
+def render_section_3_kpis(
+    ratios_df: pd.DataFrame,
+    pl_df: pd.DataFrame,
+    cf_df: pd.DataFrame,
+) -> None:
+    """Render Section 3 — Key Financial KPIs."""
+    st.markdown("## 🔑 Key Financial KPIs")
+
+    latest_ratio = ratios_df.iloc[0].to_dict() if not ratios_df.empty else {}
+    latest_pl = pl_df.iloc[0].to_dict() if not pl_df.empty else {}
+    latest_cf = cf_df.iloc[0].to_dict() if not cf_df.empty else {}
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    with c1:
+        st.metric(
+            label="Revenue / Sales",
+            value=format_currency(latest_pl.get("sales")),
+            help="Latest annual revenue from Profit & Loss statement",
+        )
+        st.metric(
+            label="ROE",
+            value=format_pct(latest_ratio.get("roe")),
+            help="Return on Equity",
+        )
+
+    with c2:
+        st.metric(
+            label="Net Profit (PAT)",
+            value=format_currency(latest_pl.get("net_profit")),
+            help="Latest annual net profit",
+        )
+        st.metric(
+            label="ROCE",
+            value=format_pct(latest_ratio.get("roce")),
+            help="Return on Capital Employed",
+        )
+
+    with c3:
+        st.metric(
+            label="EPS",
+            value=format_num(latest_pl.get("eps") or latest_ratio.get("eps")),
+            help="Earnings Per Share",
+        )
+        st.metric(
+            label="Operating Margin (OPM)",
+            value=format_pct(latest_pl.get("opm_percentage") or latest_ratio.get("operating_margin")),
+            help="Operating profit margin percentage",
+        )
+
+    with c4:
+        st.metric(
+            label="Debt to Equity",
+            value=format_num(latest_ratio.get("debt_equity")),
+            help="Debt to Equity ratio",
+        )
+        st.metric(
+            label="Net Profit Margin",
+            value=format_pct(latest_ratio.get("net_profit_margin")),
+            help="Net profit margin percentage",
+        )
+
+    st.markdown("---")
+
+
+def render_section_4_profitability(
+    pl_df: pd.DataFrame,
+    ratios_df: pd.DataFrame,
+    ticker: str,
+) -> None:
+    """Render Section 4 — Profitability & Growth Trends."""
+    st.markdown("## 📈 Profitability & Growth Trends")
+
+    if pl_df.empty and ratios_df.empty:
+        st.info("ℹ️ Historical P&L and ratio data unavailable for chart rendering.")
+        st.markdown("---")
+        return
+
+    # Clean & sort historical data ascending by year
+    pl_clean = pl_df.copy()
+    if not pl_clean.empty and "year" in pl_clean.columns:
+        pl_clean = pl_clean.sort_values("year", ascending=True)
+
+    ratios_clean = ratios_df.copy()
+    if not ratios_clean.empty and "year" in ratios_clean.columns:
+        ratios_clean = ratios_clean.sort_values("year", ascending=True)
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("✅ Strengths")
-        if pros:
-            for pro in pros:
-                st.success(f"✓ {pro}")
+        st.markdown("#### Revenue & Net Profit Trend (₹ Crores)")
+        if not pl_clean.empty and "sales" in pl_clean.columns and "net_profit" in pl_clean.columns:
+            fig = go.Figure()
+            fig.add_trace(
+                go.Bar(
+                    x=pl_clean["year"],
+                    y=pl_clean["sales"],
+                    name="Revenue",
+                    marker_color="#1f77b4",
+                )
+            )
+            fig.add_trace(
+                go.Bar(
+                    x=pl_clean["year"],
+                    y=pl_clean["net_profit"],
+                    name="Net Profit",
+                    marker_color="#2ca02c",
+                )
+            )
+            fig.update_layout(
+                barmode="group",
+                height=350,
+                margin=dict(l=20, r=20, t=30, b=20),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                xaxis_title="Financial Period",
+                yaxis_title="Amount (₹ Cr)",
+            )
+            st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("No specific strengths identified")
+            st.info("Data unavailable for Revenue/Net Profit chart.")
 
     with col2:
-        st.subheader("❌ Concerns")
-        if cons:
-            for con in cons:
-                st.error(f"✗ {con}")
+        st.markdown("#### ROE vs ROCE Trend (%)")
+        if not ratios_clean.empty and "roe" in ratios_clean.columns:
+            fig = go.Figure()
+            fig.add_trace(
+                go.Scatter(
+                    x=ratios_clean["year"],
+                    y=ratios_clean["roe"],
+                    mode="lines+markers",
+                    name="ROE (%)",
+                    line=dict(color="#ff7f0e", width=3),
+                )
+            )
+            if "roce" in ratios_clean.columns:
+                fig.add_trace(
+                    go.Scatter(
+                        x=ratios_clean["year"],
+                        y=ratios_clean["roce"],
+                        mode="lines+markers",
+                        name="ROCE (%)",
+                        line=dict(color="#d62728", width=3),
+                    )
+                )
+            fig.update_layout(
+                height=350,
+                margin=dict(l=20, r=20, t=30, b=20),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                xaxis_title="Financial Period",
+                yaxis_title="Percentage (%)",
+            )
+            st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("No specific concerns identified")
+            st.info("Data unavailable for ROE/ROCE chart.")
 
     st.markdown("---")
 
 
-def render_not_found_message(ticker: str) -> None:
-    """
-    Render not found message.
+def render_section_5_cashflow_intelligence(intel: Dict[str, Any]) -> None:
+    """Render Section 5 — Cash Flow Intelligence (Module 3 Output)."""
+    st.markdown("## 💰 Cash Flow Intelligence (Module 3)")
 
-    Parameters
-    ----------
-    ticker : str
-        Ticker that was not found
-    """
-    st.header("🔍 Company Search")
+    if not intel:
+        st.info("ℹ️ Cash Flow Intelligence metrics unavailable for this company.")
+        st.markdown("---")
+        return
+
+    cfo_q = intel.get("cfo_quality", {})
+    capex_i = intel.get("capex_intensity", {})
+    fcf_cagr = intel.get("fcf_cagr_5yr", {})
+    fcf_conv = intel.get("fcf_conversion", {})
+    distress = intel.get("distress", {})
+    deleveraging = intel.get("deleveraging", {})
+    cap_alloc = intel.get("capital_allocation_label", "Insufficient Data")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.metric(
+            label="CFO Quality Score",
+            value=format_num(cfo_q.get("score")),
+            delta=cfo_q.get("label", "Insufficient Data"),
+        )
+        st.metric(
+            label="CapEx Intensity",
+            value=format_pct(capex_i.get("value")),
+            delta=capex_i.get("label", "Insufficient Data"),
+        )
+
+    with col2:
+        st.metric(
+            label="5-Year FCF CAGR",
+            value=format_pct(fcf_cagr.get("value")),
+            delta=fcf_cagr.get("flag") or "Normal",
+        )
+        st.metric(
+            label="FCF Conversion",
+            value=format_pct(fcf_conv.get("value")),
+            delta=fcf_conv.get("flag") or "Normal",
+        )
+
+    with col3:
+        distress_flag = distress.get("flag", False)
+        deleveraging_flag = deleveraging.get("flag", False)
+
+        st.metric(
+            label="Distress Signal",
+            value="🚨 ALERT" if distress_flag else "✅ CLEAR",
+            delta="CFO < 0 & CFF > 0" if distress_flag else "Normal",
+        )
+        st.metric(
+            label="Deleveraging Flag",
+            value="📉 DELEVERAGING" if deleveraging_flag else "➖ STABLE",
+            delta="Borrowings Declining" if deleveraging_flag else "Normal",
+        )
+
+    st.markdown(f"**Capital Allocation Label (Module 3 Engine):** `{cap_alloc}`")
     st.markdown("---")
 
-    st.error(f"**{ticker}** not found.")
-    st.info("Please try another company.")
 
-    st.markdown("""
-    ### Suggestions:
-    - Check the ticker symbol spelling
-    - Try searching by company name
-    - Use the autocomplete suggestions
-    - Ensure the company is part of Nifty 100
-    """)
+def render_section_6_pros_cons(pros_cons: Dict[str, List[Dict[str, Any]]]) -> None:
+    """Render Section 6 — Pros & Cons (Module 2D Output)."""
+    st.markdown("## ⚖️ Pros & Cons Signals (Module 2D)")
+
+    pros = pros_cons.get("pros", [])
+    cons = pros_cons.get("cons", [])
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("### ✅ Strengths (Pros)")
+        if pros:
+            for p in pros:
+                conf = p.get("confidence_pct")
+                conf_str = f" [Confidence: {conf:.1f}%]" if conf is not None else ""
+                rule_id = p.get("rule_id", "PRO")
+                st.success(f"**[{rule_id}]** {p.get('text', '')}{conf_str}")
+        else:
+            st.info("No explicit positive signals identified for this company.")
+
+    with col2:
+        st.markdown("### ❌ Concerns (Cons)")
+        if cons:
+            for c in cons:
+                conf = c.get("confidence_pct")
+                conf_str = f" [Confidence: {conf:.1f}%]" if conf is not None else ""
+                rule_id = c.get("rule_id", "CON")
+                st.error(f"**[{rule_id}]** {c.get('text', '')}{conf_str}")
+        else:
+            st.info("No explicit negative concerns identified for this company.")
+
+    st.markdown("---")
+
+
+def render_section_7_capital_allocation(detail: Dict[str, Any]) -> None:
+    """Render Section 7 — Capital Allocation (Module 4 Output)."""
+    st.markdown("## 🏛️ Capital Allocation (Module 4)")
+
+    if not detail:
+        st.info("ℹ️ Capital allocation classification data unavailable.")
+        st.markdown("---")
+        return
+
+    rating = detail.get("rating", "Unrated")
+    pattern = detail.get("pattern", "Unclassified")
+    prev_pattern = detail.get("previous_pattern")
+    changed = detail.get("changed", False)
+
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
+        st.metric(label="Capital Allocation Rating", value=str(rating))
+
+    with c2:
+        st.metric(label="Current Pattern", value=str(pattern))
+
+    with c3:
+        if changed and prev_pattern:
+            st.metric(label="Pattern Status", value="🔄 Shifted", delta=f"Prev: {prev_pattern}")
+        else:
+            st.metric(label="Pattern Status", value="✅ Stable", delta="No Shift")
+
+    st.markdown("---")
+
+
+def render_section_8_valuation(val_detail: Dict[str, Any]) -> None:
+    """Render Section 8 — Valuation."""
+    st.markdown("## 🏷️ Valuation Analytics")
+
+    pe = val_detail.get("pe")
+    pb = val_detail.get("pb")
+    ev_ebitda = val_detail.get("ev_ebitda")
+    sec_pe = val_detail.get("sector_median_pe")
+    v_flag = val_detail.get("valuation_flag")
+    diff_pct = val_detail.get("difference_pct")
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    with c1:
+        st.metric(label="P/E Ratio", value=format_num(pe))
+
+    with c2:
+        st.metric(label="P/B Ratio", value=format_num(pb))
+
+    with c3:
+        st.metric(label="EV / EBITDA", value=format_num(ev_ebitda))
+
+    with c4:
+        st.metric(
+            label="Valuation Status",
+            value=str(v_flag) if v_flag else "Data unavailable",
+            delta=f"{diff_pct:+.1f}% vs Sector" if diff_pct is not None else None,
+        )
+
+    st.markdown("---")
+
+
+def render_section_9_peer_position(percentiles_df: pd.DataFrame, ticker: str) -> None:
+    """Render Section 9 — Peer Position & Percentile Rankings."""
+    st.markdown("## 📊 Peer Position & Percentiles")
+
+    if percentiles_df.empty:
+        st.info("ℹ️ Peer percentile rankings unavailable for this company.")
+        st.markdown("---")
+        return
+
+    st.markdown("#### Metric Percentile Rankings Within Peer Group")
+
+    # Render clean dataframe of metrics
+    display_df = percentiles_df[["metric", "metric_value", "percentile_rank", "period"]].copy()
+    display_df.columns = ["Metric", "Value", "Percentile Rank (0-1)", "Period"]
+    display_df["Percentile Rank (0-1)"] = display_df["Percentile Rank (0-1)"].apply(
+        lambda x: f"{float(x):.2f}" if x is not None and not pd.isna(x) else "N/A"
+    )
+
+    st.dataframe(display_df, use_container_width=True, hide_index=True)
+    st.markdown("---")
+
+
+def render_section_10_historical_trend(
+    pl_df: pd.DataFrame,
+    bs_df: pd.DataFrame,
+    cf_df: pd.DataFrame,
+) -> None:
+    """Render Section 10 — Multi-Year Historical Financial Trend."""
+    st.markdown("## 📜 Multi-Year Historical Financial Trend")
+
+    tabs = st.tabs(["Profit & Loss", "Balance Sheet", "Cash Flow"])
+
+    with tabs[0]:
+        if not pl_df.empty:
+            st.dataframe(pl_df, use_container_width=True, hide_index=True)
+        else:
+            st.info("P&L statement history unavailable.")
+
+    with tabs[1]:
+        if not bs_df.empty:
+            st.dataframe(bs_df, use_container_width=True, hide_index=True)
+        else:
+            st.info("Balance sheet statement history unavailable.")
+
+    with tabs[2]:
+        if not cf_df.empty:
+            st.dataframe(cf_df, use_container_width=True, hide_index=True)
+        else:
+            st.info("Cash flow statement history unavailable.")
+
+    st.markdown("---")
 
 
 # =============================================================================
-# MAIN PAGE FUNCTION
+# MAIN ENTRY POINT
 # =============================================================================
 
 def main() -> None:
-    """
-    Main function to render the company profile screen.
-    """
-    logger.info("Company Profile screen accessed")
+    """Main execution function for Company Intelligence dashboard page."""
+    logger.info("Accessing Company Intelligence Dashboard page")
 
-    # Page header
-    st.title("👤 Company Profile")
-    st.markdown("### Detailed Financial Analysis for Nifty 100 Companies")
+    st.title("👤 Company Intelligence Dashboard")
+    st.caption("Module 5B — Comprehensive Financial Intelligence & Analytics")
     st.markdown("---")
 
-    # Company search
-    selected_ticker = render_company_search()
+    # Load master company list
+    companies_df = load_company_master_list()
+
+    # Company selection
+    selected_ticker = render_company_selector(companies_df)
 
     if not selected_ticker:
-        st.info("👈 Use the sidebar to search and select a company")
-        logger.info("No company selected")
+        st.info("👈 Please select a company from the sidebar dropdown to display financial intelligence.")
         return
 
-    logger.info(f"Company selected: {selected_ticker}")
+    # Load all company intelligence with loading spinner
+    with st.spinner(f"Loading financial intelligence for {selected_ticker}..."):
+        intel = load_company_full_intelligence(selected_ticker)
 
-    # Load company data
-    with st.spinner(f"Loading profile for {selected_ticker}..."):
-        profile = get_company_profile(selected_ticker)
+    if not intel or not intel.get("profile"):
+        st.error(f"❌ Intelligence records for ticker **{selected_ticker}** could not be compiled.")
+        st.info("Please select another company from the list.")
+        return
 
-        if not profile:
-            render_not_found_message(selected_ticker)
-            logger.warning(f"Company not found: {selected_ticker}")
-            return
-
-        kpis = get_company_kpis(selected_ticker)
-        revenue_df = get_revenue_data(selected_ticker)
-        roe_roce_df = get_roe_roce_data(selected_ticker)
-        pros, cons = get_pros_cons(selected_ticker)
-
-    # Render sections
-    render_company_card(profile)
-    render_kpi_cards(kpis)
-    render_revenue_chart(revenue_df, selected_ticker)
-    render_roe_roce_chart(roe_roce_df, selected_ticker)
-    render_pros_cons(pros, cons)
+    # Render all 11 sections
+    render_section_1_header(intel.get("profile"), selected_ticker)
+    render_section_2_health(intel.get("health"))
+    render_section_3_kpis(intel.get("ratios_df"), intel.get("pl_df"), intel.get("cf_df"))
+    render_section_4_profitability(intel.get("pl_df"), intel.get("ratios_df"), selected_ticker)
+    render_section_5_cashflow_intelligence(intel.get("cashflow_intel", {}))
+    render_section_6_pros_cons(intel.get("pros_cons", {}))
+    render_section_7_capital_allocation(intel.get("capital_allocation", {}))
+    render_section_8_valuation(intel.get("valuation", {}))
+    render_section_9_peer_position(intel.get("peer_percentiles_df"), selected_ticker)
+    render_section_10_historical_trend(intel.get("pl_df"), intel.get("bs_df"), intel.get("cf_df"))
 
     # Footer
-    st.markdown("---")
     st.caption(
-        "💡 **Tip:** All data is cached for 10 minutes for optimal performance. "
-        "Use the sidebar to search for different companies."
+        "💡 **Tip:** Data is automatically cached for 10 minutes for optimal performance. "
+        "Use the sidebar to inspect other Nifty 100 companies."
     )
-
-    logger.info(f"Company profile rendered successfully for {selected_ticker}")
 
 
 if __name__ == "__main__":
