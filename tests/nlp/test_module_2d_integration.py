@@ -4,7 +4,10 @@ import pandas as pd
 import pytest
 
 from src.nlp import pros_cons_generator as pg
-from tests.nlp.test_pros_cons_generator import make_context
+try:
+    from tests.nlp.test_pros_cons_generator import make_context
+except ImportError:
+    from .test_pros_cons_generator import make_context
 
 
 @pytest.fixture

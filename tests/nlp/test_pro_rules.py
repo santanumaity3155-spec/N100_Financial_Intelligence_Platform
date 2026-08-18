@@ -48,7 +48,10 @@ from src.nlp.pro_rules import (  # noqa: E402
     PRO_12,
     get_pro_rule_instances,
 )
-from tests.nlp.test_pros_cons_generator import make_context  # noqa: E402
+try:
+    from tests.nlp.test_pros_cons_generator import make_context  # noqa: E402
+except ImportError:
+    from .test_pros_cons_generator import make_context  # noqa: E402
 
 EXPECTED_PRO_IDS = [
     "PRO_01", "PRO_02", "PRO_03", "PRO_04", "PRO_05", "PRO_06",

@@ -21,7 +21,10 @@ from src.nlp.con_rules import (
     CON_01, CON_02, CON_03, CON_04, CON_05, CON_06,
     CON_07, CON_08, CON_09, CON_10, CON_11, CON_12,
 )
-from tests.nlp.test_pros_cons_generator import make_context
+try:
+    from tests.nlp.test_pros_cons_generator import make_context
+except ImportError:
+    from .test_pros_cons_generator import make_context
 
 def _assert_triggered(result: RuleResult) -> None:
     assert result.triggered is True
