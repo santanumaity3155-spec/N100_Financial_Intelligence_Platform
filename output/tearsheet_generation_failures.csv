@@ -1,1 +1,10 @@
 company_id,error,stage
+ADANIPOWER,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\ADANIPOWER_tearsheet.pdf',tearsheet_generation
+IOC,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\IOC_tearsheet.pdf',tearsheet_generation
+LODHA,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\LODHA_tearsheet.pdf',tearsheet_generation
+MOTHERSON,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\MOTHERSON_tearsheet.pdf',tearsheet_generation
+NTPC,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\NTPC_tearsheet.pdf',tearsheet_generation
+POWERGRID,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\POWERGRID_tearsheet.pdf',tearsheet_generation
+TATAMOTORS,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\TATAMOTORS_tearsheet.pdf',tearsheet_generation
+TECHM,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\TECHM_tearsheet.pdf',tearsheet_generation
+ULTRACEMCO,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\ULTRACEMCO_tearsheet.pdf',tearsheet_generation
