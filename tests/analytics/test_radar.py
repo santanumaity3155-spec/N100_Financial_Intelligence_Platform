@@ -125,8 +125,8 @@ def db_connection(temp_db):
     """Create a database connection with test data."""
     from src.database.connection import db
     
-    # Temporarily override the database path
     original_path = db.database_path
+    db.close()
     db.database_path = temp_db
     
     conn = db.connect()
@@ -197,8 +197,9 @@ def db_connection(temp_db):
     
     yield conn
     
-    # Restore original path
+    db.close()
     db.database_path = original_path
+    db.close()
 
 
 @pytest.fixture
@@ -654,8 +655,9 @@ class TestGenerateAllCharts:
             assert stats['total_companies'] == 0
             assert stats['charts_generated'] == 0
             
-            # Restore original path
+            db.close()
             db.database_path = original_path
+            db.close()
             
         finally:
             try:

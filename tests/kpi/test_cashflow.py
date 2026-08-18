@@ -385,7 +385,7 @@ class TestCalculateAllCashflowKPIs:
 class TestCSVGeneration:
     """Test cases for CSV generation."""
 
-    def test_generate_csv(self):
+    def test_generate_csv(self, tmp_path):
         """Test CSV generation."""
         results = [
             {
@@ -403,23 +403,17 @@ class TestCSVGeneration:
             }
         ]
         
-        output_path = "output/test_capital_allocation.csv"
-        generate_capital_allocation_csv(results, output_path)
+        output_path = tmp_path / "test_capital_allocation.csv"
+        generate_capital_allocation_csv(results, str(output_path))
         
-        assert os.path.exists(output_path)
-        
-        # Clean up
-        if os.path.exists(output_path):
-            os.remove(output_path)
-            os.rmdir("output")
+        assert output_path.exists()
 
-    def test_generate_csv_empty_results(self):
+    def test_generate_csv_empty_results(self, tmp_path):
         """Test CSV generation with empty results."""
-        output_path = "output/test_empty.csv"
-        generate_capital_allocation_csv([], output_path)
+        output_path = tmp_path / "test_empty.csv"
+        generate_capital_allocation_csv([], str(output_path))
         
-        # Should not create file for empty results
-        assert not os.path.exists(output_path)
+        assert not output_path.exists()
 
 
 class TestEdgeCases:

@@ -1,0 +1,18 @@
+import sqlite3
+conn = sqlite3.connect(r'D:\New Project\Bluestock_Projects\Nifty 100\N100 Financial Intelligence Platform\N100_Financial_Intelligence_Platform\data\database\n100.db')
+cursor = conn.cursor()
+cursor.execute('PRAGMA table_info(cash_flow)')
+cols = cursor.fetchall()
+print('cash_flow columns:', [c[1] for c in cols])
+cursor.execute("SELECT * FROM cash_flow WHERE company_id='RELIANCE' LIMIT 3")
+rows = cursor.fetchall()
+print('Sample RELIANCE rows:')
+for row in rows:
+    print(row)
+cursor.execute('SELECT COUNT(*) FROM cash_flow WHERE cash_from_operating_activity IS NOT NULL')
+print('Non-null OCF count:', cursor.fetchone()[0])
+cursor.execute('SELECT COUNT(*) FROM cash_flow')
+print('Total cash_flow rows:', cursor.fetchone()[0])
+cursor.execute("SELECT DISTINCT company_id FROM cash_flow LIMIT 10")
+print('Sample companies:', [r[0] for r in cursor.fetchall()])
+conn.close()
