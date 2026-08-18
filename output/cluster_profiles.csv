@@ -1,0 +1,6 @@
+cluster_id,cluster_name,roe_mean,roe_median,debt_to_equity_mean,debt_to_equity_median,revenue_cagr_5yr_mean,revenue_cagr_5yr_median,fcf_cagr_5yr_mean,fcf_cagr_5yr_median,opm_mean,opm_median
+0,Core Market Performers,61.2824,16.35,200.3066,24.235,12.1074,11.02,7.3134,7.855,966.0944,22.5
+1,High Cash Flow Outlier,16.8,16.8,3.47,3.47,10.35,10.35,228.75,228.75,6906.0,6906.0
+2,Extreme ROE Outlier,17014.58,17014.58,0.35,0.35,19.3,19.3,71.57,71.57,15908.0,15908.0
+3,Banking Leverage Outlier,17.1,17.1,4088.82,4088.82,20.29,20.29,-7.36,-7.36,-57587.0,-57587.0
+4,Hyper Revenue Growth Outlier,1.82,1.82,0.0,0.0,561.31,561.31,7.855,7.855,78.0,78.0
