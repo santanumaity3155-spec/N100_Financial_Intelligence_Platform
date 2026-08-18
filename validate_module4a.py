@@ -222,8 +222,8 @@ def check_engine_evaluation():
 def check_pattern_mapping():
     """Check if existing pattern mapping can be identified."""
     try:
-        # Check the mapping in pages/07_capital.py
-        mapping_file = Path("pages/07_capital.py")
+        # Check the mapping in src/dashboard/pages/07_capital.py
+        mapping_file = Path("src/dashboard/pages/07_capital.py")
         if mapping_file.exists():
             content = mapping_file.read_text(encoding='utf-8')
             # Look for the pattern mapping
