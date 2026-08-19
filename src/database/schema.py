@@ -354,6 +354,9 @@ INDEXES = {
         "CREATE INDEX IF NOT EXISTS idx_health_scores_rating ON financial_health_scores(rating);",
         "CREATE INDEX IF NOT EXISTS idx_health_scores_overall ON financial_health_scores(overall_score);",
     ],
+    "sectors": [
+        "CREATE INDEX IF NOT EXISTS idx_sectors_company ON sectors(company_id);",
+    ],
     "peer_percentiles": [
         "CREATE INDEX IF NOT EXISTS idx_peer_percentiles_company ON peer_percentiles(company_id);",
         "CREATE INDEX IF NOT EXISTS idx_peer_percentiles_group ON peer_percentiles(peer_group_name);",

@@ -1,7 +1,7 @@
 # Sprint 3 Final Validation Report
 
-**Generated:** 2026-08-19 10:59:33
-**Execution Time:** 0.01 seconds
+**Generated:** 2026-08-19 11:34:37
+**Execution Time:** 0.04 seconds
 
 ## Overall Result
 
@@ -24,7 +24,7 @@
 - ✅ **database_connection**: Connection successful
 - ✅ **foreign_keys_enabled**: Foreign keys are enabled
 - ❌ **tables_exist**: Missing tables: ['companies', 'profit_loss', 'balance_sheet', 'cash_flow', 'analysis', 'documents', 'pros_cons', 'sectors', 'stock_prices', 'market_cap', 'financial_ratios', 'peer_groups', 'financial_health_scores', 'peer_percentiles']
-- ✅ **indexes_defined**: Indexes defined for 13 tables in schema
+- ✅ **indexes_defined**: Indexes defined for 14 tables in schema
 - ❌ **database_integrity**: Database corruption: 100
 
 #### Errors
@@ -76,7 +76,7 @@
 ### Health Score
 
 **Status:** ❌ FAIL
-**Execution Time:** 0.00s
+**Execution Time:** 0.04s
 
 #### Checks
 
@@ -154,7 +154,7 @@
 - **Total Companies:** 0
 - **Reports Generated:** 0
 - **Charts Generated:** 0
-- **Execution Time:** 0.01s
+- **Execution Time:** 0.04s
 
 ## Sprint Status
 

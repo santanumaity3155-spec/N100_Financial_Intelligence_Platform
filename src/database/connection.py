@@ -13,6 +13,7 @@ Responsibilities
 5. Safe connection closing
 """
 
+import threading
 import sqlite3
 from pathlib import Path
 from typing import Optional
@@ -26,110 +27,99 @@ logger = get_logger(__name__)
 
 class DatabaseConnection:
     """
-    SQLite Database Connection Manager
+    SQLite Database Connection Manager (Thread-Safe)
     """
 
     def __init__(self):
-
         DATABASE_DIR.mkdir(parents=True, exist_ok=True)
-
         self.database_path = SQLITE_DATABASE
+        self._local = threading.local()
 
-        self.connection: Optional[sqlite3.Connection] = None
+    @property
+    def connection(self) -> Optional[sqlite3.Connection]:
+        """
+        Get the thread-local SQLite connection.
+        """
+        return getattr(self._local, "conn", None)
+
+    @connection.setter
+    def connection(self, val: Optional[sqlite3.Connection]):
+        self._local.conn = val
 
     def connect(self) -> sqlite3.Connection:
         """
-        Establish database connection.
+        Establish thread-local database connection.
 
         Returns
         -------
         sqlite3.Connection
         """
-
-        if self.connection is not None:
+        conn = self.connection
+        if conn is not None:
             try:
-                self.connection.execute("SELECT 1")
+                conn.execute("SELECT 1")
             except (sqlite3.ProgrammingError, sqlite3.OperationalError):
-                self.connection = None
+                conn = None
 
-        if self.connection is None:
-
+        if conn is None:
             try:
-
-                self.connection = sqlite3.connect(
+                conn = sqlite3.connect(
                     self.database_path,
-                    check_same_thread=False
+                    check_same_thread=False,
+                    timeout=30.0
                 )
-
-                self.connection.row_factory = sqlite3.Row
-
-                self.enable_foreign_keys()
-
+                conn.row_factory = sqlite3.Row
+                conn.execute("PRAGMA foreign_keys = ON;")
+                self.connection = conn
                 logger.info(
-                    f"Connected to SQLite database: {self.database_path}"
+                    f"Connected to SQLite database (thread-safe): {self.database_path}"
                 )
-
             except sqlite3.Error as e:
-
                 logger.exception("Failed to connect to database")
-
                 raise e
 
-        return self.connection
+        return conn
 
     def enable_foreign_keys(self):
         """
         Enable SQLite Foreign Key Constraints.
         """
-
-        if self.connection:
-
-            self.connection.execute(
-                "PRAGMA foreign_keys = ON;"
-            )
-
-            logger.info("Foreign Keys Enabled")
+        conn = self.connect()
+        conn.execute("PRAGMA foreign_keys = ON;")
+        logger.info("Foreign Keys Enabled")
 
     def get_cursor(self) -> sqlite3.Cursor:
         """
-        Returns SQLite Cursor.
+        Returns SQLite Cursor for current thread.
         """
-
         return self.connect().cursor()
 
     def commit(self):
         """
-        Commit all pending transactions.
+        Commit pending transactions for current thread.
         """
-
-        if self.connection:
-
-            self.connection.commit()
-
+        conn = self.connection
+        if conn:
+            conn.commit()
             logger.info("Transaction Committed")
 
     def rollback(self):
         """
-        Rollback transaction.
+        Rollback transaction for current thread.
         """
-
-        if self.connection:
-
-            self.connection.rollback()
-
+        conn = self.connection
+        if conn:
+            conn.rollback()
             logger.warning("Transaction Rolled Back")
 
     def close(self):
         """
-        Close database connection.
+        Close database connection for current thread.
         """
-
-        if self.connection:
-
-            self.connection.close()
-
+        conn = self.connection
+        if conn:
+            conn.close()
             logger.info("Database Connection Closed")
-
             self.connection = None
 
 

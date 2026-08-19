@@ -51,6 +51,10 @@ def validate_float_param(val: Any, param_name: str) -> Optional[float]:
     """
     if val is None:
         return None
+    if hasattr(val, "default"):
+        if val.default is None or str(val.default).startswith("PydanticUndefined"):
+            return None
+        val = val.default
     if isinstance(val, (int, float)):
         if math.isnan(val) or math.isinf(val):
             raise HTTPException(
@@ -178,7 +182,7 @@ def get_screener_results(
                     "SELECT metric, metric_value FROM peer_percentiles WHERE company_id = ?",
                     (c_id,)
                 )
-                pp_dict = {row[0]: row[1] for row in pp_cur.fetchall()}
+                pp_dict = {row["metric"]: row["metric_value"] for row in pp_cur.fetchall()}
                 if fcf_val is None:
                     fcf_val = pp_dict.get("free_cash_flow")
                 if roe_val is None:
@@ -203,7 +207,7 @@ def get_screener_results(
                 if fcf_val is None or fcf_val < v_min_fcf:
                     continue
 
-            if sector and sector.strip():
+            if isinstance(sector, str) and sector.strip():
                 sec_clean = sector.strip().lower()
                 if sec_clean not in c_sec.lower() and c_sec.lower() not in sec_clean:
                     continue
