@@ -16,6 +16,7 @@ client = TestClient(app)
 # VALUATION TESTS
 # =============================================================================
 
+
 def test_market_cap_valuation_known():
     response = client.get("/api/v1/market-cap/TCS")
     assert response.status_code == 200
@@ -34,6 +35,7 @@ def test_market_cap_valuation_invalid_ticker():
 # =============================================================================
 # PORTFOLIO TESTS
 # =============================================================================
+
 
 def test_portfolio_stats():
     response = client.get("/api/v1/portfolio/stats")
@@ -56,6 +58,7 @@ def test_portfolio_stats():
 # =============================================================================
 # DOCUMENT TESTS
 # =============================================================================
+
 
 def test_company_documents_known():
     response = client.get("/api/v1/companies/ABB/documents")
@@ -80,12 +83,16 @@ def test_company_documents_invalid_ticker():
 # SECURITY TESTS
 # =============================================================================
 
-@pytest.mark.parametrize("payload", [
-    "' OR 1=1 --",
-    "../../secret",
-    "<script>alert(1)</script>",
-    "'; DROP TABLE companies; --",
-])
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        "' OR 1=1 --",
+        "../../secret",
+        "<script>alert(1)</script>",
+        "'; DROP TABLE companies; --",
+    ],
+)
 def test_security_malicious_inputs(payload):
     # Test path parameter security
     res_path = client.get(f"/api/v1/companies/{payload}")

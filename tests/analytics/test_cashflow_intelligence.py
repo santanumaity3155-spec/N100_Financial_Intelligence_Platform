@@ -51,16 +51,21 @@ from src.module3_cashflow_intelligence import (
     process_all_companies,
 )
 
-
 # =============================================================================
 # TEST DATA HELPERS
 # =============================================================================
+
 
 def make_cf(rows):
     """Build a cash-flow DataFrame with the populated *_activity columns."""
     return pd.DataFrame(
         rows,
-        columns=["period", "operating_activity", "investing_activity", "financing_activity"],
+        columns=[
+            "period",
+            "operating_activity",
+            "investing_activity",
+            "financing_activity",
+        ],
     )
 
 
@@ -77,6 +82,7 @@ def make_bs(rows):
 # =============================================================================
 # PERIOD PARSING
 # =============================================================================
+
 
 class TestParsePeriod:
     """Period parsing and annual-period validation."""
@@ -111,20 +117,25 @@ class TestParsePeriod:
 # CFO QUALITY
 # =============================================================================
 
+
 class TestCFOQuality:
     """CFO Quality = average(CFO / PAT) over the latest 5 valid years."""
 
     def test_normal_average(self):
-        cf = make_cf([
-            ("Mar 2020", 200, -50, 0),
-            ("Mar 2021", 300, -50, 0),
-            ("Mar 2022", 400, -50, 0),
-        ])
-        pl = make_pl([
-            ("Mar 2020", 1000, 200),
-            ("Mar 2021", 1000, 300),
-            ("Mar 2022", 1000, 400),
-        ])
+        cf = make_cf(
+            [
+                ("Mar 2020", 200, -50, 0),
+                ("Mar 2021", 300, -50, 0),
+                ("Mar 2022", 400, -50, 0),
+            ]
+        )
+        pl = make_pl(
+            [
+                ("Mar 2020", 1000, 200),
+                ("Mar 2021", 1000, 300),
+                ("Mar 2022", 1000, 400),
+            ]
+        )
         result = compute_cfo_quality(cf, pl)
         # ratios: 1.0, 1.0, 1.0 -> average 1.0 -> Moderate (0.5 <= 1.0 <= 1.0)
         assert result["score"] == 1.0
@@ -146,14 +157,18 @@ class TestCFOQuality:
         assert result["label"] == "Accrual Risk"
 
     def test_pat_zero_skipped(self):
-        cf = make_cf([
-            ("Mar 2023", 100, -50, 0),
-            ("Mar 2024", 200, -50, 0),
-        ])
-        pl = make_pl([
-            ("Mar 2023", 1000, 0),   # PAT == 0 -> skipped, never fabricated
-            ("Mar 2024", 1000, 100),
-        ])
+        cf = make_cf(
+            [
+                ("Mar 2023", 100, -50, 0),
+                ("Mar 2024", 200, -50, 0),
+            ]
+        )
+        pl = make_pl(
+            [
+                ("Mar 2023", 1000, 0),  # PAT == 0 -> skipped, never fabricated
+                ("Mar 2024", 1000, 100),
+            ]
+        )
         result = compute_cfo_quality(cf, pl)
         assert result["score"] == 2.0
         assert result["years_used"] == 1
@@ -167,16 +182,20 @@ class TestCFOQuality:
 
     def test_legacy_and_canonical_periods_merged(self):
         # TCS-style mix of "Mar 2021" and legacy "Mar-22" must sort correctly.
-        cf = make_cf([
-            ("Mar 2021", 100, -50, 0),
-            ("Mar-22", 150, -50, 0),
-            ("Mar 2023", 200, -50, 0),
-        ])
-        pl = make_pl([
-            ("Mar 2021", 1000, 100),
-            ("Mar-22", 1000, 150),
-            ("Mar 2023", 1000, 200),
-        ])
+        cf = make_cf(
+            [
+                ("Mar 2021", 100, -50, 0),
+                ("Mar-22", 150, -50, 0),
+                ("Mar 2023", 200, -50, 0),
+            ]
+        )
+        pl = make_pl(
+            [
+                ("Mar 2021", 1000, 100),
+                ("Mar-22", 1000, 150),
+                ("Mar 2023", 1000, 200),
+            ]
+        )
         result = compute_cfo_quality(cf, pl)
         assert result["score"] == 1.0
         assert result["years_used"] == 3
@@ -185,6 +204,7 @@ class TestCFOQuality:
 # =============================================================================
 # CAPEX INTENSITY
 # =============================================================================
+
 
 class TestCapexIntensity:
     """CapEx Intensity = abs(investing_activity) / sales * 100 (latest year)."""
@@ -246,33 +266,40 @@ class TestCapexIntensity:
 # FREE CASH FLOW
 # =============================================================================
 
+
 class TestFreeCashFlow:
     """FCF = CFO - CapEx (CapEx = |investing_activity|)."""
 
     def test_fcf_canonical_columns(self):
-        cf = pd.DataFrame({
-            "cash_from_operating_activity": [1000.0],
-            "cash_from_investing_activity": [-300.0],
-        })
+        cf = pd.DataFrame(
+            {
+                "cash_from_operating_activity": [1000.0],
+                "cash_from_investing_activity": [-300.0],
+            }
+        )
         assert calculate_free_cash_flow(cf) == 700.0
 
     def test_fcf_computed_from_populated_activity_columns(self):
         # The engine computes FCF = OCF - |investing| even when the database
         # only populates the operating_activity / investing_activity columns.
-        cf = make_cf([
-            ("Mar 2023", 1000.0, -300.0, 0.0),
-            ("Mar 2024", 1200.0, -300.0, 0.0),
-        ])
+        cf = make_cf(
+            [
+                ("Mar 2023", 1000.0, -300.0, 0.0),
+                ("Mar 2024", 1200.0, -300.0, 0.0),
+            ]
+        )
         # FCF 2023 = 700, FCF 2024 = 900 -> 1-year CAGR = 900/700 - 1
         result = compute_fcf_cagr_5yr(cf)
         assert result["value"] is not None
         assert abs(result["value"] - ((900.0 / 700.0) - 1.0) * 100.0) < 0.05
 
     def test_fcf_positive_investing(self):
-        cf = pd.DataFrame({
-            "cash_from_operating_activity": [1000.0],
-            "cash_from_investing_activity": [300.0],
-        })
+        cf = pd.DataFrame(
+            {
+                "cash_from_operating_activity": [1000.0],
+                "cash_from_investing_activity": [300.0],
+            }
+        )
         assert calculate_free_cash_flow(cf) == 700.0
 
     def test_fcf_missing_ocf_none(self):
@@ -283,6 +310,7 @@ class TestFreeCashFlow:
 # =============================================================================
 # FCF CAGR (5 YEAR)
 # =============================================================================
+
 
 def _fcf_series(fcf_values):
     """Build 6 annual cash-flow rows that produce the given FCF values (OCF=FCF+100, investing=-100)."""
@@ -340,14 +368,16 @@ class TestFCFCagr:
 
     def test_missing_inputs_skipped(self):
         # One year with a missing OCF is skipped rather than treated as zero.
-        cf = make_cf([
-            ("Mar 2019", 200, -100, 0),
-            ("Mar 2020", np.nan, -100, 0),
-            ("Mar 2021", 220, -100, 0),
-            ("Mar 2022", 230, -100, 0),
-            ("Mar 2023", 240, -100, 0),
-            ("Mar 2024", 250, -100, 0),
-        ])
+        cf = make_cf(
+            [
+                ("Mar 2019", 200, -100, 0),
+                ("Mar 2020", np.nan, -100, 0),
+                ("Mar 2021", 220, -100, 0),
+                ("Mar 2022", 230, -100, 0),
+                ("Mar 2023", 240, -100, 0),
+                ("Mar 2024", 250, -100, 0),
+            ]
+        )
         result = compute_fcf_cagr_5yr(cf)
         assert result["value"] is not None
         assert result["flag"] is FLAG_NORMAL
@@ -357,6 +387,7 @@ class TestFCFCagr:
 # =============================================================================
 # FCF CONVERSION
 # =============================================================================
+
 
 class TestFCFConversion:
     """FCF Conversion = FCF / PAT * 100 for the latest year."""
@@ -392,7 +423,7 @@ class TestFCFConversion:
     def test_not_fcf_over_sales(self):
         # Must be FCF/PAT, not FCF/Sales and not OCF/PAT.
         cf = make_cf([("Mar 2024", 1000.0, -300.0, 0)])  # FCF = 700
-        pl = make_pl([("Mar 2024", 5000, 200)])           # FCF/PAT = 350%; FCF/Sales = 14%
+        pl = make_pl([("Mar 2024", 5000, 200)])  # FCF/PAT = 350%; FCF/Sales = 14%
         result = compute_fcf_conversion(cf, pl)
         assert result["value"] == 350.0
 
@@ -401,14 +432,17 @@ class TestFCFConversion:
 # DISTRESS SIGNAL
 # =============================================================================
 
+
 class TestDistressSignal:
     """Distress = latest-year CFO < 0 AND CFF > 0."""
 
     def test_distress_true(self):
-        cf = make_cf([
-            ("Mar 2023", 500, -100, -200),
-            ("Mar 2024", -100, -50, 300),
-        ])
+        cf = make_cf(
+            [
+                ("Mar 2023", 500, -100, -200),
+                ("Mar 2024", -100, -50, 300),
+            ]
+        )
         result = compute_distress_flag(cf)
         assert result["flag"] is True
         assert result["cfo"] == -100.0
@@ -438,55 +472,72 @@ class TestDistressSignal:
 # DELEVERAGING
 # =============================================================================
 
+
 class TestDeleveraging:
     """Deleveraging = latest CFF < 0 AND borrowings declining year-over-year."""
 
     def test_deleveraging_true(self):
-        cf = make_cf([
-            ("Mar 2023", 500, -100, -100),
-            ("Mar 2024", 400, -100, -300),
-        ])
-        bs = make_bs([
-            ("Mar 2023", 1000),
-            ("Mar 2024", 800),
-        ])
+        cf = make_cf(
+            [
+                ("Mar 2023", 500, -100, -100),
+                ("Mar 2024", 400, -100, -300),
+            ]
+        )
+        bs = make_bs(
+            [
+                ("Mar 2023", 1000),
+                ("Mar 2024", 800),
+            ]
+        )
         result = compute_deleveraging_flag(cf, bs)
         assert result["flag"] is True
         assert result["borrowings_change"] == -200.0
 
     def test_borrowings_rising_not_deleveraging(self):
-        cf = make_cf([
-            ("Mar 2023", 500, -100, -100),
-            ("Mar 2024", 400, -100, -300),
-        ])
-        bs = make_bs([
-            ("Mar 2023", 800),
-            ("Mar 2024", 1000),
-        ])
+        cf = make_cf(
+            [
+                ("Mar 2023", 500, -100, -100),
+                ("Mar 2024", 400, -100, -300),
+            ]
+        )
+        bs = make_bs(
+            [
+                ("Mar 2023", 800),
+                ("Mar 2024", 1000),
+            ]
+        )
         result = compute_deleveraging_flag(cf, bs)
         assert result["flag"] is False
 
     def test_positive_cff_not_deleveraging(self):
-        cf = make_cf([
-            ("Mar 2023", 500, -100, -100),
-            ("Mar 2024", 400, -100, 300),
-        ])
-        bs = make_bs([
-            ("Mar 2023", 1000),
-            ("Mar 2024", 800),
-        ])
+        cf = make_cf(
+            [
+                ("Mar 2023", 500, -100, -100),
+                ("Mar 2024", 400, -100, 300),
+            ]
+        )
+        bs = make_bs(
+            [
+                ("Mar 2023", 1000),
+                ("Mar 2024", 800),
+            ]
+        )
         result = compute_deleveraging_flag(cf, bs)
         assert result["flag"] is False
 
     def test_missing_borrowings_not_treated_as_zero(self):
-        cf = make_cf([
-            ("Mar 2023", 500, -100, -100),
-            ("Mar 2024", 400, -100, -300),
-        ])
-        bs = make_bs([
-            ("Mar 2023", np.nan),
-            ("Mar 2024", np.nan),
-        ])
+        cf = make_cf(
+            [
+                ("Mar 2023", 500, -100, -100),
+                ("Mar 2024", 400, -100, -300),
+            ]
+        )
+        bs = make_bs(
+            [
+                ("Mar 2023", np.nan),
+                ("Mar 2024", np.nan),
+            ]
+        )
         result = compute_deleveraging_flag(cf, bs)
         assert result["flag"] is False
 
@@ -500,6 +551,7 @@ class TestDeleveraging:
 # =============================================================================
 # CAPITAL ALLOCATION
 # =============================================================================
+
 
 class TestCapitalAllocation:
     """Capital allocation label reuses the existing classification engine."""
@@ -527,61 +579,64 @@ class TestCapitalAllocation:
 # OUTPUT GENERATION & SCHEMA
 # =============================================================================
 
+
 def sample_results_df():
     """A small synthetic results DataFrame with the module3 result schema."""
-    return pd.DataFrame([
-        {
-            "company_id": "COMP1",
-            "company_name": "Company One",
-            "sector": "IT Services",
-            "cfo_quality_score": 1.5,
-            "cfo_quality_label": "High Quality",
-            "capex_intensity_pct": 4.0,
-            "capex_label": "Moderate",
-            "fcf_cagr_5yr": 12.5,
-            "fcf_conversion_pct": 80.0,
-            "distress_flag": True,
-            "deleveraging_flag": False,
-            "capital_allocation_label": "GOOD",
-            "_cfo_value": -100.0,
-            "_cff_value": 500.0,
-            "_net_profit_latest": 200.0,
-        },
-        {
-            "company_id": "COMP2",
-            "company_name": "Company Two",
-            "sector": "Banks",
-            "cfo_quality_score": 0.8,
-            "cfo_quality_label": "Moderate",
-            "capex_intensity_pct": 10.0,
-            "capex_label": "Capital Intensive",
-            "fcf_cagr_5yr": None,
-            "fcf_conversion_pct": None,
-            "distress_flag": False,
-            "deleveraging_flag": True,
-            "capital_allocation_label": "WEAK",
-            "_cfo_value": 100.0,
-            "_cff_value": -200.0,
-            "_net_profit_latest": 150.0,
-        },
-        {
-            "company_id": "COMP3",
-            "company_name": "Company Three",
-            "sector": None,
-            "cfo_quality_score": None,
-            "cfo_quality_label": "Insufficient Data",
-            "capex_intensity_pct": None,
-            "capex_label": "Insufficient Data",
-            "fcf_cagr_5yr": None,
-            "fcf_conversion_pct": None,
-            "distress_flag": False,
-            "deleveraging_flag": False,
-            "capital_allocation_label": "Insufficient Data",
-            "_cfo_value": None,
-            "_cff_value": None,
-            "_net_profit_latest": None,
-        },
-    ])
+    return pd.DataFrame(
+        [
+            {
+                "company_id": "COMP1",
+                "company_name": "Company One",
+                "sector": "IT Services",
+                "cfo_quality_score": 1.5,
+                "cfo_quality_label": "High Quality",
+                "capex_intensity_pct": 4.0,
+                "capex_label": "Moderate",
+                "fcf_cagr_5yr": 12.5,
+                "fcf_conversion_pct": 80.0,
+                "distress_flag": True,
+                "deleveraging_flag": False,
+                "capital_allocation_label": "GOOD",
+                "_cfo_value": -100.0,
+                "_cff_value": 500.0,
+                "_net_profit_latest": 200.0,
+            },
+            {
+                "company_id": "COMP2",
+                "company_name": "Company Two",
+                "sector": "Banks",
+                "cfo_quality_score": 0.8,
+                "cfo_quality_label": "Moderate",
+                "capex_intensity_pct": 10.0,
+                "capex_label": "Capital Intensive",
+                "fcf_cagr_5yr": None,
+                "fcf_conversion_pct": None,
+                "distress_flag": False,
+                "deleveraging_flag": True,
+                "capital_allocation_label": "WEAK",
+                "_cfo_value": 100.0,
+                "_cff_value": -200.0,
+                "_net_profit_latest": 150.0,
+            },
+            {
+                "company_id": "COMP3",
+                "company_name": "Company Three",
+                "sector": None,
+                "cfo_quality_score": None,
+                "cfo_quality_label": "Insufficient Data",
+                "capex_intensity_pct": None,
+                "capex_label": "Insufficient Data",
+                "fcf_cagr_5yr": None,
+                "fcf_conversion_pct": None,
+                "distress_flag": False,
+                "deleveraging_flag": False,
+                "capital_allocation_label": "Insufficient Data",
+                "_cfo_value": None,
+                "_cff_value": None,
+                "_net_profit_latest": None,
+            },
+        ]
+    )
 
 
 class TestOutputSchema:
@@ -603,7 +658,13 @@ class TestOutputSchema:
         ]
 
     def test_distress_csv_columns_match_spec(self):
-        assert DISTRESS_CSV_COLUMNS == ["company_id", "sector", "CFO", "CFF", "latest_net_profit"]
+        assert DISTRESS_CSV_COLUMNS == [
+            "company_id",
+            "sector",
+            "CFO",
+            "CFF",
+            "latest_net_profit",
+        ]
 
     def test_build_output_dataframe(self):
         out = build_output_dataframe(sample_results_df())
@@ -683,8 +744,3 @@ class TestModule3Pipeline:
         assert len(results) == len(expected)
         assert set(results["company_id"]) == set(expected)
         assert results["company_id"].is_unique
-
-
-
-
-

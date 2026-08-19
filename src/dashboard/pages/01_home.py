@@ -34,6 +34,7 @@ logger = get_logger(__name__)
 # SIDEBAR - YEAR FILTER
 # =============================================================================
 
+
 def render_year_filter() -> int:
     """
     Render year selector in sidebar.
@@ -51,7 +52,7 @@ def render_year_filter() -> int:
         "Select Financial Year",
         options=available_years,
         index=len(available_years) - 1,  # Default to latest year
-        help="Select a year to filter all analytics"
+        help="Select a year to filter all analytics",
     )
 
     st.sidebar.markdown("---")
@@ -63,6 +64,7 @@ def render_year_filter() -> int:
 # =============================================================================
 # KPI CALCULATION FUNCTIONS
 # =============================================================================
+
 
 @st.cache_data(ttl=600)
 def calculate_home_kpis(year: int) -> dict:
@@ -87,7 +89,7 @@ def calculate_home_kpis(year: int) -> dict:
         "median_debt_to_equity": None,
         "total_companies": 0,
         "median_revenue_cagr_5yr": None,
-        "debt_free_companies": 0
+        "debt_free_companies": 0,
     }
 
     try:
@@ -174,7 +176,9 @@ def get_sector_breakdown(year: int) -> pd.DataFrame:
 
         # Calculate percentage
         total = sector_counts["Company Count"].sum()
-        sector_counts["Percentage"] = (sector_counts["Company Count"] / total * 100).round(2)
+        sector_counts["Percentage"] = (
+            sector_counts["Company Count"] / total * 100
+        ).round(2)
 
         logger.info(f"Sector breakdown calculated: {len(sector_counts)} sectors")
         return sector_counts
@@ -235,7 +239,9 @@ def get_top_quality_companies(year: int, top_n: int = 5) -> pd.DataFrame:
         if "roe" in quality_df.columns:
             roe_min, roe_max = quality_df["roe"].min(), quality_df["roe"].max()
             if roe_max > roe_min:
-                quality_df["roe_score"] = ((quality_df["roe"] - roe_min) / (roe_max - roe_min) * 100).fillna(50)
+                quality_df["roe_score"] = (
+                    (quality_df["roe"] - roe_min) / (roe_max - roe_min) * 100
+                ).fillna(50)
             else:
                 quality_df["roe_score"] = 50.0
         else:
@@ -243,9 +249,16 @@ def get_top_quality_companies(year: int, top_n: int = 5) -> pd.DataFrame:
 
         # Revenue CAGR score (higher is better)
         if "revenue_cagr_5yr" in quality_df.columns:
-            cagr_min, cagr_max = quality_df["revenue_cagr_5yr"].min(), quality_df["revenue_cagr_5yr"].max()
+            cagr_min, cagr_max = (
+                quality_df["revenue_cagr_5yr"].min(),
+                quality_df["revenue_cagr_5yr"].max(),
+            )
             if cagr_max > cagr_min:
-                quality_df["cagr_score"] = ((quality_df["revenue_cagr_5yr"] - cagr_min) / (cagr_max - cagr_min) * 100).fillna(50)
+                quality_df["cagr_score"] = (
+                    (quality_df["revenue_cagr_5yr"] - cagr_min)
+                    / (cagr_max - cagr_min)
+                    * 100
+                ).fillna(50)
             else:
                 quality_df["cagr_score"] = 50.0
         else:
@@ -253,10 +266,14 @@ def get_top_quality_companies(year: int, top_n: int = 5) -> pd.DataFrame:
 
         # Debt-to-Equity score (lower is better, so invert)
         if "debt_equity" in quality_df.columns:
-            de_values = quality_df["debt_equity"].fillna(quality_df["debt_equity"].median())
+            de_values = quality_df["debt_equity"].fillna(
+                quality_df["debt_equity"].median()
+            )
             de_max = de_values.max()
             if de_max > 0:
-                quality_df["de_score"] = ((de_max - de_values) / de_max * 100).clip(0, 100)
+                quality_df["de_score"] = ((de_max - de_values) / de_max * 100).clip(
+                    0, 100
+                )
             else:
                 quality_df["de_score"] = 100.0
         else:
@@ -264,9 +281,9 @@ def get_top_quality_companies(year: int, top_n: int = 5) -> pd.DataFrame:
 
         # Composite score (weighted average)
         quality_df["composite_score"] = (
-            quality_df["roe_score"] * 0.40 +
-            quality_df["cagr_score"] * 0.35 +
-            quality_df["de_score"] * 0.25
+            quality_df["roe_score"] * 0.40
+            + quality_df["cagr_score"] * 0.35
+            + quality_df["de_score"] * 0.25
         )
 
         # Get top N companies
@@ -275,13 +292,18 @@ def get_top_quality_companies(year: int, top_n: int = 5) -> pd.DataFrame:
         # Merge with company info
         if not companies_df.empty:
             top_companies = top_companies.merge(
-                companies_df[["ticker", "name", "sector"]],
-                on="ticker",
-                how="left"
+                companies_df[["ticker", "name", "sector"]], on="ticker", how="left"
             )
 
         # Select and rename columns
-        result_columns = ["ticker", "name", "sector", "composite_score", "roe", "revenue_cagr_5yr"]
+        result_columns = [
+            "ticker",
+            "name",
+            "sector",
+            "composite_score",
+            "roe",
+            "revenue_cagr_5yr",
+        ]
         result_columns = [col for col in result_columns if col in top_companies.columns]
 
         result = top_companies[result_columns].copy()
@@ -293,7 +315,7 @@ def get_top_quality_companies(year: int, top_n: int = 5) -> pd.DataFrame:
             "sector": "Sector",
             "composite_score": "Composite Score",
             "roe": "ROE (%)",
-            "revenue_cagr_5yr": "Revenue CAGR 5Y (%)"
+            "revenue_cagr_5yr": "Revenue CAGR 5Y (%)",
         }
         result = result.rename(columns=column_mapping)
 
@@ -313,6 +335,7 @@ def get_top_quality_companies(year: int, top_n: int = 5) -> pd.DataFrame:
 # =============================================================================
 # UI RENDERING FUNCTIONS
 # =============================================================================
+
 
 def render_kpi_cards(kpis: dict) -> None:
     """
@@ -334,7 +357,7 @@ def render_kpi_cards(kpis: dict) -> None:
             st.metric(
                 label="Average ROE",
                 value=f"{avg_roe:.2f}%",
-                help="Average Return on Equity across all companies"
+                help="Average Return on Equity across all companies",
             )
         else:
             st.metric(label="Average ROE", value="N/A")
@@ -345,7 +368,7 @@ def render_kpi_cards(kpis: dict) -> None:
             st.metric(
                 label="Median PE",
                 value=f"{median_pe:.1f}x",
-                help="Median Price-to-Earnings ratio"
+                help="Median Price-to-Earnings ratio",
             )
         else:
             st.metric(label="Median PE", value="N/A")
@@ -356,7 +379,7 @@ def render_kpi_cards(kpis: dict) -> None:
             st.metric(
                 label="Median Debt-to-Equity",
                 value=f"{median_de:.2f}",
-                help="Median Debt-to-Equity ratio"
+                help="Median Debt-to-Equity ratio",
             )
         else:
             st.metric(label="Median Debt-to-Equity", value="N/A")
@@ -366,7 +389,7 @@ def render_kpi_cards(kpis: dict) -> None:
         st.metric(
             label="Total Companies",
             value=f"{total}",
-            help="Total number of companies in database"
+            help="Total number of companies in database",
         )
 
     with col5:
@@ -375,7 +398,7 @@ def render_kpi_cards(kpis: dict) -> None:
             st.metric(
                 label="Median Revenue CAGR 5Y",
                 value=f"{median_cagr:.2f}%",
-                help="Median 5-year Revenue CAGR"
+                help="Median 5-year Revenue CAGR",
             )
         else:
             st.metric(label="Median Revenue CAGR 5Y", value="N/A")
@@ -385,7 +408,7 @@ def render_kpi_cards(kpis: dict) -> None:
         st.metric(
             label="Debt-Free Companies",
             value=f"{debt_free}",
-            help="Number of companies with zero debt"
+            help="Number of companies with zero debt",
         )
 
     st.markdown("---")
@@ -417,30 +440,26 @@ def render_sector_breakdown(sector_df: pd.DataFrame) -> None:
             names="Sector",
             hole=0.4,
             title="Sector Distribution",
-            color_discrete_sequence=px.colors.qualitative.Set3
+            color_discrete_sequence=px.colors.qualitative.Set3,
         )
 
         # Update layout
         fig.update_traces(
             textposition="inside",
             textinfo="percent+label",
-            hovertemplate="<b>%{label}</b><br>" +
-                         "Companies: %{value}<br>" +
-                         "Percentage: %{percent}<br>" +
-                         "<extra></extra>"
+            hovertemplate="<b>%{label}</b><br>"
+            + "Companies: %{value}<br>"
+            + "Percentage: %{percent}<br>"
+            + "<extra></extra>",
         )
 
         fig.update_layout(
             showlegend=True,
             legend=dict(
-                orientation="v",
-                yanchor="middle",
-                y=0.5,
-                xanchor="left",
-                x=1.02
+                orientation="v", yanchor="middle", y=0.5, xanchor="left", x=1.02
             ),
             height=500,
-            margin=dict(l=20, r=20, t=40, b=20)
+            margin=dict(l=20, r=20, t=40, b=20),
         )
 
         st.plotly_chart(fig, use_container_width=True)
@@ -458,10 +477,12 @@ def render_sector_breakdown(sector_df: pd.DataFrame) -> None:
             column_config={
                 "Sector": st.column_config.TextColumn("Sector", width="medium"),
                 "Company Count": st.column_config.NumberColumn("Count", width="small"),
-                "Percentage": st.column_config.NumberColumn("%", width="small", format="%.2f")
+                "Percentage": st.column_config.NumberColumn(
+                    "%", width="small", format="%.2f"
+                ),
             },
             hide_index=True,
-            use_container_width=True
+            use_container_width=True,
         )
 
 
@@ -491,12 +512,18 @@ def render_top_quality_companies(top_df: pd.DataFrame) -> None:
             "Ticker": st.column_config.TextColumn("Ticker", width="small"),
             "Company Name": st.column_config.TextColumn("Company Name", width="medium"),
             "Sector": st.column_config.TextColumn("Sector", width="medium"),
-            "Composite Score": st.column_config.NumberColumn("Score", width="small", format="%.2f"),
-            "ROE (%)": st.column_config.NumberColumn("ROE", width="small", format="%.2f"),
-            "Revenue CAGR 5Y (%)": st.column_config.NumberColumn("CAGR", width="small", format="%.2f")
+            "Composite Score": st.column_config.NumberColumn(
+                "Score", width="small", format="%.2f"
+            ),
+            "ROE (%)": st.column_config.NumberColumn(
+                "ROE", width="small", format="%.2f"
+            ),
+            "Revenue CAGR 5Y (%)": st.column_config.NumberColumn(
+                "CAGR", width="small", format="%.2f"
+            ),
         },
         hide_index=True,
-        use_container_width=True
+        use_container_width=True,
     )
 
 
@@ -524,7 +551,7 @@ def render_quick_stats() -> None:
             st.metric(
                 label="Companies Loaded",
                 value=f"{count}",
-                help="Total companies in database"
+                help="Total companies in database",
             )
 
         with col3:
@@ -541,14 +568,14 @@ def render_quick_stats() -> None:
             st.metric(
                 label="Latest Financial Year",
                 value=f"{latest_year}",
-                help="Most recent year with financial data"
+                help="Most recent year with financial data",
             )
 
         with col4:
             st.metric(
                 label="Dashboard Version",
                 value="2.0.0",
-                help="Current dashboard version"
+                help="Current dashboard version",
             )
 
     except Exception as e:
@@ -559,6 +586,7 @@ def render_quick_stats() -> None:
 # =============================================================================
 # MAIN PAGE FUNCTION
 # =============================================================================
+
 
 def main() -> None:
     """

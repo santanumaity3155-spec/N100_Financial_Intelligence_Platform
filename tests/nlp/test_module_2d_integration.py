@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 from src.nlp import pros_cons_generator as pg
+
 try:
     from tests.nlp.test_pros_cons_generator import make_context
 except ImportError:
@@ -26,7 +27,9 @@ def sample_rule_results():
     return _make
 
 
-def test_generate_all_pros_cons_applies_threshold_and_keeps_valid_rows(monkeypatch, sample_rule_results):
+def test_generate_all_pros_cons_applies_threshold_and_keeps_valid_rows(
+    monkeypatch, sample_rule_results
+):
     def fake_get_company_context(company_id, conn=None, data=None):
         return make_context(company_id=company_id)
 
@@ -44,7 +47,9 @@ def test_generate_all_pros_cons_applies_threshold_and_keeps_valid_rows(monkeypat
         ]
 
     monkeypatch.setattr(pg, "get_company_context", fake_get_company_context)
-    monkeypatch.setattr(pg, "evaluate_rules_for_company", fake_evaluate_rules_for_company)
+    monkeypatch.setattr(
+        pg, "evaluate_rules_for_company", fake_evaluate_rules_for_company
+    )
 
     df, stats = pg.generate_all_pros_cons(["C1", "C2"], conn=None)
 
@@ -56,48 +61,68 @@ def test_generate_all_pros_cons_applies_threshold_and_keeps_valid_rows(monkeypat
 
 
 def test_validate_output_schema_rejects_confidence_60():
-    df = pd.DataFrame([
-        {
-            "company_id": "C1",
-            "type": "pro",
-            "rule_id": "PRO_01",
-            "text": "ok",
-            "confidence_pct": 60.0,
-        }
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "company_id": "C1",
+                "type": "pro",
+                "rule_id": "PRO_01",
+                "text": "ok",
+                "confidence_pct": 60.0,
+            }
+        ]
+    )
     valid, issues = pg.validate_output_schema(df)
     assert valid is False
     assert any("confidence_pct" in issue for issue in issues)
 
 
 def test_validate_output_schema_rejects_invalid_rule_id_and_missing_company():
-    df = pd.DataFrame([
-        {
-            "company_id": "",
-            "type": "pro",
-            "rule_id": "PRO_01",
-            "text": "ok",
-            "confidence_pct": 70.0,
-        },
-        {
-            "company_id": "C2",
-            "type": "con",
-            "rule_id": "BAD_RULE",
-            "text": "bad",
-            "confidence_pct": 75.0,
-        },
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "company_id": "",
+                "type": "pro",
+                "rule_id": "PRO_01",
+                "text": "ok",
+                "confidence_pct": 70.0,
+            },
+            {
+                "company_id": "C2",
+                "type": "con",
+                "rule_id": "BAD_RULE",
+                "text": "bad",
+                "confidence_pct": 75.0,
+            },
+        ]
+    )
     valid, issues = pg.validate_output_schema(df)
     assert valid is False
-    assert any("company_id" in issue.lower() or "rule_id" in issue.lower() for issue in issues)
+    assert any(
+        "company_id" in issue.lower() or "rule_id" in issue.lower() for issue in issues
+    )
 
 
 def test_validate_company_coverage_flags_missing_both_types():
     companies = ["C1", "C2", "C3"]
-    df = pd.DataFrame([
-        {"company_id": "C1", "type": "pro", "rule_id": "PRO_01", "text": "x", "confidence_pct": 80.0},
-        {"company_id": "C2", "type": "con", "rule_id": "CON_01", "text": "x", "confidence_pct": 80.0},
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "company_id": "C1",
+                "type": "pro",
+                "rule_id": "PRO_01",
+                "text": "x",
+                "confidence_pct": 80.0,
+            },
+            {
+                "company_id": "C2",
+                "type": "con",
+                "rule_id": "CON_01",
+                "text": "x",
+                "confidence_pct": 80.0,
+            },
+        ]
+    )
     stats = pg.validate_company_coverage(companies, df)
     assert stats["companies_total"] == 3
     assert stats["missing_pro"] == 2
@@ -105,10 +130,24 @@ def test_validate_company_coverage_flags_missing_both_types():
 
 
 def test_duplicate_identical_signal_rows_are_detected():
-    df = pd.DataFrame([
-        {"company_id": "C1", "type": "pro", "rule_id": "PRO_01", "text": "x", "confidence_pct": 80.0},
-        {"company_id": "C1", "type": "pro", "rule_id": "PRO_01", "text": "x", "confidence_pct": 80.0},
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "company_id": "C1",
+                "type": "pro",
+                "rule_id": "PRO_01",
+                "text": "x",
+                "confidence_pct": 80.0,
+            },
+            {
+                "company_id": "C1",
+                "type": "pro",
+                "rule_id": "PRO_01",
+                "text": "x",
+                "confidence_pct": 80.0,
+            },
+        ]
+    )
     valid, issues = pg.validate_output_schema(df)
     assert valid is False
     assert any("duplicate" in issue.lower() for issue in issues)
@@ -120,11 +159,13 @@ def test_confidence_6001_is_included_and_60_is_excluded():
 
 
 def test_load_all_company_ids_reports_sanity_stats(monkeypatch):
-    df = pd.DataFrame([
-        {"company_id": "C1", "company_name": "Alpha", "sector": "Tech"},
-        {"company_id": "C1", "company_name": "Alpha Duplicate", "sector": "Tech"},
-        {"company_id": None, "company_name": "Missing", "sector": "Tech"},
-    ])
+    df = pd.DataFrame(
+        [
+            {"company_id": "C1", "company_name": "Alpha", "sector": "Tech"},
+            {"company_id": "C1", "company_name": "Alpha Duplicate", "sector": "Tech"},
+            {"company_id": None, "company_name": "Missing", "sector": "Tech"},
+        ]
+    )
     monkeypatch.setattr(pg, "_load_table", lambda *args, **kwargs: df)
 
     ids, stats = pg.load_all_company_ids(None)
@@ -135,10 +176,26 @@ def test_load_all_company_ids_reports_sanity_stats(monkeypatch):
 
 
 def test_coverage_failures_report_is_generated_only_when_needed(tmp_path):
-    failures = pd.DataFrame([
-        {"company_id": "C1", "company_name": "Alpha", "sector": "Tech", "pro_count": 0, "con_count": 0, "failure_reason": "missing metrics"}
-    ])
+    failures = pd.DataFrame(
+        [
+            {
+                "company_id": "C1",
+                "company_name": "Alpha",
+                "sector": "Tech",
+                "pro_count": 0,
+                "con_count": 0,
+                "failure_reason": "missing metrics",
+            }
+        ]
+    )
     target = tmp_path / "coverage_failures.csv"
     pg.write_coverage_failures_csv(failures, target)
     assert target.exists()
-    assert list(pd.read_csv(target).columns) == ["company_id", "company_name", "sector", "pro_count", "con_count", "failure_reason"]
+    assert list(pd.read_csv(target).columns) == [
+        "company_id",
+        "company_name",
+        "sector",
+        "pro_count",
+        "con_count",
+        "failure_reason",
+    ]

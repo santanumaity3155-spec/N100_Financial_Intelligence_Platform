@@ -35,7 +35,14 @@ def test_03_required_company_fields_exist():
     data = response.json()
     assert len(data) > 0
     first = data[0]
-    required_fields = ["company_id", "company_name", "broad_sector", "sub_sector", "roe_pct", "roce_pct"]
+    required_fields = [
+        "company_id",
+        "company_name",
+        "broad_sector",
+        "sub_sector",
+        "roe_pct",
+        "roce_pct",
+    ]
     for field in required_fields:
         assert field in first, f"Field '{field}' missing from GET /companies response"
 
@@ -67,7 +74,10 @@ def test_06_search_by_company_name_works():
     data = response.json()
     assert len(data) > 0
     for comp in data:
-        assert "tata" in comp["company_name"].lower() or "tata" in comp["company_id"].lower()
+        assert (
+            "tata" in comp["company_name"].lower()
+            or "tata" in comp["company_id"].lower()
+        )
 
 
 def test_07_search_by_ticker_works():

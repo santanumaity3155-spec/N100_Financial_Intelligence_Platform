@@ -18,13 +18,25 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.nlp.pros_cons_generator import RuleResult, TYPE_CON, validate_confidence
 from src.nlp.con_rules import (
-    CON_01, CON_02, CON_03, CON_04, CON_05, CON_06,
-    CON_07, CON_08, CON_09, CON_10, CON_11, CON_12,
+    CON_01,
+    CON_02,
+    CON_03,
+    CON_04,
+    CON_05,
+    CON_06,
+    CON_07,
+    CON_08,
+    CON_09,
+    CON_10,
+    CON_11,
+    CON_12,
 )
+
 try:
     from tests.nlp.test_pros_cons_generator import make_context
 except ImportError:
     from .test_pros_cons_generator import make_context
+
 
 def _assert_triggered(result: RuleResult) -> None:
     assert result.triggered is True
@@ -33,14 +45,17 @@ def _assert_triggered(result: RuleResult) -> None:
     assert validate_confidence(result.confidence_pct)
     assert 0.0 <= result.confidence_pct <= 100.0
 
+
 def _assert_not_triggered(result: RuleResult) -> None:
     assert result.triggered is False
     assert result.confidence_pct == 0.0
     assert result.text == ""
 
+
 # =============================================================================
 # BATCH 1: CON_01 - CON_03
 # =============================================================================
+
 
 class TestCON01:
     def test_de_high_non_financial(self):
@@ -58,6 +73,7 @@ class TestCON01:
     def test_missing_de(self):
         ctx = make_context(latest={}, is_financial=False)
         _assert_not_triggered(CON_01().evaluate(ctx))
+
 
 class TestCON02:
     def test_3_negative_fcf_years(self):
@@ -80,6 +96,7 @@ class TestCON02:
         ctx = make_context(history={"free_cash_flow": [-5, -10, np.nan, -15, -20]})
         _assert_not_triggered(CON_02().evaluate(ctx))
 
+
 class TestCON03:
     def test_3_opm_declines(self):
         ctx = make_context(history={"opm": [30, 28, 25, 22]})
@@ -101,9 +118,11 @@ class TestCON03:
         ctx = make_context(history={"opm": [30, 28, np.nan, 25, 22]})
         _assert_not_triggered(CON_03().evaluate(ctx))
 
+
 # =============================================================================
 # BATCH 2: CON_04 - CON_06
 # =============================================================================
+
 
 class TestCON04:
     def test_negative_net_profit(self):
@@ -122,6 +141,7 @@ class TestCON04:
         ctx = make_context(latest={})
         _assert_not_triggered(CON_04().evaluate(ctx))
 
+
 class TestCON05:
     def test_2_revenue_declines(self):
         ctx = make_context(history={"revenue": [100, 95, 90]})
@@ -138,6 +158,7 @@ class TestCON05:
     def test_increasing_revenue(self):
         ctx = make_context(history={"revenue": [90, 95, 100]})
         _assert_not_triggered(CON_05().evaluate(ctx))
+
 
 class TestCON06:
     def test_icr_low(self):
@@ -156,9 +177,11 @@ class TestCON06:
         ctx = make_context(latest={})
         _assert_not_triggered(CON_06().evaluate(ctx))
 
+
 # =============================================================================
 # BATCH 3: CON_07 - CON_09
 # =============================================================================
+
 
 class TestCON07:
     def test_payout_high(self):
@@ -172,6 +195,7 @@ class TestCON07:
     def test_payout_low(self):
         ctx = make_context(latest={"dividend_payout": 80.0})
         _assert_not_triggered(CON_07().evaluate(ctx))
+
 
 class TestCON08:
     def test_3_de_increases(self):
@@ -189,6 +213,7 @@ class TestCON08:
     def test_decreasing_de(self):
         ctx = make_context(history={"debt_to_equity": [1.5, 1.1, 0.8, 0.5]})
         _assert_not_triggered(CON_08().evaluate(ctx))
+
 
 class TestCON09:
     def test_3_eps_declines(self):
@@ -211,9 +236,11 @@ class TestCON09:
         ctx = make_context(history={"eps": [5, 2, -1, -5]})
         _assert_triggered(CON_09().evaluate(ctx))
 
+
 # =============================================================================
 # BATCH 4: CON_10 - CON_12
 # =============================================================================
+
 
 class TestCON10:
     def test_roce_low(self):
@@ -227,6 +254,7 @@ class TestCON10:
     def test_roce_high(self):
         ctx = make_context(latest={"roce": 12.0})
         _assert_not_triggered(CON_10().evaluate(ctx))
+
 
 class TestCON11:
     def test_net_debt_high(self):
@@ -253,6 +281,7 @@ class TestCON11:
         ctx = make_context(latest={"net_debt": 350})
         _assert_not_triggered(CON_11().evaluate(ctx))
 
+
 class TestCON12:
     def test_rev_cagr_low(self):
         ctx = make_context(trailing={"revenue_cagr": 4.0})
@@ -270,14 +299,26 @@ class TestCON12:
         ctx = make_context(trailing={})
         _assert_not_triggered(CON_12().evaluate(ctx))
 
+
 # =============================================================================
 # Edge cases
 # =============================================================================
 
+
 class TestConEdgeCases:
     RULES = [
-        CON_01(), CON_02(), CON_03(), CON_04(), CON_05(), CON_06(),
-        CON_07(), CON_08(), CON_09(), CON_10(), CON_11(), CON_12(),
+        CON_01(),
+        CON_02(),
+        CON_03(),
+        CON_04(),
+        CON_05(),
+        CON_06(),
+        CON_07(),
+        CON_08(),
+        CON_09(),
+        CON_10(),
+        CON_11(),
+        CON_12(),
     ]
 
     def test_none_context_never_crashes(self):
@@ -294,13 +335,15 @@ class TestConEdgeCases:
             assert result.triggered is False
 
     def test_all_nan_history_never_crashes(self):
-        ctx = make_context(history={
-            "free_cash_flow": [np.nan, np.nan],
-            "opm": [np.nan, np.nan],
-            "revenue": [np.nan, np.nan],
-            "debt_to_equity": [np.nan, np.nan],
-            "eps": [np.nan, np.nan],
-        })
+        ctx = make_context(
+            history={
+                "free_cash_flow": [np.nan, np.nan],
+                "opm": [np.nan, np.nan],
+                "revenue": [np.nan, np.nan],
+                "debt_to_equity": [np.nan, np.nan],
+                "eps": [np.nan, np.nan],
+            }
+        )
         for rule in self.RULES:
             result = rule.evaluate(ctx)
             assert isinstance(result, RuleResult)

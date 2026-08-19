@@ -20,16 +20,18 @@ def test_app_import_and_entry_point():
         import src.dashboard.app as app_module
 
         # Check that it has a main function
-        assert hasattr(app_module, 'main'), "app.py should have a main function"
+        assert hasattr(app_module, "main"), "app.py should have a main function"
         assert callable(app_module.main), "main should be callable"
 
         # Check that it has the expected attributes
-        assert hasattr(app_module, 'APP_TITLE'), "app.py should have APP_TITLE"
-        assert hasattr(app_module, 'APP_VERSION'), "app.py should have APP_VERSION"
-        assert hasattr(app_module, 'APP_MODULE'), "app.py should have APP_MODULE"
+        assert hasattr(app_module, "APP_TITLE"), "app.py should have APP_TITLE"
+        assert hasattr(app_module, "APP_VERSION"), "app.py should have APP_VERSION"
+        assert hasattr(app_module, "APP_MODULE"), "app.py should have APP_MODULE"
 
         # Check that APP_TITLE is set correctly
-        assert app_module.APP_TITLE == "Nifty 100 Analytics", f"Expected 'Nifty 100 Analytics', got {app_module.APP_TITLE}"
+        assert (
+            app_module.APP_TITLE == "Nifty 100 Analytics"
+        ), f"Expected 'Nifty 100 Analytics', got {app_module.APP_TITLE}"
 
     except Exception as e:
         raise AssertionError(f"Failed to import or validate app.py: {e}")
@@ -46,7 +48,9 @@ def test_pages_directory_structure():
     py_files = list(pages_dir.glob("*.py"))
 
     # Should have __init__.py and 8 page files
-    assert len(py_files) == 9, f"Expected 9 Python files in pages directory (__init__.py + 8 pages), got {len(py_files)}"
+    assert (
+        len(py_files) == 9
+    ), f"Expected 9 Python files in pages directory (__init__.py + 8 pages), got {len(py_files)}"
 
     # Check for __init__.py
     init_file = pages_dir / "__init__.py"
@@ -61,12 +65,14 @@ def test_pages_directory_structure():
         "05_trends.py",
         "06_sectors.py",
         "07_capital.py",
-        "08_reports.py"
+        "08_reports.py",
     ]
 
     for page_file in expected_pages:
         page_path = pages_dir / page_file
-        assert page_path.exists(), f"Expected page file {page_file} not found in pages directory"
+        assert (
+            page_path.exists()
+        ), f"Expected page file {page_file} not found in pages directory"
 
     # Most importantly: check that there are NO duplicate URL pathnames
     # Streamlit derives URL pathname from filename by stripping leading numbers and underscores
@@ -83,20 +89,37 @@ def test_pages_directory_structure():
         url_pathname = stem
         # Remove leading digits and underscores
         i = 0
-        while i < len(url_pathname) and (url_pathname[i].isdigit() or url_pathname[i] == '_'):
+        while i < len(url_pathname) and (
+            url_pathname[i].isdigit() or url_pathname[i] == "_"
+        ):
             i += 1
         url_pathname = url_pathname[i:]
 
         # Check for duplicates
-        assert url_pathname not in url_pathnames, f"Duplicate URL pathname detected: '{url_pathname}' from file {py_file.name}"
+        assert (
+            url_pathname not in url_pathnames
+        ), f"Duplicate URL pathname detected: '{url_pathname}' from file {py_file.name}"
         url_pathnames.add(url_pathname)
 
     # Verify we have exactly 8 unique URL pathnames (one for each page)
-    assert len(url_pathnames) == 8, f"Expected 8 unique URL pathnames, got {len(url_pathnames)}"
+    assert (
+        len(url_pathnames) == 8
+    ), f"Expected 8 unique URL pathnames, got {len(url_pathnames)}"
 
     # Verify the expected pathnames are present
-    expected_pathnames = {"home", "profile", "screener", "peers", "trends", "sectors", "capital", "reports"}
-    assert url_pathnames == expected_pathnames, f"URL pathnames mismatch. Expected: {expected_pathnames}, Got: {url_pathnames}"
+    expected_pathnames = {
+        "home",
+        "profile",
+        "screener",
+        "peers",
+        "trends",
+        "sectors",
+        "capital",
+        "reports",
+    }
+    assert (
+        url_pathnames == expected_pathnames
+    ), f"URL pathnames mismatch. Expected: {expected_pathnames}, Got: {url_pathnames}"
 
 
 def test_dashboard_component_imports():
@@ -106,16 +129,20 @@ def test_dashboard_component_imports():
         "src.dashboard.components.charts",
         "src.dashboard.components.filters",
         "src.dashboard.components.sidebar",
-        "src.dashboard.components.tables"
+        "src.dashboard.components.tables",
     ]
 
     for component in components:
         try:
             importlib.import_module(component)
         except ImportError as e:
-            raise AssertionError(f"Failed to import dashboard component {component}: {e}")
+            raise AssertionError(
+                f"Failed to import dashboard component {component}: {e}"
+            )
         except Exception as e:
-            raise AssertionError(f"Error importing dashboard component {component}: {e}")
+            raise AssertionError(
+                f"Error importing dashboard component {component}: {e}"
+            )
 
     # Also test that the package can be imported
     try:
@@ -150,7 +177,9 @@ def test_company_count_consistency():
         companies_df = get_companies()
 
         # Should return a DataFrame
-        assert hasattr(companies_df, 'shape'), "get_companies should return a DataFrame-like object"
+        assert hasattr(
+            companies_df, "shape"
+        ), "get_companies should return a DataFrame-like object"
 
         # Even if empty, should not crash
         # In a real implementation, we might expect some companies, but for foundation testing
@@ -170,14 +199,26 @@ def test_empty_data_handling():
         home_module = importlib.import_module("src.dashboard.pages.01_home")
 
         # Check that key functions exist
-        assert hasattr(home_module, 'calculate_home_kpis'), "home module should have calculate_home_kpis function"
-        assert hasattr(home_module, 'get_sector_breakdown'), "home module should have get_sector_breakdown function"
-        assert hasattr(home_module, 'get_top_quality_companies'), "home module should have get_top_quality_companies function"
+        assert hasattr(
+            home_module, "calculate_home_kpis"
+        ), "home module should have calculate_home_kpis function"
+        assert hasattr(
+            home_module, "get_sector_breakdown"
+        ), "home module should have get_sector_breakdown function"
+        assert hasattr(
+            home_module, "get_top_quality_companies"
+        ), "home module should have get_top_quality_companies function"
 
         # These should be callable
-        assert callable(home_module.calculate_home_kpis), "calculate_home_kpis should be callable"
-        assert callable(home_module.get_sector_breakdown), "get_sector_breakdown should be callable"
-        assert callable(home_module.get_top_quality_companies), "get_top_quality_companies should be callable"
+        assert callable(
+            home_module.calculate_home_kpis
+        ), "calculate_home_kpis should be callable"
+        assert callable(
+            home_module.get_sector_breakdown
+        ), "get_sector_breakdown should be callable"
+        assert callable(
+            home_module.get_top_quality_companies
+        ), "get_top_quality_companies should be callable"
 
     except Exception as e:
         raise AssertionError(f"Failed to test empty data handling: {e}")
@@ -198,14 +239,30 @@ def test_page_discovery_and_navigation():
         reports_module = importlib.import_module("src.dashboard.pages.08_reports")
 
         # Each should have a main function (the page entry point)
-        assert hasattr(home_module, 'main') and callable(home_module.main), "home page should have callable main function"
-        assert hasattr(profile_module, 'main') and callable(profile_module.main), "profile page should have callable main function"
-        assert hasattr(screener_module, 'main') and callable(screener_module.main), "screener page should have callable main function"
-        assert hasattr(peers_module, 'main') and callable(peers_module.main), "peers page should have callable main function"
-        assert hasattr(trends_module, 'main') and callable(trends_module.main), "trends page should have callable main function"
-        assert hasattr(sectors_module, 'main') and callable(sectors_module.main), "sectors page should have callable main function"
-        assert hasattr(capital_module, 'main') and callable(capital_module.main), "capital page should have callable main function"
-        assert hasattr(reports_module, 'main') and callable(reports_module.main), "reports page should have callable main function"
+        assert hasattr(home_module, "main") and callable(
+            home_module.main
+        ), "home page should have callable main function"
+        assert hasattr(profile_module, "main") and callable(
+            profile_module.main
+        ), "profile page should have callable main function"
+        assert hasattr(screener_module, "main") and callable(
+            screener_module.main
+        ), "screener page should have callable main function"
+        assert hasattr(peers_module, "main") and callable(
+            peers_module.main
+        ), "peers page should have callable main function"
+        assert hasattr(trends_module, "main") and callable(
+            trends_module.main
+        ), "trends page should have callable main function"
+        assert hasattr(sectors_module, "main") and callable(
+            sectors_module.main
+        ), "sectors page should have callable main function"
+        assert hasattr(capital_module, "main") and callable(
+            capital_module.main
+        ), "capital page should have callable main function"
+        assert hasattr(reports_module, "main") and callable(
+            reports_module.main
+        ), "reports page should have callable main function"
 
     except ImportError as e:
         raise AssertionError(f"Failed to import page modules: {e}")
@@ -218,8 +275,11 @@ def test_no_duplicate_page_registration():
     pages_dir = PROJECT_ROOT / "src" / "dashboard" / "pages"
 
     # Collect all potential page files (excluding __init__.py and backups)
-    page_files = [f for f in pages_dir.glob("*.py")
-                  if f.name != "__init__.py" and not f.name.endswith(".backup")]
+    page_files = [
+        f
+        for f in pages_dir.glob("*.py")
+        if f.name != "__init__.py" and not f.name.endswith(".backup")
+    ]
 
     # Map URL pathnames to files
     url_to_files = {}
@@ -230,7 +290,9 @@ def test_no_duplicate_page_registration():
         # Calculate URL pathname as Streamlit would (strip leading numbers/underscores)
         url_pathname = stem
         i = 0
-        while i < len(url_pathname) and (url_pathname[i].isdigit() or url_pathname[i] == '_'):
+        while i < len(url_pathname) and (
+            url_pathname[i].isdigit() or url_pathname[i] == "_"
+        ):
             i += 1
         url_pathname = url_pathname[i:]
 
@@ -244,14 +306,29 @@ def test_no_duplicate_page_registration():
             url_to_files[url_pathname] = [page_file.name]
 
     # Check for duplicates
-    duplicates = {pathname: files for pathname, files in url_to_files.items() if len(files) > 1}
+    duplicates = {
+        pathname: files for pathname, files in url_to_files.items() if len(files) > 1
+    }
 
-    assert len(duplicates) == 0, f"Duplicate page registrations found that would cause StreamlitAPIException: {duplicates}"
+    assert (
+        len(duplicates) == 0
+    ), f"Duplicate page registrations found that would cause StreamlitAPIException: {duplicates}"
 
     # Verify we have the expected 8 unique pathnames
-    expected_pathnames = {"home", "profile", "screener", "peers", "trends", "sectors", "capital", "reports"}
+    expected_pathnames = {
+        "home",
+        "profile",
+        "screener",
+        "peers",
+        "trends",
+        "sectors",
+        "capital",
+        "reports",
+    }
     actual_pathnames = set(url_to_files.keys())
-    assert actual_pathnames == expected_pathnames, f"Expected pathnames {expected_pathnames}, got {actual_pathnames}"
+    assert (
+        actual_pathnames == expected_pathnames
+    ), f"Expected pathnames {expected_pathnames}, got {actual_pathnames}"
 
 
 if __name__ == "__main__":
@@ -264,7 +341,7 @@ if __name__ == "__main__":
         test_company_count_consistency,
         test_empty_data_handling,
         test_page_discovery_and_navigation,
-        test_no_duplicate_page_registration
+        test_no_duplicate_page_registration,
     ]
 
     passed = 0

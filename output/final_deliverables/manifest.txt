@@ -1,0 +1,145 @@
+============================================================
+N100 FINANCIAL INTELLIGENCE PLATFORM — DELIVERABLES MANIFEST
+============================================================
+Total Authoritative Deliverables: 23
+Archive Location: output/final_deliverables/
+============================================================
+
+Deliverable #01: NIFTY_SMALL_100.db
+  Source Path : NIFTY_SMALL_100.db
+  Archive Path: output/final_deliverables/NIFTY_SMALL_100.db
+  File Size   : 2,367,488 bytes
+  Description : SQLite Financial Database containing 20 normalized tables and 10,000+ financial records
+------------------------------------------------------------
+Deliverable #02: financial_health_scores.csv
+  Source Path : output\financial_health_scores.csv
+  Archive Path: output/final_deliverables/financial_health_scores.csv
+  File Size   : 188,530 bytes
+  Description : Financial Health Scoring Engine composite scores (0-100) and component grades
+------------------------------------------------------------
+Deliverable #03: peer_percentiles.csv
+  Source Path : output\peer_percentiles.csv
+  Archive Path: output/final_deliverables/peer_percentiles.csv
+  File Size   : 1,088,931 bytes
+  Description : Peer Percentile Ranking Engine dataset across 13 peer groups and 10 ratio metrics
+------------------------------------------------------------
+Deliverable #04: capital_allocation_latest_year.csv
+  Source Path : output\capital_allocation_latest_year.csv
+  Archive Path: output/final_deliverables/capital_allocation_latest_year.csv
+  File Size   : 5,844 bytes
+  Description : Capital Allocation Engine latest fiscal year deployment metrics
+------------------------------------------------------------
+Deliverable #05: capital_allocation_distribution.csv
+  Source Path : output\capital_allocation_distribution.csv
+  Archive Path: output/final_deliverables/capital_allocation_distribution.csv
+  File Size   : 279 bytes
+  Description : Capital Allocation Distribution summary across reinvestment vs shareholder returns
+------------------------------------------------------------
+Deliverable #06: cashflow_intelligence.xlsx
+  Source Path : output\cashflow_intelligence.xlsx
+  Archive Path: output/final_deliverables/cashflow_intelligence.xlsx
+  File Size   : 11,401 bytes
+  Description : Cash Flow Intelligence Engine multi-year Excel analytics workbook
+------------------------------------------------------------
+Deliverable #07: pros_cons_generated.csv
+  Source Path : output\pros_cons_generated.csv
+  Archive Path: output/final_deliverables/pros_cons_generated.csv
+  File Size   : 37,624 bytes
+  Description : NLP Pros and Cons Generator investment highlights and risk alerts
+------------------------------------------------------------
+Deliverable #08: valuation_summary.xlsx
+  Source Path : output\valuation_summary.xlsx
+  Archive Path: output/final_deliverables/valuation_summary.xlsx
+  File Size   : 13,773 bytes
+  Description : Automated Valuation Model master summary Excel spreadsheet
+------------------------------------------------------------
+Deliverable #09: valuation_flags.csv
+  Source Path : output\valuation_flags.csv
+  Archive Path: output/final_deliverables/valuation_flags.csv
+  File Size   : 3,118 bytes
+  Description : Valuation Mispricing Flags (Overvalued / Undervalued / Fair Value alerts)
+------------------------------------------------------------
+Deliverable #10: distress_alerts.csv
+  Source Path : output\distress_alerts.csv
+  Archive Path: output/final_deliverables/distress_alerts.csv
+  File Size   : 698 bytes
+  Description : Early Warning Financial Distress & Solvency Risk Alerts
+------------------------------------------------------------
+Deliverable #11: outlier_report.csv
+  Source Path : output\outlier_report.csv
+  Archive Path: output/final_deliverables/outlier_report.csv
+  File Size   : 496 bytes
+  Description : Analytical Outlier Detection Report across company financial ratios
+------------------------------------------------------------
+Deliverable #12: cluster_labels.csv
+  Source Path : output\cluster_labels.csv
+  Archive Path: output/final_deliverables/cluster_labels.csv
+  File Size   : 2,668 bytes
+  Description : Unsupervised K-Means Machine Learning Cluster Allocations
+------------------------------------------------------------
+Deliverable #13: cluster_profiles.csv
+  Source Path : output\cluster_profiles.csv
+  Archive Path: output/final_deliverables/cluster_profiles.csv
+  File Size   : 645 bytes
+  Description : Machine Learning Cluster Feature Centroids and Behavioral Profiles
+------------------------------------------------------------
+Deliverable #14: portfolio_stats.csv
+  Source Path : output\portfolio_stats.csv
+  Archive Path: output/final_deliverables/portfolio_stats.csv
+  File Size   : 687 bytes
+  Description : Portfolio Analytics Statistics and Aggregate Risk Metrics
+------------------------------------------------------------
+Deliverable #15: pattern_changes.csv
+  Source Path : output\pattern_changes.csv
+  Archive Path: output/final_deliverables/pattern_changes.csv
+  File Size   : 3,531 bytes
+  Description : Financial Pattern Change Detection Log across multi-year statements
+------------------------------------------------------------
+Deliverable #16: pattern_change_summary.csv
+  Source Path : output\pattern_change_summary.csv
+  Archive Path: output/final_deliverables/pattern_change_summary.csv
+  File Size   : 622 bytes
+  Description : Financial Pattern Change Summary Matrix
+------------------------------------------------------------
+Deliverable #17: parse_failures.csv
+  Source Path : output\parse_failures.csv
+  Archive Path: output/final_deliverables/parse_failures.csv
+  File Size   : 1,809 bytes
+  Description : Data Ingestion & Excel Statement Parser Diagnostic Log
+------------------------------------------------------------
+Deliverable #18: module4_cross_validation.csv
+  Source Path : output\module4_cross_validation.csv
+  Archive Path: output/final_deliverables/module4_cross_validation.csv
+  File Size   : 4,176 bytes
+  Description : Financial Statement Cross-Validation Audit Results
+------------------------------------------------------------
+Deliverable #19: ratio_load_summary.csv
+  Source Path : output\ratio_load_summary.csv
+  Archive Path: output/final_deliverables/ratio_load_summary.csv
+  File Size   : 432 bytes
+  Description : ETL Financial Ratio Load Diagnostic Summary
+------------------------------------------------------------
+Deliverable #20: postman_collection.json
+  Source Path : output\postman_collection.json
+  Archive Path: output/final_deliverables/postman_collection.json
+  File Size   : 7,826 bytes
+  Description : FastAPI Postman API Test Suite Collection JSON
+------------------------------------------------------------
+Deliverable #21: perf_notes.md
+  Source Path : output\perf_notes.md
+  Archive Path: output/final_deliverables/perf_notes.md
+  File Size   : 3,884 bytes
+  Description : Module 6G Performance Benchmarks and Concurrency Load Test Documentation
+------------------------------------------------------------
+Deliverable #22: correlation_heatmap.png
+  Source Path : reports\correlation_heatmap.png
+  Archive Path: output/final_deliverables/correlation_heatmap.png
+  File Size   : 198,778 bytes
+  Description : Multivariate Financial Ratio Pearson Correlation Matrix Heatmap Plot
+------------------------------------------------------------
+Deliverable #23: analyst_guide.pdf
+  Source Path : docs\analyst_guide.pdf
+  Archive Path: output/final_deliverables/analyst_guide.pdf
+  File Size   : 29,046 bytes
+  Description : Authoritative 14-Page Institutional Analyst & Operational Guide PDF
+------------------------------------------------------------

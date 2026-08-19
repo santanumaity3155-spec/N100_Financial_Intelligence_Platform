@@ -20,6 +20,7 @@ logger = get_logger(__name__)
 # SCREENER EXPORTER
 # =============================================================================
 
+
 class ScreenerExporter:
     """
     Exports screener results to CSV files.
@@ -229,9 +230,7 @@ class ScreenerExporter:
                     row = {k: record.get(k, "") for k in fieldnames}
                     writer.writerow(row)
 
-            logger.info(
-                f"Exported {len(results)} filtered results to {csv_path}"
-            )
+            logger.info(f"Exported {len(results)} filtered results to {csv_path}")
             return csv_path
 
         except Exception as e:

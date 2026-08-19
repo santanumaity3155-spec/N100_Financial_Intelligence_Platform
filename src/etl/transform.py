@@ -18,7 +18,7 @@ logger = get_logger(__name__)
 class DataTransformer:
     """
     Transforms DataFrames according to business rules.
-    
+
     Responsibilities:
     1. Apply dataset-specific transformations
     2. Calculate derived fields
@@ -33,12 +33,12 @@ class DataTransformer:
     def transform_companies(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transform companies dataset.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             Raw companies DataFrame
-            
+
         Returns
         -------
         pd.DataFrame
@@ -67,22 +67,21 @@ class DataTransformer:
         if "isin_code" in df.columns:
             df["isin_code"] = df["isin_code"].astype(str).str.strip().str.upper()
 
-        self.transformation_log.append({
-            "dataset": "companies",
-            "operations": ["clean_strings", "normalize_ids"]
-        })
+        self.transformation_log.append(
+            {"dataset": "companies", "operations": ["clean_strings", "normalize_ids"]}
+        )
 
         return df
 
     def transform_profit_loss(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transform profit and loss dataset.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             Raw profit and loss DataFrame
-            
+
         Returns
         -------
         pd.DataFrame
@@ -101,30 +100,35 @@ class DataTransformer:
 
         # Convert numeric columns
         numeric_cols = [
-            "revenue", "gross_profit", "operating_profit",
-            "net_profit", "eps"
+            "revenue",
+            "gross_profit",
+            "operating_profit",
+            "net_profit",
+            "eps",
         ]
-        
+
         for col in numeric_cols:
             if col in df.columns:
-                df[col] = pd.to_numeric(df[col], errors='coerce')
+                df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        self.transformation_log.append({
-            "dataset": "profit_loss",
-            "operations": ["normalize_ids", "convert_numeric"]
-        })
+        self.transformation_log.append(
+            {
+                "dataset": "profit_loss",
+                "operations": ["normalize_ids", "convert_numeric"],
+            }
+        )
 
         return df
 
     def transform_balance_sheet(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transform balance sheet dataset.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             Raw balance sheet DataFrame
-            
+
         Returns
         -------
         pd.DataFrame
@@ -143,31 +147,37 @@ class DataTransformer:
 
         # Convert numeric columns
         numeric_cols = [
-            "total_assets", "total_liabilities", "total_equity",
-            "current_assets", "current_liabilities", "cash_and_equivalents",
-            "total_debt"
+            "total_assets",
+            "total_liabilities",
+            "total_equity",
+            "current_assets",
+            "current_liabilities",
+            "cash_and_equivalents",
+            "total_debt",
         ]
-        
+
         for col in numeric_cols:
             if col in df.columns:
-                df[col] = pd.to_numeric(df[col], errors='coerce')
+                df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        self.transformation_log.append({
-            "dataset": "balance_sheet",
-            "operations": ["normalize_ids", "convert_numeric"]
-        })
+        self.transformation_log.append(
+            {
+                "dataset": "balance_sheet",
+                "operations": ["normalize_ids", "convert_numeric"],
+            }
+        )
 
         return df
 
     def transform_cash_flow(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transform cash flow dataset.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             Raw cash flow DataFrame
-            
+
         Returns
         -------
         pd.DataFrame
@@ -186,30 +196,31 @@ class DataTransformer:
 
         # Convert numeric columns
         numeric_cols = [
-            "operating_cash_flow", "investing_cash_flow",
-            "financing_cash_flow", "free_cash_flow"
+            "operating_cash_flow",
+            "investing_cash_flow",
+            "financing_cash_flow",
+            "free_cash_flow",
         ]
-        
+
         for col in numeric_cols:
             if col in df.columns:
-                df[col] = pd.to_numeric(df[col], errors='coerce')
+                df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        self.transformation_log.append({
-            "dataset": "cash_flow",
-            "operations": ["normalize_ids", "convert_numeric"]
-        })
+        self.transformation_log.append(
+            {"dataset": "cash_flow", "operations": ["normalize_ids", "convert_numeric"]}
+        )
 
         return df
 
     def transform_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transform analysis dataset.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             Raw analysis DataFrame
-            
+
         Returns
         -------
         pd.DataFrame
@@ -230,22 +241,21 @@ class DataTransformer:
         if "analysis_type" in df.columns:
             df["analysis_type"] = df["analysis_type"].astype(str).str.strip()
 
-        self.transformation_log.append({
-            "dataset": "analysis",
-            "operations": ["normalize_ids", "clean_strings"]
-        })
+        self.transformation_log.append(
+            {"dataset": "analysis", "operations": ["normalize_ids", "clean_strings"]}
+        )
 
         return df
 
     def transform_documents(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transform documents dataset.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             Raw documents DataFrame
-            
+
         Returns
         -------
         pd.DataFrame
@@ -266,22 +276,21 @@ class DataTransformer:
         if "document_url" in df.columns:
             df["document_url"] = df["document_url"].astype(str).str.strip()
 
-        self.transformation_log.append({
-            "dataset": "documents",
-            "operations": ["normalize_ids", "clean_strings"]
-        })
+        self.transformation_log.append(
+            {"dataset": "documents", "operations": ["normalize_ids", "clean_strings"]}
+        )
 
         return df
 
     def transform_pros_cons(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transform pros and cons dataset.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             Raw pros and cons DataFrame
-            
+
         Returns
         -------
         pd.DataFrame
@@ -305,22 +314,21 @@ class DataTransformer:
         if "analysis_period" in df.columns:
             df["analysis_period"] = df["analysis_period"].astype(str).str.strip()
 
-        self.transformation_log.append({
-            "dataset": "pros_cons",
-            "operations": ["normalize_ids", "clean_strings"]
-        })
+        self.transformation_log.append(
+            {"dataset": "pros_cons", "operations": ["normalize_ids", "clean_strings"]}
+        )
 
         return df
 
     def transform_sectors(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transform sectors dataset.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             Raw sectors DataFrame
-            
+
         Returns
         -------
         pd.DataFrame
@@ -341,22 +349,21 @@ class DataTransformer:
         if "sector_description" in df.columns:
             df["sector_description"] = df["sector_description"].astype(str).str.strip()
 
-        self.transformation_log.append({
-            "dataset": "sectors",
-            "operations": ["normalize_ids", "clean_strings"]
-        })
+        self.transformation_log.append(
+            {"dataset": "sectors", "operations": ["normalize_ids", "clean_strings"]}
+        )
 
         return df
 
     def transform_stock_prices(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transform stock prices dataset.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             Raw stock prices DataFrame
-            
+
         Returns
         -------
         pd.DataFrame
@@ -371,35 +378,40 @@ class DataTransformer:
 
         # Normalize date
         if "date" in df.columns:
-            df["date"] = pd.to_datetime(df["date"], errors='coerce')
+            df["date"] = pd.to_datetime(df["date"], errors="coerce")
             df["date"] = df["date"].dt.strftime("%Y-%m-%d")
 
         # Convert numeric columns
         numeric_cols = [
-            "open_price", "high_price", "low_price",
-            "close_price", "volume"
+            "open_price",
+            "high_price",
+            "low_price",
+            "close_price",
+            "volume",
         ]
-        
+
         for col in numeric_cols:
             if col in df.columns:
-                df[col] = pd.to_numeric(df[col], errors='coerce')
+                df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        self.transformation_log.append({
-            "dataset": "stock_prices",
-            "operations": ["normalize_ids", "normalize_dates", "convert_numeric"]
-        })
+        self.transformation_log.append(
+            {
+                "dataset": "stock_prices",
+                "operations": ["normalize_ids", "normalize_dates", "convert_numeric"],
+            }
+        )
 
         return df
 
     def transform_market_cap(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transform market cap dataset.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             Raw market cap DataFrame
-            
+
         Returns
         -------
         pd.DataFrame
@@ -414,34 +426,34 @@ class DataTransformer:
 
         # Normalize date
         if "date" in df.columns:
-            df["date"] = pd.to_datetime(df["date"], errors='coerce')
+            df["date"] = pd.to_datetime(df["date"], errors="coerce")
             df["date"] = df["date"].dt.strftime("%Y-%m-%d")
 
         # Convert numeric columns
-        numeric_cols = [
-            "market_cap", "enterprise_value", "shares_outstanding"
-        ]
-        
+        numeric_cols = ["market_cap", "enterprise_value", "shares_outstanding"]
+
         for col in numeric_cols:
             if col in df.columns:
-                df[col] = pd.to_numeric(df[col], errors='coerce')
+                df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        self.transformation_log.append({
-            "dataset": "market_cap",
-            "operations": ["normalize_ids", "normalize_dates", "convert_numeric"]
-        })
+        self.transformation_log.append(
+            {
+                "dataset": "market_cap",
+                "operations": ["normalize_ids", "normalize_dates", "convert_numeric"],
+            }
+        )
 
         return df
 
     def transform_financial_ratios(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transform financial ratios dataset.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             Raw financial ratios DataFrame
-            
+
         Returns
         -------
         pd.DataFrame
@@ -460,30 +472,39 @@ class DataTransformer:
 
         # Convert numeric columns
         numeric_cols = [
-            "pe_ratio", "pb_ratio", "ps_ratio", "roe", "roa",
-            "debt_to_equity", "current_ratio", "quick_ratio", "dividend_yield"
+            "pe_ratio",
+            "pb_ratio",
+            "ps_ratio",
+            "roe",
+            "roa",
+            "debt_to_equity",
+            "current_ratio",
+            "quick_ratio",
+            "dividend_yield",
         ]
-        
+
         for col in numeric_cols:
             if col in df.columns:
-                df[col] = pd.to_numeric(df[col], errors='coerce')
+                df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        self.transformation_log.append({
-            "dataset": "financial_ratios",
-            "operations": ["normalize_ids", "convert_numeric"]
-        })
+        self.transformation_log.append(
+            {
+                "dataset": "financial_ratios",
+                "operations": ["normalize_ids", "convert_numeric"],
+            }
+        )
 
         return df
 
     def transform_peer_groups(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transform peer groups dataset.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             Raw peer groups DataFrame
-            
+
         Returns
         -------
         pd.DataFrame
@@ -498,39 +519,36 @@ class DataTransformer:
 
         # Normalize peer_company_id
         if "peer_company_id" in df.columns:
-            df["peer_company_id"] = df["peer_company_id"].astype(str).str.strip().str.upper()
+            df["peer_company_id"] = (
+                df["peer_company_id"].astype(str).str.strip().str.upper()
+            )
 
         # Clean peer_group_name
         if "peer_group_name" in df.columns:
             df["peer_group_name"] = df["peer_group_name"].astype(str).str.strip()
 
-        self.transformation_log.append({
-            "dataset": "peer_groups",
-            "operations": ["normalize_ids", "clean_strings"]
-        })
+        self.transformation_log.append(
+            {"dataset": "peer_groups", "operations": ["normalize_ids", "clean_strings"]}
+        )
 
         return df
 
-    def transform_dataset(
-        self,
-        dataset_name: str,
-        df: pd.DataFrame
-    ) -> pd.DataFrame:
+    def transform_dataset(self, dataset_name: str, df: pd.DataFrame) -> pd.DataFrame:
         """
         Apply appropriate transformation to a dataset.
-        
+
         Parameters
         ----------
         dataset_name : str
             Name of the dataset
         df : pd.DataFrame
             DataFrame to transform
-            
+
         Returns
         -------
         pd.DataFrame
             Transformed DataFrame
-            
+
         Raises
         ------
         ValueError
@@ -565,7 +583,7 @@ class DataTransformer:
     def get_transformation_log(self) -> List[Dict[str, Any]]:
         """
         Get log of all transformations performed.
-        
+
         Returns
         -------
         List[Dict[str, Any]]
@@ -587,14 +605,14 @@ class DataTransformer:
 def transform_dataset(dataset_name: str, df: pd.DataFrame) -> pd.DataFrame:
     """
     Convenience function to transform a dataset.
-    
+
     Parameters
     ----------
     dataset_name : str
         Name of the dataset
     df : pd.DataFrame
         DataFrame to transform
-        
+
     Returns
     -------
     pd.DataFrame
@@ -611,18 +629,20 @@ def transform_dataset(dataset_name: str, df: pd.DataFrame) -> pd.DataFrame:
 if __name__ == "__main__":
 
     logging.basicConfig(level=logging.INFO)
-    
+
     # Create sample DataFrame
-    df = pd.DataFrame({
-        "company_id": ["TCS", "INFY", "WIPRO"],
-        "period": ["2024-Q1", "2024-Q2", "2024-Q3"],
-        "revenue": ["1000", "2000", "3000"],
-        "net_profit": [100.5, 200.3, 300.7]
-    })
-    
+    df = pd.DataFrame(
+        {
+            "company_id": ["TCS", "INFY", "WIPRO"],
+            "period": ["2024-Q1", "2024-Q2", "2024-Q3"],
+            "revenue": ["1000", "2000", "3000"],
+            "net_profit": [100.5, 200.3, 300.7],
+        }
+    )
+
     transformer = DataTransformer()
     df_transformed = transformer.transform_profit_loss(df)
-    
+
     print("\nTransformed DataFrame:")
     print(df_transformed)
     print("\nTransformation Log:")

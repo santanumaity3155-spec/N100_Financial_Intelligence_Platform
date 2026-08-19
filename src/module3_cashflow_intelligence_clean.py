@@ -31,21 +31,32 @@ from src.analytics.cashflow_kpis import (
     RATING_WEAK,
     RATING_DISTRESSED,
 )
-from src.analytics.cagr import calculate_cagr, FLAG_NORMAL, FLAG_ZERO_BASE, FLAG_DECLINE_TO_LOSS, FLAG_TURNAROUND, FLAG_BOTH_NEGATIVE, FLAG_INSUFFICIENT
+from src.analytics.cagr import (
+    calculate_cagr,
+    FLAG_NORMAL,
+    FLAG_ZERO_BASE,
+    FLAG_DECLINE_TO_LOSS,
+    FLAG_TURNAROUND,
+    FLAG_BOTH_NEGATIVE,
+    FLAG_INSUFFICIENT,
+)
 
 # Import database configuration
 from src.config.constants import DATABASE_DIR
 from src.config.settings import SQLITE_DATABASE
 
 # Configure logger
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
 def fetch_company_data(conn, company_id):
     """Fetch latest cash flow, profit loss, and balance sheet data for a company."""
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT period FROM cash_flow
         WHERE company_id = ?
         ORDER BY
@@ -66,7 +77,9 @@ def fetch_company_data(conn, company_id):
                         WHEN 'Dec' THEN '12'
                      END || '-01' DESC
             LIMIT 1
-    """, (company_id,))
+    """,
+        (company_id,),
+    )
     period_row = cursor.fetchone()
     if not period_row:
         cursor.close()
@@ -76,10 +89,13 @@ def fetch_company_data(conn, company_id):
 
     # Cash flow data
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT * FROM cash_flow
         WHERE company_id = ? AND period = ?
-    """, (company_id, period))
+    """,
+        (company_id, period),
+    )
     cf_row = cursor.fetchone()
     if cf_row:
         cursor.execute("PRAGMA table_info(cash_flow);")
@@ -91,10 +107,13 @@ def fetch_company_data(conn, company_id):
 
     # Profit loss data
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT * FROM profit_loss
         WHERE company_id = ? AND period = ?
-    """, (company_id, period))
+    """,
+        (company_id, period),
+    )
     pl_row = cursor.fetchone()
     if pl_row:
         cursor.execute("PRAGMA table_info(profit_loss);")
@@ -106,10 +125,13 @@ def fetch_company_data(conn, company_id):
 
     # Balance sheet data
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT * FROM balance_sheet
         WHERE company_id = ? AND period = ?
-    """, (company_id, period))
+    """,
+        (company_id, period),
+    )
     bs_row = cursor.fetchone()
     if bs_row:
         cursor.execute("PRAGMA table_info(balance_sheet);")
@@ -127,7 +149,7 @@ def compute_cfo_quality(cf_data_list, pl_data_list):
     ratios = []
     for cf_data, pl_data in zip(cf_data_list, pl_data_list):
         cfo = _get_operating_cash_flow(cf_data)
-        net_profit = pl_data.get('net_profit')
+        net_profit = pl_data.get("net_profit")
         if cfo is not None and net_profit is not None and net_profit != 0:
             ratios.append(cfo / net_profit)
     return sum(ratios) / len(ratios) if ratios else None
@@ -141,7 +163,7 @@ def compute_capex_intensity_latest(cf_data, pl_data):
     # Capex is typically negative (cash outflow), return absolute value
     if investing_activity < 0:
         investing_activity = abs(investing_activity)
-    sales = _safe_get_value(pl_data, 'sales', 0)
+    sales = _safe_get_value(pl_data, "sales", 0)
     return (investing_activity / sales * 100) if sales != 0 else None
 
 
@@ -182,14 +204,16 @@ def compute_fcf_conversion_latest(cf_data, pl_data):
     if capex < 0:
         capex = abs(capex)
     fcf = ocf - capex if ocf is not None else None
-    net_profit = _safe_get_value(pl_data, 'net_profit', 0)
+    net_profit = _safe_get_value(pl_data, "net_profit", 0)
     return (fcf / net_profit * 100) if net_profit != 0 and fcf is not None else None
 
 
 def compute_distress_flag_latest(cf_data):
     """Compute Distress Flag for latest year (CFO < 0 AND CFF > 0)."""
     cfo = _get_operating_cash_flow(cf_data)
-    cff = cf_data.get('cash_from_financing_activity') or cf_data.get('financing_activity')
+    cff = cf_data.get("cash_from_financing_activity") or cf_data.get(
+        "financing_activity"
+    )
     return bool(cfo is not None and cff is not None and cfo < 0 and cff > 0)
 
 
@@ -201,8 +225,10 @@ def compute_deleveraging_flag_latest(cf_data_list, bs_data_list):
     # Check latest year
     latest_cf = cf_data_list[-1]
     latest_bs = bs_data_list[-1]
-    cff = latest_cf.get('cash_from_financing_activity') or latest_cf.get('financing_activity')
-    borrowings = latest_bs.get('borrowings')
+    cff = latest_cf.get("cash_from_financing_activity") or latest_cf.get(
+        "financing_activity"
+    )
+    borrowings = latest_bs.get("borrowings")
 
     if cff is None or borrowings is None:
         return False
@@ -213,7 +239,7 @@ def compute_deleveraging_flag_latest(cf_data_list, bs_data_list):
 
     # Check if borrowings are declining compared to previous year
     prev_bs = bs_data_list[-2]
-    prev_borrowings = prev_bs.get('borrowings')
+    prev_borrowings = prev_bs.get("borrowings")
 
     if prev_borrowings is None:
         return False
@@ -231,10 +257,12 @@ def compute_capital_allocation_label_latest(cf_data, pl_data):
     if capex < 0:
         capex = abs(capex)
     fcf = ocf - capex if ocf is not None else None
-    net_profit = _safe_get_value(pl_data, 'net_profit', 0)
-    sales = _safe_get_value(pl_data, 'sales', 0)
+    net_profit = _safe_get_value(pl_data, "net_profit", 0)
+    sales = _safe_get_value(pl_data, "sales", 0)
 
-    cash_conversion = (fcf / net_profit * 100) if net_profit != 0 and fcf is not None else 0
+    cash_conversion = (
+        (fcf / net_profit * 100) if net_profit != 0 and fcf is not None else 0
+    )
     capex_intensity = (capex / sales * 100) if sales != 0 else 0
 
     return classify_capital_allocation(fcf, cash_conversion, capex_intensity, ocf)
@@ -254,7 +282,8 @@ def process_company(company_id):
 
         # Fetch historical data (up to 5 years)
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT period FROM cash_flow
             WHERE company_id = ?
             ORDER BY
@@ -275,7 +304,9 @@ def process_company(company_id):
                             WHEN 'Dec' THEN '12'
                          END || '-01' DESC
             LIMIT 5
-        """, (company_id,))
+        """,
+            (company_id,),
+        )
         periods = [row[0] for row in cursor.fetchall()]
         cursor.close()
 
@@ -295,14 +326,32 @@ def process_company(company_id):
 
         # Compute metrics
         result = {
-            'company_id': company_id,
-            'cfo_quality': compute_cfo_quality(cf_data_list, pl_data_list),
-            'capex_intensity_latest': compute_capex_intensity_latest(cf_data_list[-1], pl_data_list[-1]) if cf_data_list and pl_data_list else None,
-            'fcf_cagr_5yr': compute_fcf_cagr_5yr(cf_data_list, pl_data_list),
-            'fcf_conversion_latest': compute_fcf_conversion_latest(cf_data_list[-1], pl_data_list[-1]) if cf_data_list and pl_data_list else None,
-            'distress_flag_latest': compute_distress_flag_latest(cf_data_list[-1]) if cf_data_list else None,
-            'deleveraging_flag_latest': compute_deleveraging_flag_latest(cf_data_list, bs_data_list),
-            'capital_allocation_label_latest': compute_capital_allocation_label_latest(cf_data_list[-1], pl_data_list[-1]) if cf_data_list and pl_data_list else None,
+            "company_id": company_id,
+            "cfo_quality": compute_cfo_quality(cf_data_list, pl_data_list),
+            "capex_intensity_latest": (
+                compute_capex_intensity_latest(cf_data_list[-1], pl_data_list[-1])
+                if cf_data_list and pl_data_list
+                else None
+            ),
+            "fcf_cagr_5yr": compute_fcf_cagr_5yr(cf_data_list, pl_data_list),
+            "fcf_conversion_latest": (
+                compute_fcf_conversion_latest(cf_data_list[-1], pl_data_list[-1])
+                if cf_data_list and pl_data_list
+                else None
+            ),
+            "distress_flag_latest": (
+                compute_distress_flag_latest(cf_data_list[-1]) if cf_data_list else None
+            ),
+            "deleveraging_flag_latest": compute_deleveraging_flag_latest(
+                cf_data_list, bs_data_list
+            ),
+            "capital_allocation_label_latest": (
+                compute_capital_allocation_label_latest(
+                    cf_data_list[-1], pl_data_list[-1]
+                )
+                if cf_data_list and pl_data_list
+                else None
+            ),
         }
 
         return result
@@ -364,14 +413,14 @@ def main():
 
     # Reorder columns for clarity
     column_order = [
-        'company_id',
-        'cfo_quality',
-        'capex_intensity_latest',
-        'fcf_cagr_5yr',
-        'fcf_conversion_latest',
-        'distress_flag_latest',
-        'deleveraging_flag_latest',
-        'capital_allocation_label_latest',
+        "company_id",
+        "cfo_quality",
+        "capex_intensity_latest",
+        "fcf_cagr_5yr",
+        "fcf_conversion_latest",
+        "distress_flag_latest",
+        "deleveraging_flag_latest",
+        "capital_allocation_label_latest",
     ]
     df = df[column_order]
 
@@ -381,7 +430,7 @@ def main():
     logger.info(f"Saved cash flow intelligence to {excel_path}")
 
     # Filter for distressed companies and save to CSV
-    distressed_df = df[df['distress_flag_latest'] == True].copy()
+    distressed_df = df[df["distress_flag_latest"] == True].copy()
     csv_path = output_dir / "distress_alerts.csv"
     distressed_df.to_csv(csv_path, index=False)
     logger.info(f"Saved distress alerts to {csv_path} ({len(distressed_df)} companies)")

@@ -52,39 +52,65 @@ RADAR_AXES = [
 # PYDANTIC RESPONSE MODELS
 # =============================================================================
 
+
 class PeerPercentileMetricItem(BaseModel):
+    """PeerPercentileMetricItem class representation."""
+
     metric: str = Field(..., description="Financial metric name")
     metric_value: Optional[float] = Field(None, description="Actual metric value")
-    percentile_rank: float = Field(..., description="Percentile rank within peer group (0.0 to 1.0)")
+    percentile_rank: float = Field(
+        ..., description="Percentile rank within peer group (0.0 to 1.0)"
+    )
 
 
 class PeerCompanyPercentileItem(BaseModel):
+    """PeerCompanyPercentileItem class representation."""
+
     company_id: str = Field(..., description="Company ticker symbol")
     company_name: str = Field(..., description="Company name")
-    percentiles: Dict[str, float] = Field(..., description="Dictionary mapping metric to percentile rank")
-    metric_details: List[PeerPercentileMetricItem] = Field(..., description="Detailed metric list with values and percentiles")
+    percentiles: Dict[str, float] = Field(
+        ..., description="Dictionary mapping metric to percentile rank"
+    )
+    metric_details: List[PeerPercentileMetricItem] = Field(
+        ..., description="Detailed metric list with values and percentiles"
+    )
 
 
 class PeerGroupResponse(BaseModel):
+    """PeerGroupResponse class representation."""
+
     peer_group_name: str = Field(..., description="Peer group identifier")
     company_count: int = Field(..., description="Total companies in peer group")
-    companies: List[PeerCompanyPercentileItem] = Field(..., description="List of companies with 10 metric percentiles")
+    companies: List[PeerCompanyPercentileItem] = Field(
+        ..., description="List of companies with 10 metric percentiles"
+    )
 
 
 class RadarCompareResponse(BaseModel):
+    """RadarCompareResponse class representation."""
+
     ticker: str = Field(..., description="Requested company ticker")
     company_name: str = Field(..., description="Requested company name")
     peer_group_name: Optional[str] = Field(None, description="Assigned peer group")
-    benchmark_ticker: Optional[str] = Field(None, description="Benchmark company ticker for this peer group")
+    benchmark_ticker: Optional[str] = Field(
+        None, description="Benchmark company ticker for this peer group"
+    )
     metrics: List[str] = Field(..., description="List of 8 radar axis metrics")
-    company_values: Dict[str, Optional[float]] = Field(..., description="8 metric values for requested company")
-    peer_average: Dict[str, Optional[float]] = Field(..., description="8 metric average values across peer group")
-    benchmark_values: Dict[str, Optional[float]] = Field(..., description="8 metric values for benchmark company")
+    company_values: Dict[str, Optional[float]] = Field(
+        ..., description="8 metric values for requested company"
+    )
+    peer_average: Dict[str, Optional[float]] = Field(
+        ..., description="8 metric average values across peer group"
+    )
+    benchmark_values: Dict[str, Optional[float]] = Field(
+        ..., description="8 metric values for benchmark company"
+    )
 
 
 # =============================================================================
 # ENDPOINTS
 # =============================================================================
+
 
 @router.get(
     "/peers/{group_name}",
@@ -94,8 +120,8 @@ class RadarCompareResponse(BaseModel):
     responses={
         200: {"description": "Peer group percentile data returned successfully"},
         404: {"description": "Peer group not found"},
-        500: {"description": "Internal server error"}
-    }
+        500: {"description": "Internal server error"},
+    },
 )
 def get_peer_group_details(group_name: str) -> PeerGroupResponse:
     """
@@ -105,7 +131,7 @@ def get_peer_group_details(group_name: str) -> PeerGroupResponse:
         if not group_name or not group_name.strip():
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Peer group name cannot be empty"
+                detail="Peer group name cannot be empty",
             )
 
         group_clean = group_name.strip()
@@ -120,13 +146,13 @@ def get_peer_group_details(group_name: str) -> PeerGroupResponse:
             SELECT DISTINCT peer_group_name FROM peer_groups 
             WHERE LOWER(peer_group_name) = LOWER(?)
             """,
-            (group_clean, group_clean)
+            (group_clean, group_clean),
         )
         row = group_cur.fetchone()
         if not row:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Peer group '{group_name}' not found."
+                detail=f"Peer group '{group_name}' not found.",
             )
         canonical_group_name = row[0]
 
@@ -139,7 +165,7 @@ def get_peer_group_details(group_name: str) -> PeerGroupResponse:
             WHERE LOWER(pp.peer_group_name) = LOWER(?)
             """,
             conn,
-            params=[canonical_group_name]
+            params=[canonical_group_name],
         )
 
         if df.empty:
@@ -152,12 +178,12 @@ def get_peer_group_details(group_name: str) -> PeerGroupResponse:
                 WHERE LOWER(pg.peer_group_name) = LOWER(?)
                 """,
                 conn,
-                params=[canonical_group_name]
+                params=[canonical_group_name],
             )
             if pg_df.empty:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Peer group '{group_name}' contains no companies."
+                    detail=f"Peer group '{group_name}' contains no companies.",
                 )
 
         company_items: List[PeerCompanyPercentileItem] = []
@@ -170,30 +196,40 @@ def get_peer_group_details(group_name: str) -> PeerGroupResponse:
             for m in REQUIRED_PEER_METRICS:
                 m_rows = group_df[group_df["metric"] == m]
                 if not m_rows.empty:
-                    m_val = float(m_rows["metric_value"].iloc[0]) if pd.notna(m_rows["metric_value"].iloc[0]) else None
-                    p_rank = float(m_rows["percentile_rank"].iloc[0]) if pd.notna(m_rows["percentile_rank"].iloc[0]) else 0.5
+                    m_val = (
+                        float(m_rows["metric_value"].iloc[0])
+                        if pd.notna(m_rows["metric_value"].iloc[0])
+                        else None
+                    )
+                    p_rank = (
+                        float(m_rows["percentile_rank"].iloc[0])
+                        if pd.notna(m_rows["percentile_rank"].iloc[0])
+                        else 0.5
+                    )
                 else:
                     m_val = None
                     p_rank = 0.5
 
                 perc_dict[m] = p_rank
-                metric_list.append(PeerPercentileMetricItem(
-                    metric=m,
-                    metric_value=m_val,
-                    percentile_rank=p_rank
-                ))
+                metric_list.append(
+                    PeerPercentileMetricItem(
+                        metric=m, metric_value=m_val, percentile_rank=p_rank
+                    )
+                )
 
-            company_items.append(PeerCompanyPercentileItem(
-                company_id=c_id,
-                company_name=c_name,
-                percentiles=perc_dict,
-                metric_details=metric_list
-            ))
+            company_items.append(
+                PeerCompanyPercentileItem(
+                    company_id=c_id,
+                    company_name=c_name,
+                    percentiles=perc_dict,
+                    metric_details=metric_list,
+                )
+            )
 
         return PeerGroupResponse(
             peer_group_name=canonical_group_name,
             company_count=len(company_items),
-            companies=company_items
+            companies=company_items,
         )
 
     except HTTPException:
@@ -202,7 +238,7 @@ def get_peer_group_details(group_name: str) -> PeerGroupResponse:
         logger.exception(f"Error in GET /peers/{group_name}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve peer group data"
+            detail="Failed to retrieve peer group data",
         ) from exc
 
 
@@ -214,8 +250,8 @@ def get_peer_group_details(group_name: str) -> PeerGroupResponse:
     responses={
         200: {"description": "Radar comparison data returned successfully"},
         404: {"description": "Company ticker not found"},
-        500: {"description": "Internal server error"}
-    }
+        500: {"description": "Internal server error"},
+    },
 )
 def get_company_peer_compare(ticker: str) -> RadarCompareResponse:
     """
@@ -225,33 +261,39 @@ def get_company_peer_compare(ticker: str) -> RadarCompareResponse:
         if not ticker or not ticker.strip():
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Ticker symbol cannot be empty"
+                detail="Ticker symbol cannot be empty",
             )
 
         ticker_clean = ticker.strip().upper()
         conn = get_connection()
 
         # Validate company exists
-        comp_cur = conn.execute("SELECT company_id, company_name FROM companies WHERE company_id = ?", (ticker_clean,))
+        comp_cur = conn.execute(
+            "SELECT company_id, company_name FROM companies WHERE company_id = ?",
+            (ticker_clean,),
+        )
         comp_row = comp_cur.fetchone()
         if not comp_row:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Company ticker '{ticker}' not found."
+                detail=f"Company ticker '{ticker}' not found.",
             )
         req_c_name = comp_row["company_name"]
 
         # Find peer group for company
-        pg_cur = conn.execute("SELECT peer_group_name FROM peer_groups WHERE company_id = ?", (ticker_clean,))
+        pg_cur = conn.execute(
+            "SELECT peer_group_name FROM peer_groups WHERE company_id = ?",
+            (ticker_clean,),
+        )
         pg_row = pg_cur.fetchone()
-        
+
         peer_group_name = pg_row["peer_group_name"] if pg_row else None
 
         if not peer_group_name:
             # Fallback lookup in sectors
             sec_cur = conn.execute(
                 "SELECT COALESCE(sub_sector, broad_sector) FROM sectors WHERE company_id = ?",
-                (ticker_clean,)
+                (ticker_clean,),
             )
             sec_row = sec_cur.fetchone()
             peer_group_name = sec_row[0] if sec_row else "Other"
@@ -259,13 +301,14 @@ def get_company_peer_compare(ticker: str) -> RadarCompareResponse:
         # Find benchmark company for this peer group
         bench_cur = conn.execute(
             "SELECT company_id FROM peer_groups WHERE peer_group_name = ? AND is_benchmark = 1",
-            (peer_group_name,)
+            (peer_group_name,),
         )
         bench_row = bench_cur.fetchone()
         bench_ticker = bench_row["company_id"] if bench_row else None
 
         # Build metric dictionary helper for a company
         def get_8_metrics_for_company(cid: str) -> Dict[str, Optional[float]]:
+            """Get 8 metrics for company functionality."""
             cur = conn.execute(
                 """
                 SELECT 
@@ -301,12 +344,12 @@ def get_company_peer_compare(ticker: str) -> RadarCompareResponse:
                 ) fhs ON c.company_id = fhs.company_id AND fhs.rn = 1
                 WHERE c.company_id = ?
                 """,
-                (cid,)
+                (cid,),
             )
             r = cur.fetchone()
             if not r:
                 return {axis: None for axis in RADAR_AXES}
-            
+
             return {
                 "roe": float(r[0]) if r[0] is not None else None,
                 "roce": float(r[1]) if r[1] is not None else None,
@@ -331,7 +374,7 @@ def get_company_peer_compare(ticker: str) -> RadarCompareResponse:
         # 3. Peer group average
         peer_cids_cur = conn.execute(
             "SELECT DISTINCT company_id FROM peer_groups WHERE peer_group_name = ?",
-            (peer_group_name,)
+            (peer_group_name,),
         )
         peer_cids = [r[0] for r in peer_cids_cur.fetchall()]
         if not peer_cids:
@@ -351,7 +394,7 @@ def get_company_peer_compare(ticker: str) -> RadarCompareResponse:
             metrics=RADAR_AXES,
             company_values=c_values,
             peer_average=peer_avg_dict,
-            benchmark_values=b_values
+            benchmark_values=b_values,
         )
 
     except HTTPException:
@@ -360,5 +403,5 @@ def get_company_peer_compare(ticker: str) -> RadarCompareResponse:
         logger.exception(f"Error in GET /companies/{ticker}/peers/compare")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve radar comparison data"
+            detail="Failed to retrieve radar comparison data",
         ) from exc

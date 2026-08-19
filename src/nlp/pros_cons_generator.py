@@ -65,7 +65,9 @@ VALID_TYPES: Tuple[str, str] = (TYPE_PRO, TYPE_CON)
 
 # Output file paths for Module 2D
 PROS_CONS_GENERATED_CSV_PATH: Path = OUTPUT_DIR / "pros_cons_generated.csv"
-PROS_CONS_COVERAGE_FAILURES_CSV_PATH: Path = OUTPUT_DIR / "pros_cons_coverage_failures.csv"
+PROS_CONS_COVERAGE_FAILURES_CSV_PATH: Path = (
+    OUTPUT_DIR / "pros_cons_coverage_failures.csv"
+)
 
 # Confidence framework
 CONFIDENCE_MIN: float = 0.0
@@ -98,22 +100,24 @@ _YEAR_REGEX: re.Pattern = re.compile(r"(?<!\d)(\d{4})(?!\d)")
 # actual sub_sector values present in the DB plus common alternate labels so
 # the helper stays robust if the source data changes.
 # -----------------------------------------------------------------------------
-FINANCIAL_SUB_SECTORS: frozenset = frozenset({
-    "Private Banks",
-    "Public Sector Banks",
-    "Consumer Finance",
-    "Speciality Finance",
-    "Diversified Financials",
-    "Life Insurance",
-    "General Insurance",
-    # Common alternate labels (defensive)
-    "Banks",
-    "NBFC",
-    "Insurance - Life",
-    "Insurance - General",
-    "Financial Services",
-    "Asset Management",
-})
+FINANCIAL_SUB_SECTORS: frozenset = frozenset(
+    {
+        "Private Banks",
+        "Public Sector Banks",
+        "Consumer Finance",
+        "Speciality Finance",
+        "Diversified Financials",
+        "Life Insurance",
+        "General Insurance",
+        # Common alternate labels (defensive)
+        "Banks",
+        "NBFC",
+        "Insurance - Life",
+        "Insurance - General",
+        "Financial Services",
+        "Asset Management",
+    }
+)
 
 # -----------------------------------------------------------------------------
 # Primary metric → candidate source columns (highest priority first).
@@ -161,7 +165,7 @@ METRIC_SOURCES: Dict[str, List[Tuple[str, str]]] = {
     "cfo": [(TABLE_CASH_FLOW, "cash_from_operating_activity")],
     "cff": [(TABLE_CASH_FLOW, "cash_from_financing_activity")],
     "net_debt": [(TABLE_BALANCE_SHEET, "net_debt")],  # computed in merge
-    "ebitda": [(TABLE_PROFIT_LOSS, "ebitda")],        # computed in merge
+    "ebitda": [(TABLE_PROFIT_LOSS, "ebitda")],  # computed in merge
     "revenue_cagr": [(TABLE_FINANCIAL_KPIS, "revenue_cagr")],
     "profit_cagr": [(TABLE_FINANCIAL_KPIS, "profit_cagr")],
     "eps_cagr": [(TABLE_FINANCIAL_KPIS, "eps_cagr")],
@@ -242,7 +246,9 @@ def _load_table(
         available = [c for c in columns if c in existing]
         all_cols = available
         if not available:
-            logger.warning("Table '%s' has none of the requested columns %s", table, list(columns))
+            logger.warning(
+                "Table '%s' has none of the requested columns %s", table, list(columns)
+            )
             return pd.DataFrame(columns=list(columns))
         select_cols = ", ".join(f'"{c}"' for c in available)
 
@@ -257,7 +263,9 @@ def _load_table(
 
     logger.info(
         "Loaded %d rows from '%s' in %.3fs",
-        len(df), table, time.time() - start,
+        len(df),
+        table,
+        time.time() - start,
     )
     return df
 
@@ -295,8 +303,12 @@ def load_companies(conn: Optional[Any] = None) -> pd.DataFrame:
     roe_percentage``. Returns an empty DataFrame when the table is missing.
     """
     cols = [
-        "company_id", "company_name", "sector", "industry",
-        "roce_percentage", "roe_percentage",
+        "company_id",
+        "company_name",
+        "sector",
+        "industry",
+        "roce_percentage",
+        "roe_percentage",
     ]
     df = _load_table(TABLE_COMPANIES, cols, conn=conn)
     if df.empty:
@@ -326,9 +338,12 @@ def load_analysis_data(conn: Optional[Any] = None) -> pd.DataFrame:
     compounded_profit_growth, roe, stock_price_cagr``.
     """
     cols = [
-        "company_id", "period",
-        "compounded_sales_growth", "compounded_profit_growth",
-        "roe", "stock_price_cagr",
+        "company_id",
+        "period",
+        "compounded_sales_growth",
+        "compounded_profit_growth",
+        "roe",
+        "stock_price_cagr",
     ]
     df = _load_table(TABLE_ANALYSIS, cols, conn=conn)
     if df.empty:
@@ -346,9 +361,12 @@ def load_cashflow_data(conn: Optional[Any] = None) -> pd.DataFrame:
     cash_from_financing_activity, free_cash_flow, net_cash_flow``.
     """
     cols = [
-        "company_id", "period",
-        "cash_from_operating_activity", "cash_from_financing_activity",
-        "free_cash_flow", "net_cash_flow",
+        "company_id",
+        "period",
+        "cash_from_operating_activity",
+        "cash_from_financing_activity",
+        "free_cash_flow",
+        "net_cash_flow",
     ]
     df = _load_table(TABLE_CASH_FLOW, cols, conn=conn)
     if df.empty:
@@ -368,15 +386,27 @@ def load_ratio_data(conn: Optional[Any] = None) -> pd.DataFrame:
     """
     # Target columns we want in the final dataframe
     target_cols = [
-        "company_id", "period", "roe", "roce", "roa", "debt_to_equity",
-        "interest_coverage", "free_cash_flow", "operating_cash_flow",
-        "dividend_yield", "revenue_cagr", "profit_cagr", "eps_cagr",
+        "company_id",
+        "period",
+        "roe",
+        "roce",
+        "roa",
+        "debt_to_equity",
+        "interest_coverage",
+        "free_cash_flow",
+        "operating_cash_flow",
+        "dividend_yield",
+        "revenue_cagr",
+        "profit_cagr",
+        "eps_cagr",
     ]
 
     # Load financial_kpis with target columns (missing columns will be added as None)
     df_kpis = _load_table(TABLE_FINANCIAL_KPIS, target_cols, conn=conn)
     if not df_kpis.empty:
-        df_kpis["company_id"] = df_kpis["company_id"].astype(str).str.strip().str.upper()
+        df_kpis["company_id"] = (
+            df_kpis["company_id"].astype(str).str.strip().str.upper()
+        )
         # Ensure all target columns exist (they should, but safe)
         for col in target_cols:
             if col not in df_kpis.columns:
@@ -384,11 +414,18 @@ def load_ratio_data(conn: Optional[Any] = None) -> pd.DataFrame:
 
     # Load financial_ratios with its specific columns, then map to target columns
     ratio_cols = [
-        "company_id", "period", "roe", "roa", "debt_to_equity", "dividend_yield"
+        "company_id",
+        "period",
+        "roe",
+        "roa",
+        "debt_to_equity",
+        "dividend_yield",
     ]
     df_ratios = _load_table(TABLE_FINANCIAL_RATIOS, ratio_cols, conn=conn)
     if not df_ratios.empty:
-        df_ratios["company_id"] = df_ratios["company_id"].astype(str).str.strip().str.upper()
+        df_ratios["company_id"] = (
+            df_ratios["company_id"].astype(str).str.strip().str.upper()
+        )
         # Ensure all target columns exist, filling missing with None
         for col in target_cols:
             if col not in df_ratios.columns:
@@ -413,19 +450,18 @@ def load_ratio_data(conn: Optional[Any] = None) -> pd.DataFrame:
     combined = pd.concat([df_kpis, df_ratios], ignore_index=True)
     # Sort by company_id, period, and _source so that kpis (0) comes before ratios (1) for same key
     combined = combined.sort_values(
-        ["company_id", "period", "_source"],
-        na_position='last'
+        ["company_id", "period", "_source"], na_position="last"
     ).reset_index(drop=True)
     # Drop duplicates keeping the first (which is from kpis if available)
     combined = combined.drop_duplicates(subset=["company_id", "period"], keep="first")
     # Drop the helper column
-    combined = combined.drop(columns=["_source"], errors='ignore')
+    combined = combined.drop(columns=["_source"], errors="ignore")
 
     logger.info(
         "Loaded ratio data: %d financial_kpis, %d financial_ratios, %d combined",
         len(df_kpis) if not df_kpis.empty else 0,
         len(df_ratios) if not df_ratios.empty else 0,
-        len(combined)
+        len(combined),
     )
     return combined
 
@@ -437,8 +473,14 @@ def load_balance_sheet(conn: Optional[Any] = None) -> pd.DataFrame:
     share_capital, investments, total_assets``.
     """
     cols = [
-        "company_id", "period", "borrowings", "reserves", "equity_capital",
-        "share_capital", "investments", "total_assets",
+        "company_id",
+        "period",
+        "borrowings",
+        "reserves",
+        "equity_capital",
+        "share_capital",
+        "investments",
+        "total_assets",
     ]
     df = _load_table(TABLE_BALANCE_SHEET, cols, conn=conn)
     if df.empty:
@@ -468,8 +510,16 @@ def load_profit_loss(conn: Optional[Any] = None) -> pd.DataFrame:
     opm_percentage, eps, dividend_payout, depreciation, interest``.
     """
     cols = [
-        "company_id", "period", "sales", "operating_profit", "net_profit",
-        "opm_percentage", "eps", "dividend_payout", "depreciation", "interest",
+        "company_id",
+        "period",
+        "sales",
+        "operating_profit",
+        "net_profit",
+        "opm_percentage",
+        "eps",
+        "dividend_payout",
+        "depreciation",
+        "interest",
     ]
     df = _load_table(TABLE_PROFIT_LOSS, cols, conn=conn)
     if df.empty:
@@ -635,13 +685,14 @@ def get_historical_values(
     return cleaned
 
 
-def has_minimum_history(values: Sequence[Any], min_years: int = MIN_HISTORY_YEARS) -> bool:
+def has_minimum_history(
+    values: Sequence[Any], min_years: int = MIN_HISTORY_YEARS
+) -> bool:
     """Return True when *values* contain at least ``min_years`` valid numbers."""
     return len(get_historical_values(values)) >= min_years
 
 
-def has_consecutive_years(years: Sequence[int], required: int,
-                          step: int = 1) -> bool:
+def has_consecutive_years(years: Sequence[int], required: int, step: int = 1) -> bool:
     """Return True when *years* contain ``required`` consecutive values.
 
     Parameters
@@ -819,7 +870,9 @@ def is_declining(values: Sequence[Any], periods: int = 3) -> bool:
     return all(next_val < prev for prev, next_val in zip(recent_safe, recent_safe[1:]))
 
 
-def count_consecutive_positive(values: Sequence[Any], max_len: Optional[int] = None) -> int:
+def count_consecutive_positive(
+    values: Sequence[Any], max_len: Optional[int] = None
+) -> int:
     """Count the length of the longest *trailing* run of positive values."""
     cleaned = get_historical_values(values, max_len=max_len)
     count = 0
@@ -831,7 +884,9 @@ def count_consecutive_positive(values: Sequence[Any], max_len: Optional[int] = N
     return count
 
 
-def count_consecutive_negative(values: Sequence[Any], max_len: Optional[int] = None) -> int:
+def count_consecutive_negative(
+    values: Sequence[Any], max_len: Optional[int] = None
+) -> int:
     """Count the length of the longest *trailing* run of negative values."""
     cleaned = get_historical_values(values, max_len=max_len)
     count = 0
@@ -1057,14 +1112,17 @@ def prepare_company_history(
 
     merged = (
         merged.groupby("year", sort=True)
-              .apply(_combine_year, include_groups=False)
-              .reset_index()
+        .apply(_combine_year, include_groups=False)
+        .reset_index()
     )
 
     if not merged.empty:
         logger.info(
             "Prepared history for '%s': %d years (%d .. %d)",
-            cid, len(merged), int(merged["year"].min()), int(merged["year"].max()),
+            cid,
+            len(merged),
+            int(merged["year"].min()),
+            int(merged["year"].max()),
         )
     return merged
 
@@ -1088,8 +1146,7 @@ def prepare_latest_year_data(
     latest_row = history_df.loc[history_df["year"].idxmax()]
     latest_year = int(latest_row["year"])
     latest_period = (
-        str(latest_row.get("period"))
-        if latest_row.get("period") is not None else None
+        str(latest_row.get("period")) if latest_row.get("period") is not None else None
     )
     latest_metrics: Dict[str, Optional[float]] = {}
     for metric in METRIC_SOURCES:
@@ -1199,7 +1256,10 @@ def get_company_context(
 
     history_df = prepare_company_history(cid, conn=conn, data=data)
     latest_period, latest_year, latest_metrics = prepare_latest_year_data(
-        cid, history_df=history_df, conn=conn, data=data,
+        cid,
+        history_df=history_df,
+        conn=conn,
+        data=data,
     )
 
     history_years: List[int] = []
@@ -1208,9 +1268,7 @@ def get_company_context(
         history_years = [int(y) for y in history_df["year"].tolist()]
         for metric in METRIC_SOURCES:
             if metric in history_df.columns:
-                history[metric] = [
-                    safe_float(v) for v in history_df[metric].tolist()
-                ]
+                history[metric] = [safe_float(v) for v in history_df[metric].tolist()]
             else:
                 history[metric] = [None] * len(history_years)
 
@@ -1233,7 +1291,10 @@ def get_company_context(
     )
     logger.info(
         "Built context for '%s' (latest year=%s, %d history years, financial=%s)",
-        cid, latest_year, len(history_years), is_financial,
+        cid,
+        latest_year,
+        len(history_years),
+        is_financial,
     )
     return context
 
@@ -1251,9 +1312,7 @@ def is_financial_sector(sub_sector: Optional[str]) -> bool:
     """
     if not sub_sector:
         return False
-    return str(sub_sector).strip().lower() in {
-        s.lower() for s in FINANCIAL_SUB_SECTORS
-    }
+    return str(sub_sector).strip().lower() in {s.lower() for s in FINANCIAL_SUB_SECTORS}
 
 
 def get_sub_sector(
@@ -1361,13 +1420,16 @@ class FinancialRule(ABC):
     description: str = ""
 
     def __init__(self) -> None:
+        """Initialize class instance attributes."""
         if not self.rule_id or not self.rule_type:
             raise ValueError(
                 "FinancialRule subclasses must define rule_id and rule_type"
             )
 
     @abstractmethod
-    def evaluate(self, context: CompanyContext, conn: Optional[Any] = None) -> RuleResult:
+    def evaluate(
+        self, context: CompanyContext, conn: Optional[Any] = None
+    ) -> RuleResult:
         """Evaluate the rule against *context*.
 
         Parameters
@@ -1394,8 +1456,7 @@ class FinancialRule(ABC):
             text="",
             confidence_pct=0.0,
             reason=(
-                f"Rule '{self.rule_id}' not yet implemented"
-                " (foundation placeholder)"
+                f"Rule '{self.rule_id}' not yet implemented" " (foundation placeholder)"
             ),
         )
 
@@ -1496,11 +1557,16 @@ def evaluate_rules_for_company(
             except Exception as exc:  # a rule must never crash a full run
                 logger.exception(
                     "Rule '%s' failed for '%s': %s",
-                    rule.rule_id, context.company_id, exc,
+                    rule.rule_id,
+                    context.company_id,
+                    exc,
                 )
     logger.info(
         "Evaluated %d registered rules for '%s' (pro=%d, con=%d)",
-        len(results), context.company_id, len(PRO_RULES), len(CON_RULES)
+        len(results),
+        context.company_id,
+        len(PRO_RULES),
+        len(CON_RULES),
     )
     return results
 
@@ -1618,9 +1684,7 @@ def validate_output_schema(df: pd.DataFrame) -> Tuple[bool, List[str]]:
             issues.append(f"row {idx}: confidence_pct invalid or NaN ({raw!r})")
             continue
         if not (0.0 <= value <= 100.0):
-            issues.append(
-                f"row {idx}: confidence_pct out of range ({value!r})"
-            )
+            issues.append(f"row {idx}: confidence_pct out of range ({value!r})")
         if value <= 60.0:
             issues.append(
                 f"row {idx}: confidence_pct must be strictly greater than 60.0 ({value!r})"
@@ -1639,14 +1703,36 @@ def validate_output_schema(df: pd.DataFrame) -> Tuple[bool, List[str]]:
         issues.append(f"null/empty rule_id at rows: {rows[:5]}")
 
     valid_rule_ids = {
-        "PRO_01", "PRO_02", "PRO_03", "PRO_04", "PRO_05", "PRO_06",
-        "PRO_07", "PRO_08", "PRO_09", "PRO_10", "PRO_11", "PRO_12",
-        "CON_01", "CON_02", "CON_03", "CON_04", "CON_05", "CON_06",
-        "CON_07", "CON_08", "CON_09", "CON_10", "CON_11", "CON_12",
+        "PRO_01",
+        "PRO_02",
+        "PRO_03",
+        "PRO_04",
+        "PRO_05",
+        "PRO_06",
+        "PRO_07",
+        "PRO_08",
+        "PRO_09",
+        "PRO_10",
+        "PRO_11",
+        "PRO_12",
+        "CON_01",
+        "CON_02",
+        "CON_03",
+        "CON_04",
+        "CON_05",
+        "CON_06",
+        "CON_07",
+        "CON_08",
+        "CON_09",
+        "CON_10",
+        "CON_11",
+        "CON_12",
     }
     bad_rule_ids = df[~df["rule_id"].astype(str).str.strip().isin(valid_rule_ids)]
     if not bad_rule_ids.empty:
-        bogus_rules = sorted({str(x) for x in bad_rule_ids["rule_id"].astype(str).tolist()})[:10]
+        bogus_rules = sorted(
+            {str(x) for x in bad_rule_ids["rule_id"].astype(str).tolist()}
+        )[:10]
         issues.append(f"invalid rule_id value(s): {bogus_rules}")
 
     dup_mask = df.duplicated(subset=["company_id", "type", "rule_id"], keep=False)
@@ -1661,15 +1747,11 @@ def validate_output_schema(df: pd.DataFrame) -> Tuple[bool, List[str]]:
         )
 
     if issues:
-        logger.warning(
-            "Output schema validation failed with %d issue(s)", len(issues)
-        )
+        logger.warning("Output schema validation failed with %d issue(s)", len(issues))
         for issue in issues[:10]:
             logger.warning("  - %s", issue)
     else:
-        logger.info(
-            "Output schema validation passed for %d row(s)", len(df)
-        )
+        logger.info("Output schema validation passed for %d row(s)", len(df))
     return not issues, issues
 
 
@@ -1699,7 +1781,11 @@ def validate_company_coverage(
     company_list = sorted({str(c).strip().upper() for c in companies if c})
     total = len(company_list)
 
-    if results_df is None or not isinstance(results_df, pd.DataFrame) or results_df.empty:
+    if (
+        results_df is None
+        or not isinstance(results_df, pd.DataFrame)
+        or results_df.empty
+    ):
         stats: Dict[str, Any] = {
             "companies_total": total,
             "results_total": 0,
@@ -1712,7 +1798,8 @@ def validate_company_coverage(
         }
         logger.info(
             "Coverage (Module 2A, no rules): missing_pro=%d, missing_con=%d",
-            stats["missing_pro"], stats["missing_con"],
+            stats["missing_pro"],
+            stats["missing_con"],
         )
         return stats
 
@@ -1747,7 +1834,9 @@ def validate_company_coverage(
     }
     logger.info(
         "Coverage: companies=%d, with_pro=%d, with_con=%d, fully_covered=%d",
-        total, stats["companies_with_pro"], stats["companies_with_con"],
+        total,
+        stats["companies_with_pro"],
+        stats["companies_with_con"],
         stats["companies_fully_covered"],
     )
     return stats
@@ -1827,11 +1916,14 @@ def run_foundation_report(
         len(report["financial_companies"]),
     )
     logger.info("Registered rules: pro=%d con=%d", len(PRO_RULES), len(CON_RULES))
-    logger.info("Module 2A foundation report completed in %.3fs", report["execution_time_seconds"])
+    logger.info(
+        "Module 2A foundation report completed in %.3fs",
+        report["execution_time_seconds"],
+    )
     return report
 
 
-def _run_foundation_report( # Renamed from main for Module 2A smoke run
+def _run_foundation_report(  # Renamed from main for Module 2A smoke run
     conn: Optional[Any] = None,
     limit: Optional[int] = None,
 ) -> Dict[str, Any]:
@@ -1897,11 +1989,15 @@ def _run_foundation_report( # Renamed from main for Module 2A smoke run
         len(report["financial_companies"]),
     )
     logger.info("Registered rules: pro=%d con=%d", len(PRO_RULES), len(CON_RULES))
-    logger.info("Module 2A foundation report completed in %.3fs", report["execution_time_seconds"])
+    logger.info(
+        "Module 2A foundation report completed in %.3fs",
+        report["execution_time_seconds"],
+    )
     return report
 
 
 MODULE_2D_COMPLETION_REPORT_PATH: Path = PROJECT_ROOT / "MODULE_2D_COMPLETION_REPORT.md"
+
 
 def load_all_company_ids(conn: Any) -> Tuple[List[str], Dict[str, Any]]:
     """Load all company IDs from the 'companies' table with sanity checks."""
@@ -1913,7 +2009,9 @@ def load_all_company_ids(conn: Any) -> Tuple[List[str], Dict[str, Any]]:
         "companies_missing_id_fields": [],
     }
     try:
-        df = _load_table(TABLE_COMPANIES, ["company_id", "company_name", "sector"], conn=conn)
+        df = _load_table(
+            TABLE_COMPANIES, ["company_id", "company_name", "sector"], conn=conn
+        )
         if df.empty:
             logger.error("No companies found in the database.")
             return [], stats
@@ -1924,16 +2022,28 @@ def load_all_company_ids(conn: Any) -> Tuple[List[str], Dict[str, Any]]:
         duplicates = df[df.duplicated(subset=["company_id"], keep=False)]
         if not duplicates.empty:
             stats["duplicate_company_ids"] = duplicates["company_id"].unique().tolist()
-            logger.warning("Found duplicate company_ids in 'companies' table: %s", stats["duplicate_company_ids"])
+            logger.warning(
+                "Found duplicate company_ids in 'companies' table: %s",
+                stats["duplicate_company_ids"],
+            )
 
         # Check for missing identity fields
         missing_id_fields = df[df["company_id"].isna() | df["company_name"].isna()]
         if not missing_id_fields.empty:
-            stats["companies_missing_id_fields"] = missing_id_fields["company_id"].tolist()
-            logger.warning("Companies missing required identity fields: %s", stats["companies_missing_id_fields"])
+            stats["companies_missing_id_fields"] = missing_id_fields[
+                "company_id"
+            ].tolist()
+            logger.warning(
+                "Companies missing required identity fields: %s",
+                stats["companies_missing_id_fields"],
+            )
 
-        cleaned = df["company_id"].map(lambda v: str(v).strip().upper() if pd.notna(v) and str(v).strip() else None)
-        company_ids = sorted({cid for cid in cleaned if cid is not None and cid != "NONE"})
+        cleaned = df["company_id"].map(
+            lambda v: str(v).strip().upper() if pd.notna(v) and str(v).strip() else None
+        )
+        company_ids = sorted(
+            {cid for cid in cleaned if cid is not None and cid != "NONE"}
+        )
         stats["unique_company_ids"] = len(company_ids)
 
         logger.info("Loaded %d unique company IDs from the database.", len(company_ids))
@@ -1941,6 +2051,7 @@ def load_all_company_ids(conn: Any) -> Tuple[List[str], Dict[str, Any]]:
     except Exception as exc:
         logger.error("Failed to load company IDs: %s", exc)
         return [], stats
+
 
 def generate_all_pros_cons(
     company_ids: List[str],
@@ -1981,10 +2092,12 @@ def generate_all_pros_cons(
 
         except Exception as exc:  # pragma: no cover - defensive but logged
             logger.exception("Failed processing company '%s': %s", cid, exc)
-            failed_companies.append({
-                "company_id": cid,
-                "error": str(exc),
-            })
+            failed_companies.append(
+                {
+                    "company_id": cid,
+                    "error": str(exc),
+                }
+            )
 
     df = pd.DataFrame(all_results, columns=OUTPUT_COLUMNS)
     if not df.empty:
@@ -2073,25 +2186,38 @@ def build_company_coverage_report(
         for _, row in sectors_df.iterrows():
             cid = str(row.get("company_id", "")).strip().upper()
             if cid:
-                sector_map[cid] = str(row.get("sector", row.get("sub_sector", ""))).strip()
+                sector_map[cid] = str(
+                    row.get("sector", row.get("sub_sector", ""))
+                ).strip()
 
     if results_df is None or results_df.empty:
         rows = []
         for cid in companies_list:
-            rows.append({
-                "company_id": cid,
-                "company_name": company_map.get(cid, ""),
-                "sector": sector_map.get(cid, ""),
-                "pro_count": 0,
-                "con_count": 0,
-                "has_pro": False,
-                "has_con": False,
-                "coverage_status": "FAIL",
-            })
-        return pd.DataFrame(rows, columns=[
-            "company_id", "company_name", "sector", "pro_count", "con_count",
-            "has_pro", "has_con", "coverage_status",
-        ])
+            rows.append(
+                {
+                    "company_id": cid,
+                    "company_name": company_map.get(cid, ""),
+                    "sector": sector_map.get(cid, ""),
+                    "pro_count": 0,
+                    "con_count": 0,
+                    "has_pro": False,
+                    "has_con": False,
+                    "coverage_status": "FAIL",
+                }
+            )
+        return pd.DataFrame(
+            rows,
+            columns=[
+                "company_id",
+                "company_name",
+                "sector",
+                "pro_count",
+                "con_count",
+                "has_pro",
+                "has_con",
+                "coverage_status",
+            ],
+        )
 
     results = results_df.copy()
     pro_counts = (
@@ -2107,20 +2233,31 @@ def build_company_coverage_report(
         con_count = int(con_counts.get(cid, 0))
         has_pro = pro_count > 0
         has_con = con_count > 0
-        rows.append({
-            "company_id": cid,
-            "company_name": company_map.get(cid, ""),
-            "sector": sector_map.get(cid, ""),
-            "pro_count": pro_count,
-            "con_count": con_count,
-            "has_pro": has_pro,
-            "has_con": has_con,
-            "coverage_status": "PASS" if has_pro and has_con else "FAIL",
-        })
-    return pd.DataFrame(rows, columns=[
-        "company_id", "company_name", "sector", "pro_count", "con_count",
-        "has_pro", "has_con", "coverage_status",
-    ])
+        rows.append(
+            {
+                "company_id": cid,
+                "company_name": company_map.get(cid, ""),
+                "sector": sector_map.get(cid, ""),
+                "pro_count": pro_count,
+                "con_count": con_count,
+                "has_pro": has_pro,
+                "has_con": has_con,
+                "coverage_status": "PASS" if has_pro and has_con else "FAIL",
+            }
+        )
+    return pd.DataFrame(
+        rows,
+        columns=[
+            "company_id",
+            "company_name",
+            "sector",
+            "pro_count",
+            "con_count",
+            "has_pro",
+            "has_con",
+            "coverage_status",
+        ],
+    )
 
 
 def generate_coverage_failures(
@@ -2130,12 +2267,21 @@ def generate_coverage_failures(
     sectors_df: Optional[pd.DataFrame] = None,
 ) -> pd.DataFrame:
     """Return only companies failing the final Pro/Con coverage requirement."""
-    coverage = build_company_coverage_report(company_ids, results_df, companies_df, sectors_df)
+    coverage = build_company_coverage_report(
+        company_ids, results_df, companies_df, sectors_df
+    )
     failures = coverage[coverage["coverage_status"] == "FAIL"].copy()
     if failures.empty:
-        return pd.DataFrame(columns=[
-            "company_id", "company_name", "sector", "pro_count", "con_count", "failure_reason",
-        ])
+        return pd.DataFrame(
+            columns=[
+                "company_id",
+                "company_name",
+                "sector",
+                "pro_count",
+                "con_count",
+                "failure_reason",
+            ]
+        )
 
     failures["failure_reason"] = ""
     for idx, row in failures.iterrows():
@@ -2148,9 +2294,16 @@ def generate_coverage_failures(
         else:
             reason = "Coverage rule not satisfied"
         failures.at[idx, "failure_reason"] = reason
-    return failures[[
-        "company_id", "company_name", "sector", "pro_count", "con_count", "failure_reason",
-    ]].reset_index(drop=True)
+    return failures[
+        [
+            "company_id",
+            "company_name",
+            "sector",
+            "pro_count",
+            "con_count",
+            "failure_reason",
+        ]
+    ].reset_index(drop=True)
 
 
 # Keep the final result consistent with the earlier validation helpers.
@@ -2159,4 +2312,3 @@ def generate_coverage_failures(
 # above the >60 threshold, and each result must have a valid rule id and
 # non-empty company id.
 # ---------------------------------------------------------------------------
-

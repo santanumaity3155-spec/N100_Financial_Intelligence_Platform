@@ -64,7 +64,7 @@ class TestModule4DIntegration:
             "Growth Funded by Debt",
             "Cash Accumulator",
             "Pre-Revenue",
-            "Mixed"
+            "Mixed",
         }
 
         assert set(SUPPORTED_PATTERNS) == expected_patterns
@@ -80,12 +80,12 @@ class TestModule4DIntegration:
             # Get Module 4B latest year company count
             dist_path = OUTPUT_DIR / "capital_allocation_distribution.csv"
             dist_df = pd.read_csv(dist_path)
-            module4b_count = dist_df['company_count'].sum()
+            module4b_count = dist_df["company_count"].sum()
 
             # Get Module 4C companies with history
             changes_df, summary = compute_pattern_changes()
-            module4c_processed = summary['companies_with_previous_year']
-            module4c_insufficient = summary['companies_insufficient_history']
+            module4c_processed = summary["companies_with_previous_year"]
+            module4c_insufficient = summary["companies_insufficient_history"]
 
             # All should match
             assert auth_count == 94
@@ -101,22 +101,28 @@ class TestModule4DIntegration:
         dist_df = pd.read_csv(dist_path)
 
         # Sum of percentages should be approximately 100%
-        percentage_sum = dist_df['percentage'].sum()
-        assert 99.0 <= percentage_sum <= 101.0, f"Percentage sum {percentage_sum}% not in expected range"
+        percentage_sum = dist_df["percentage"].sum()
+        assert (
+            99.0 <= percentage_sum <= 101.0
+        ), f"Percentage sum {percentage_sum}% not in expected range"
 
     def test_duplicate_detection(self):
         """7. Duplicate detection - verify no duplicate records in outputs."""
         # Check Module 4B distribution for duplicates
         dist_path = OUTPUT_DIR / "capital_allocation_distribution.csv"
         dist_df = pd.read_csv(dist_path)
-        assert dist_df['pattern'].is_unique, "Duplicate patterns found in Module 4B output"
+        assert dist_df[
+            "pattern"
+        ].is_unique, "Duplicate patterns found in Module 4B output"
 
         # Check Module 4C pattern changes for duplicates
         changes_path = OUTPUT_DIR / "pattern_changes.csv"
         if changes_path.exists():
             changes_df = pd.read_csv(changes_path)
             if not changes_df.empty:
-                assert changes_df['company_id'].is_unique, "Duplicate companies found in Module 4C output"
+                assert changes_df[
+                    "company_id"
+                ].is_unique, "Duplicate companies found in Module 4C output"
 
     def test_pattern_change_validation(self):
         """8. Pattern change validation - verify all reported changes are actual changes."""
@@ -125,11 +131,17 @@ class TestModule4DIntegration:
             changes_df = pd.read_csv(changes_path)
             if not changes_df.empty:
                 # All changes should have previous_pattern != latest_pattern
-                unchanged_mask = changes_df['previous_pattern'] == changes_df['latest_pattern']
-                assert not unchanged_mask.any(), "Found unchanged patterns marked as changed"
+                unchanged_mask = (
+                    changes_df["previous_pattern"] == changes_df["latest_pattern"]
+                )
+                assert (
+                    not unchanged_mask.any()
+                ), "Found unchanged patterns marked as changed"
 
                 # All should have changed = True
-                assert (changes_df['changed'] == True).all(), "Not all changes marked as changed"
+                assert (
+                    changes_df["changed"] == True
+                ).all(), "Not all changes marked as changed"
 
     def test_year_ordering(self):
         """9. Year ordering - verify previous_year < latest_year for all changes."""
@@ -138,8 +150,10 @@ class TestModule4DIntegration:
             changes_df = pd.read_csv(changes_path)
             if not changes_df.empty:
                 # All should have previous_year < latest_year
-                invalid_order = changes_df['previous_year'] >= changes_df['latest_year']
-                assert not invalid_order.any(), "Found invalid year ordering (previous >= latest)"
+                invalid_order = changes_df["previous_year"] >= changes_df["latest_year"]
+                assert (
+                    not invalid_order.any()
+                ), "Found invalid year ordering (previous >= latest)"
 
     def test_cross_module_pattern_consistency(self):
         """10. Cross-module pattern consistency - verify 4B and 4C latest patterns match."""
@@ -156,18 +170,20 @@ class TestModule4DIntegration:
             # Merge and compare
             if not df_4b.empty and not df_4c_latest.empty:
                 merged = pd.merge(
-                    df_4b[['company_id', 'capital_allocation_pattern']],
-                    df_4c_latest[['company_id', 'capital_allocation_pattern']],
-                    on='company_id',
-                    suffixes=('_module4b', '_module4c')
+                    df_4b[["company_id", "capital_allocation_pattern"]],
+                    df_4c_latest[["company_id", "capital_allocation_pattern"]],
+                    on="company_id",
+                    suffixes=("_module4b", "_module4c"),
                 )
 
                 # All should match
                 mismatches = merged[
-                    merged['capital_allocation_pattern_module4b'] !=
-                    merged['capital_allocation_pattern_module4c']
+                    merged["capital_allocation_pattern_module4b"]
+                    != merged["capital_allocation_pattern_module4c"]
                 ]
-                assert len(mismatches) == 0, f"Found {len(mismatches)} pattern mismatches between modules"
+                assert (
+                    len(mismatches) == 0
+                ), f"Found {len(mismatches)} pattern mismatches between modules"
 
         finally:
             conn.close()
@@ -238,18 +254,28 @@ class TestModule4DIntegration:
         # Check Module 4B distribution
         dist_path = OUTPUT_DIR / "capital_allocation_distribution.csv"
         dist_df = pd.read_csv(dist_path)
-        invalid_patterns = set(dist_df['pattern']) - set(SUPPORTED_PATTERNS)
-        assert len(invalid_patterns) == 0, f"Invalid patterns found in Module 4B: {invalid_patterns}"
+        invalid_patterns = set(dist_df["pattern"]) - set(SUPPORTED_PATTERNS)
+        assert (
+            len(invalid_patterns) == 0
+        ), f"Invalid patterns found in Module 4B: {invalid_patterns}"
 
         # Check Module 4C pattern changes
         changes_path = OUTPUT_DIR / "pattern_changes.csv"
         if changes_path.exists():
             changes_df = pd.read_csv(changes_path)
             if not changes_df.empty:
-                invalid_prev = set(changes_df['previous_pattern']) - set(SUPPORTED_PATTERNS)
-                invalid_latest = set(changes_df['latest_pattern']) - set(SUPPORTED_PATTERNS)
-                assert len(invalid_prev) == 0, f"Invalid previous patterns in Module 4C: {invalid_prev}"
-                assert len(invalid_latest) == 0, f"Invalid latest patterns in Module 4C: {invalid_latest}"
+                invalid_prev = set(changes_df["previous_pattern"]) - set(
+                    SUPPORTED_PATTERNS
+                )
+                invalid_latest = set(changes_df["latest_pattern"]) - set(
+                    SUPPORTED_PATTERNS
+                )
+                assert (
+                    len(invalid_prev) == 0
+                ), f"Invalid previous patterns in Module 4C: {invalid_prev}"
+                assert (
+                    len(invalid_latest) == 0
+                ), f"Invalid latest patterns in Module 4C: {invalid_latest}"
 
     def test_zero_count_pattern_support(self):
         """14. Zero-count pattern support - verify zero-count patterns are included."""
@@ -257,14 +283,17 @@ class TestModule4DIntegration:
         dist_df = pd.read_csv(dist_path)
 
         # All supported patterns should be present
-        patterns_in_output = set(dist_df['pattern'])
-        assert set(SUPPORTED_PATTERNS) == patterns_in_output, \
-            f"Missing patterns in output. Expected: {SUPPORTED_PATTERNS}, Got: {list(patterns_in_output)}"
+        patterns_in_output = set(dist_df["pattern"])
+        assert (
+            set(SUPPORTED_PATTERNS) == patterns_in_output
+        ), f"Missing patterns in output. Expected: {SUPPORTED_PATTERNS}, Got: {list(patterns_in_output)}"
 
         # Check that zero-count patterns have zero company count and zero percentage
         for pattern in SUPPORTED_PATTERNS:
-            pattern_row = dist_df[dist_df['pattern'] == pattern]
-            assert not pattern_row.empty, f"Pattern {pattern} missing from distribution output"
+            pattern_row = dist_df[dist_df["pattern"] == pattern]
+            assert (
+                not pattern_row.empty
+            ), f"Pattern {pattern} missing from distribution output"
             # Note: We don't assert count == 0 because some patterns may have companies
             # but we do verify the pattern exists
 
@@ -273,5 +302,3 @@ def test_validate_module4_passes():
     """Test that the final Module 4 validator passes."""
     result = validate_module4()
     assert result is True, "Module 4 final validation should pass"
-
-

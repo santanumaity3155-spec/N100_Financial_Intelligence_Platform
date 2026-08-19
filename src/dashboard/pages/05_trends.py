@@ -64,6 +64,7 @@ METRIC_COLORS = [
 # DATA LOADING (cached)
 # =============================================================================
 
+
 @st.cache_data(ttl=600, show_spinner=False)
 def load_companies() -> pd.DataFrame:
     """
@@ -81,10 +82,12 @@ def load_companies() -> pd.DataFrame:
             return pd.DataFrame()
 
         # Standardize column names
-        df = df.rename(columns={
-            "ticker": "company_id",
-            "name": "company_name",
-        })
+        df = df.rename(
+            columns={
+                "ticker": "company_id",
+                "name": "company_name",
+            }
+        )
 
         logger.info(f"Loaded {len(df)} companies for trend analysis")
         return df[["company_id", "company_name", "sector", "industry"]]
@@ -149,7 +152,9 @@ def load_financial_data(company_id: str) -> Dict[str, pd.DataFrame]:
 
         return data
     except Exception as e:
-        logger.error(f"Failed to load financial data for {company_id}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Failed to load financial data for {company_id}: {str(e)}", exc_info=True
+        )
         return {
             "profit_loss": pd.DataFrame(),
             "ratios": pd.DataFrame(),
@@ -161,6 +166,7 @@ def load_financial_data(company_id: str) -> Dict[str, pd.DataFrame]:
 # =============================================================================
 # DATA PROCESSING
 # =============================================================================
+
 
 def prepare_trend_data(
     financial_data: Dict[str, pd.DataFrame],
@@ -239,7 +245,9 @@ def prepare_trend_data(
 
         return trend_df
     except Exception as e:
-        logger.error(f"Failed to prepare trend data for {metric_name}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Failed to prepare trend data for {metric_name}: {str(e)}", exc_info=True
+        )
         return pd.DataFrame()
 
 
@@ -272,6 +280,7 @@ def calculate_yoy(df: pd.DataFrame) -> pd.DataFrame:
 # =============================================================================
 # VISUALIZATION
 # =============================================================================
+
 
 def build_trend_chart(
     trend_data: Dict[str, pd.DataFrame],
@@ -332,7 +341,9 @@ def build_trend_chart(
                         yoy_val = row["yoy_pct"]
                         # Color code: green for positive, red for negative
                         yoy_color = "#2E7D32" if yoy_val >= 0 else "#C62828"
-                        yoy_text = f"+{yoy_val:.1f}%" if yoy_val >= 0 else f"{yoy_val:.1f}%"
+                        yoy_text = (
+                            f"+{yoy_val:.1f}%" if yoy_val >= 0 else f"{yoy_val:.1f}%"
+                        )
 
                         fig.add_annotation(
                             x=row["year"],
@@ -382,7 +393,9 @@ def build_trend_chart(
         # Enable zoom and pan
         fig.update_xaxes(rangeslider_visible=False)
 
-        logger.info(f"Trend chart built successfully with {len(selected_metrics)} metrics")
+        logger.info(
+            f"Trend chart built successfully with {len(selected_metrics)} metrics"
+        )
         return fig
     except Exception as e:
         logger.error(f"Failed to build trend chart: {str(e)}", exc_info=True)
@@ -393,7 +406,10 @@ def build_trend_chart(
 # SIDEBAR SELECTION
 # =============================================================================
 
-def render_sidebar(companies_df: pd.DataFrame) -> Tuple[Optional[str], Optional[str], Optional[List[Tuple[str, str, str, str]]]]:
+
+def render_sidebar(
+    companies_df: pd.DataFrame,
+) -> Tuple[Optional[str], Optional[str], Optional[List[Tuple[str, str, str, str]]]]:
     """
     Render sidebar with company search, year selector, and metric selector.
 
@@ -418,15 +434,21 @@ def render_sidebar(companies_df: pd.DataFrame) -> Tuple[Optional[str], Optional[
     company_names = sorted(set(company_names))
 
     # Search/autocomplete
-    search_query = st.sidebar.text_input(
-        "Search Company",
-        placeholder="Type to search...",
-        help="Search for a company by name (case-insensitive)",
-    ).strip().lower()
+    search_query = (
+        st.sidebar.text_input(
+            "Search Company",
+            placeholder="Type to search...",
+            help="Search for a company by name (case-insensitive)",
+        )
+        .strip()
+        .lower()
+    )
 
     # Filter companies
     if search_query:
-        filtered_names = [name for name in company_names if search_query in name.lower()]
+        filtered_names = [
+            name for name in company_names if search_query in name.lower()
+        ]
     else:
         filtered_names = company_names
 
@@ -478,13 +500,16 @@ def render_sidebar(companies_df: pd.DataFrame) -> Tuple[Optional[str], Optional[
 # MAIN
 # =============================================================================
 
+
 def main() -> None:
     """
     Render the Trend Analysis page.
     """
     logger.info("Trend Analysis page accessed")
     st.title("📈 Trend Analysis")
-    st.markdown("### Analyze financial metrics trends over time for Nifty 100 companies")
+    st.markdown(
+        "### Analyze financial metrics trends over time for Nifty 100 companies"
+    )
     st.markdown("---")
 
     # Load companies
@@ -545,9 +570,13 @@ def main() -> None:
         year_count = len(all_years)
 
         if year_count < 10:
-            st.info(f"📊 Data available for {year_count} years ({min_year} - {max_year})")
+            st.info(
+                f"📊 Data available for {year_count} years ({min_year} - {max_year})"
+            )
         else:
-            st.success(f"📊 Data available for {year_count} years ({min_year} - {max_year})")
+            st.success(
+                f"📊 Data available for {year_count} years ({min_year} - {max_year})"
+            )
 
     # Build and display trend chart
     try:

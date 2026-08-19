@@ -44,7 +44,6 @@ from src.nlp.parser import (  # noqa: E402
     validate_against_ratio_engine,
 )
 
-
 # =============================================================================
 # FIXTURES
 # =============================================================================
@@ -218,24 +217,33 @@ class TestParseDataFrame:
     """Verify parse_dataframe returns parsed + failures DataFrames."""
 
     def test_returns_both_dataframes(self):
-        df = pd.DataFrame({
-            "company_id": ["TEST"],
-            "compounded_sales_growth": ["10 Years: 21%"],
-            "compounded_profit_growth": ["TTM: 5%"],
-        })
+        df = pd.DataFrame(
+            {
+                "company_id": ["TEST"],
+                "compounded_sales_growth": ["10 Years: 21%"],
+                "compounded_profit_growth": ["TTM: 5%"],
+            }
+        )
         parsed_df, failures_df = parse_dataframe(df)
         assert len(parsed_df) == 1
         assert len(failures_df) == 1
 
     def test_parsed_columns(self):
-        df = pd.DataFrame({
-            "company_id": ["TEST"],
-            "compounded_sales_growth": ["10 Years: 21%"],
-        })
+        df = pd.DataFrame(
+            {
+                "company_id": ["TEST"],
+                "compounded_sales_growth": ["10 Years: 21%"],
+            }
+        )
         parsed_df, _ = parse_dataframe(df)
         expected_cols = {
-            "company_id", "metric_type", "period_years",
-            "value_pct", "source_text", "parsed_success", "failure_reason",
+            "company_id",
+            "metric_type",
+            "period_years",
+            "value_pct",
+            "source_text",
+            "parsed_success",
+            "failure_reason",
         }
         assert expected_cols.issubset(set(parsed_df.columns))
         assert parsed_df.iloc[0]["period_years"] == 10
@@ -268,16 +276,18 @@ class TestValidation:
 
     def test_difference_calculation(self):
         # Simulate a parsed row and validate against a known reference
-        parsed_df = pd.DataFrame([
-            {
-                "company_id": "HDFCBANK",
-                "metric_type": "compounded_sales_growth",
-                "period_years": 10,
-                "value_pct": 20.29,  # matches financial_kpis revenue_cagr exactly
-                "source_text": "10 Years: 20.29%",
-                "parsed_success": True,
-            }
-        ])
+        parsed_df = pd.DataFrame(
+            [
+                {
+                    "company_id": "HDFCBANK",
+                    "metric_type": "compounded_sales_growth",
+                    "period_years": 10,
+                    "value_pct": 20.29,  # matches financial_kpis revenue_cagr exactly
+                    "source_text": "10 Years: 20.29%",
+                    "parsed_success": True,
+                }
+            ]
+        )
         validated_df = validate_against_ratio_engine(parsed_df)
         row = validated_df.iloc[0]
         assert abs(row["difference_pct"]) <= 0.01
@@ -285,16 +295,18 @@ class TestValidation:
 
     def test_large_difference_flagged(self):
         # Parsed value deliberately differs > 5% from reference
-        parsed_df = pd.DataFrame([
-            {
-                "company_id": "HDFCBANK",
-                "metric_type": "compounded_sales_growth",
-                "period_years": 10,
-                "value_pct": 99.0,  # reference ~20.29, diff ~78.7
-                "source_text": "10 Years: 99%",
-                "parsed_success": True,
-            }
-        ])
+        parsed_df = pd.DataFrame(
+            [
+                {
+                    "company_id": "HDFCBANK",
+                    "metric_type": "compounded_sales_growth",
+                    "period_years": 10,
+                    "value_pct": 99.0,  # reference ~20.29, diff ~78.7
+                    "source_text": "10 Years: 99%",
+                    "parsed_success": True,
+                }
+            ]
+        )
         validated_df = validate_against_ratio_engine(parsed_df)
         row = validated_df.iloc[0]
         assert row["manual_review"] == True  # noqa: E712
@@ -302,16 +314,18 @@ class TestValidation:
 
     def test_no_reference_no_flag(self):
         # stock_price_cagr has no reference → manual_review False, diff None
-        parsed_df = pd.DataFrame([
-            {
-                "company_id": "HDFCBANK",
-                "metric_type": "stock_price_cagr",
-                "period_years": 10,
-                "value_pct": 15.0,
-                "source_text": "10 Years: 15%",
-                "parsed_success": True,
-            }
-        ])
+        parsed_df = pd.DataFrame(
+            [
+                {
+                    "company_id": "HDFCBANK",
+                    "metric_type": "stock_price_cagr",
+                    "period_years": 10,
+                    "value_pct": 15.0,
+                    "source_text": "10 Years: 15%",
+                    "parsed_success": True,
+                }
+            ]
+        )
         validated_df = validate_against_ratio_engine(parsed_df)
         row = validated_df.iloc[0]
         assert row["manual_review"] == False  # noqa: E712
@@ -330,35 +344,54 @@ class TestCsvOutput:
         _, _, parsed_csv, _ = parsed_outputs
         assert parsed_csv.exists()
         df = pd.read_csv(parsed_csv)
-        assert {"company_id", "metric_type", "period_years", "value_pct"}.issubset(set(df.columns))
+        assert {"company_id", "metric_type", "period_years", "value_pct"}.issubset(
+            set(df.columns)
+        )
 
     def test_failures_csv_generated(self, parsed_outputs):
         _, _, _, failures_csv = parsed_outputs
         assert failures_csv.exists()
         df = pd.read_csv(failures_csv)
-        assert {"company_id", "metric_type", "source_text", "failure_reason"}.issubset(set(df.columns))
+        assert {"company_id", "metric_type", "source_text", "failure_reason"}.issubset(
+            set(df.columns)
+        )
 
     def test_failures_csv_contains_ttm(self, parsed_outputs):
         _, failures_df, _, failures_csv = parsed_outputs
         # TTM rows must be present in failures
         if not failures_df.empty:
-            ttm_failures = failures_df[failures_df["source_text"].str.contains("TTM", na=False)]
+            ttm_failures = failures_df[
+                failures_df["source_text"].str.contains("TTM", na=False)
+            ]
             assert len(ttm_failures) > 0
 
     def test_save_empty_failures(self, tmp_path):
-        empty_df = pd.DataFrame(columns=[
-            "company_id", "metric_type", "source_text", "failure_reason",
-        ])
+        empty_df = pd.DataFrame(
+            columns=[
+                "company_id",
+                "metric_type",
+                "source_text",
+                "failure_reason",
+            ]
+        )
         path = tmp_path / "empty_failures.csv"
         save_failures_csv(empty_df, path)
         assert path.exists()
         assert os.path.getsize(path) > 0
 
     def test_save_empty_parsed(self, tmp_path):
-        empty_df = pd.DataFrame(columns=[
-            "company_id", "metric_type", "period_years", "value_pct",
-            "source_text", "parsed_success", "manual_review", "difference_pct",
-        ])
+        empty_df = pd.DataFrame(
+            columns=[
+                "company_id",
+                "metric_type",
+                "period_years",
+                "value_pct",
+                "source_text",
+                "parsed_success",
+                "manual_review",
+                "difference_pct",
+            ]
+        )
         path = tmp_path / "empty_parsed.csv"
         save_analysis_csv(empty_df, path)
         assert path.exists()
@@ -387,10 +420,11 @@ class TestIntegration:
     def test_sorted_output(self, parsed_outputs):
         validated_df, _, _, _ = parsed_outputs
         if len(validated_df) > 1:
-            keys = list(zip(
-                validated_df["company_id"],
-                validated_df["metric_type"],
-                validated_df["period_years"].fillna(0),
-            ))
+            keys = list(
+                zip(
+                    validated_df["company_id"],
+                    validated_df["metric_type"],
+                    validated_df["period_years"].fillna(0),
+                )
+            )
             assert keys == sorted(keys, key=lambda k: (k[0], k[1], k[2]))
-

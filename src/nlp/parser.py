@@ -152,7 +152,9 @@ def load_analysis_data() -> pd.DataFrame:
 
     # Ensure company_id is present
     if "company_id" not in df.columns:
-        logger.error("analysis.xlsx missing 'company_id' column. Found: %s", list(df.columns))
+        logger.error(
+            "analysis.xlsx missing 'company_id' column. Found: %s", list(df.columns)
+        )
         raise ValueError("analysis.xlsx missing required 'company_id' column")
 
     # Keep only target columns that actually exist
@@ -162,7 +164,9 @@ def load_analysis_data() -> pd.DataFrame:
         logger.warning("Target columns missing from analysis.xlsx: %s", missing)
 
     if not available:
-        logger.error("No target columns found in analysis.xlsx. Available: %s", list(df.columns))
+        logger.error(
+            "No target columns found in analysis.xlsx. Available: %s", list(df.columns)
+        )
         raise ValueError("No target columns found in analysis.xlsx")
 
     result = df[["company_id"] + available].copy()
@@ -263,7 +267,9 @@ def parse_metric(text: Any, metric_type: str) -> ParseResult:
     if "TTM" in upper:
         reason = "TTM period (no numeric years) — cannot map to a period_years value"
     elif "LAST YEAR" in upper or "LASTYEAR" in upper:
-        reason = "Last Year period (no numeric years) — cannot map to a period_years value"
+        reason = (
+            "Last Year period (no numeric years) — cannot map to a period_years value"
+        )
     elif "1 YEAR" in upper or "1YEAR" in upper:
         reason = "1 Year period (regex expects 'Years') — cannot parse"
     else:
@@ -306,10 +312,17 @@ def parse_dataframe(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     # Handle empty DataFrame gracefully
     if df.empty:
         logger.warning("Empty DataFrame provided — returning empty results")
-        empty_df = pd.DataFrame(columns=[
-            "company_id", "metric_type", "period_years", "value_pct",
-            "source_text", "parsed_success", "failure_reason",
-        ])
+        empty_df = pd.DataFrame(
+            columns=[
+                "company_id",
+                "metric_type",
+                "period_years",
+                "value_pct",
+                "source_text",
+                "parsed_success",
+                "failure_reason",
+            ]
+        )
         return empty_df, empty_df.copy()
 
     # Identify the metric columns actually present
@@ -317,10 +330,17 @@ def parse_dataframe(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
 
     if not metric_cols:
         logger.warning("No target columns found in DataFrame")
-        empty_df = pd.DataFrame(columns=[
-            "company_id", "metric_type", "period_years", "value_pct",
-            "source_text", "parsed_success", "failure_reason",
-        ])
+        empty_df = pd.DataFrame(
+            columns=[
+                "company_id",
+                "metric_type",
+                "period_years",
+                "value_pct",
+                "source_text",
+                "parsed_success",
+                "failure_reason",
+            ]
+        )
         return empty_df, empty_df.copy()
 
     # Melt: wide → long
@@ -337,10 +357,17 @@ def parse_dataframe(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
 
     if melted.empty:
         logger.warning("No data rows after melting — all metric columns are empty")
-        empty_df = pd.DataFrame(columns=[
-            "company_id", "metric_type", "period_years", "value_pct",
-            "source_text", "parsed_success", "failure_reason",
-        ])
+        empty_df = pd.DataFrame(
+            columns=[
+                "company_id",
+                "metric_type",
+                "period_years",
+                "value_pct",
+                "source_text",
+                "parsed_success",
+                "failure_reason",
+            ]
+        )
         return empty_df, empty_df.copy()
 
     # Apply parse_metric to each row
@@ -363,7 +390,9 @@ def parse_dataframe(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
         if col in parsed_df.columns:
             parsed_df[col] = pd.to_numeric(parsed_df[col], errors="coerce")
     if "period_years" in parsed_df.columns:
-        parsed_df["period_years"] = parsed_df["period_years"].astype("Int64")  # nullable int
+        parsed_df["period_years"] = parsed_df["period_years"].astype(
+            "Int64"
+        )  # nullable int
 
     # Sort: company_id, metric_type, period_years
     parsed_df = parsed_df.sort_values(
@@ -542,9 +571,7 @@ def validate_against_ratio_engine(
                     diff,
                 )
         except (TypeError, ValueError) as exc:
-            logger.warning(
-                "Validation error for %s / %s: %s", cid, metric_type, exc
-            )
+            logger.warning("Validation error for %s / %s: %s", cid, metric_type, exc)
 
     flagged = result["manual_review"].sum()
     logger.info(
@@ -576,10 +603,18 @@ def save_analysis_csv(parsed_df: pd.DataFrame, path: Path = PARSED_CSV_PATH) -> 
     """
     if parsed_df.empty:
         logger.warning("No parsed rows to save — creating empty CSV with headers")
-        empty_df = pd.DataFrame(columns=[
-            "company_id", "metric_type", "period_years", "value_pct",
-            "source_text", "parsed_success", "manual_review", "difference_pct",
-        ])
+        empty_df = pd.DataFrame(
+            columns=[
+                "company_id",
+                "metric_type",
+                "period_years",
+                "value_pct",
+                "source_text",
+                "parsed_success",
+                "manual_review",
+                "difference_pct",
+            ]
+        )
         empty_df.to_csv(path, index=False)
         logger.info("Empty analysis CSV saved to %s", path)
         return
@@ -593,13 +628,21 @@ def save_analysis_csv(parsed_df: pd.DataFrame, path: Path = PARSED_CSV_PATH) -> 
 
     # Select and order columns
     cols = [
-        "company_id", "metric_type", "period_years", "value_pct",
-        "source_text", "parsed_success", "manual_review", "difference_pct",
+        "company_id",
+        "metric_type",
+        "period_years",
+        "value_pct",
+        "source_text",
+        "parsed_success",
+        "manual_review",
+        "difference_pct",
     ]
     out = out[[c for c in cols if c in out.columns]]
 
     # Sort: company_id, metric_type, period_years
-    sort_cols = [c for c in ["company_id", "metric_type", "period_years"] if c in out.columns]
+    sort_cols = [
+        c for c in ["company_id", "metric_type", "period_years"] if c in out.columns
+    ]
     out = out.sort_values(sort_cols).reset_index(drop=True)
 
     out.to_csv(path, index=False)
@@ -623,9 +666,14 @@ def save_failures_csv(
     """
     if failures_df.empty:
         logger.warning("No failures to save — creating empty CSV with headers")
-        empty_df = pd.DataFrame(columns=[
-            "company_id", "metric_type", "source_text", "failure_reason",
-        ])
+        empty_df = pd.DataFrame(
+            columns=[
+                "company_id",
+                "metric_type",
+                "source_text",
+                "failure_reason",
+            ]
+        )
         empty_df.to_csv(path, index=False)
         logger.info("Empty failures CSV saved to %s", path)
         return
@@ -691,14 +739,23 @@ def main() -> Dict[str, Any]:
         parsed_df, failures_df = parse_dataframe(df)
         summary["total_rows_parsed"] = len(parsed_df)
         summary["total_rows_failed"] = len(failures_df)
-        logger.info("Step 2/5 — Parsing complete: %d parsed, %d failed", len(parsed_df), len(failures_df))
+        logger.info(
+            "Step 2/5 — Parsing complete: %d parsed, %d failed",
+            len(parsed_df),
+            len(failures_df),
+        )
 
         # ---------------------------------------------------------------
         # Step 3: Validate
         # ---------------------------------------------------------------
         validated_df = validate_against_ratio_engine(parsed_df)
-        summary["rows_flagged_manual_review"] = int(validated_df["manual_review"].sum()) if not validated_df.empty else 0
-        logger.info("Step 3/5 — Validation complete: %d flagged for manual review", summary["rows_flagged_manual_review"])
+        summary["rows_flagged_manual_review"] = (
+            int(validated_df["manual_review"].sum()) if not validated_df.empty else 0
+        )
+        logger.info(
+            "Step 3/5 — Validation complete: %d flagged for manual review",
+            summary["rows_flagged_manual_review"],
+        )
 
         # ---------------------------------------------------------------
         # Step 4: Save CSVs

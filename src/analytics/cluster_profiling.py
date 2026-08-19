@@ -17,7 +17,8 @@ from typing import Dict, List, Optional, Tuple, Any
 import numpy as np
 import pandas as pd
 import matplotlib
-matplotlib.use('Agg')  # Non-interactive backend
+
+matplotlib.use("Agg")  # Non-interactive backend
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -27,7 +28,7 @@ from src.analytics.clustering import (
     REQUIRED_FEATURES,
     load_clustering_dataset,
     impute_missing_values,
-    CLUSTER_LABELS_CSV
+    CLUSTER_LABELS_CSV,
 )
 from src.reports.sector_report import SUB_SECTOR_TO_BROAD_SECTOR
 
@@ -56,7 +57,7 @@ DEFAULT_10_KPIS = [
     "debt_to_equity",
     "interest_coverage",
     "asset_turnover",
-    "inventory_turnover"
+    "inventory_turnover",
 ]
 
 # Human-readable labels for 10 KPIs
@@ -70,7 +71,7 @@ KPI_DISPLAY_NAMES = {
     "debt_to_equity": "Debt to Equity",
     "interest_coverage": "Interest Coverage",
     "asset_turnover": "Asset Turnover",
-    "inventory_turnover": "Inventory Turnover"
+    "inventory_turnover": "Inventory Turnover",
 }
 
 # Initial automatic / descriptive cluster naming based on empirical data
@@ -79,7 +80,7 @@ DEFAULT_CLUSTER_NAMES = {
     1: "High Cash Flow Outlier",
     2: "Extreme ROE Outlier",
     3: "Banking Leverage Outlier",
-    4: "Hyper Revenue Growth Outlier"
+    4: "Hyper Revenue Growth Outlier",
 }
 
 
@@ -87,11 +88,12 @@ DEFAULT_CLUSTER_NAMES = {
 # PART 1 — CLUSTER PROFILING & DESCRIPTIVE NAMING
 # =============================================================================
 
+
 def profile_clusters(
     df_labels: Optional[pd.DataFrame] = None,
     conn: Any = None,
     custom_names: Optional[Dict[int, str]] = None,
-    output_path: Path = CLUSTER_PROFILES_CSV
+    output_path: Path = CLUSTER_PROFILES_CSV,
 ) -> pd.DataFrame:
     """
     Profile all 5 KMeans clusters by calculating mean and median for the 5 clustering features.
@@ -118,7 +120,9 @@ def profile_clusters(
 
     if df_labels is None:
         if not CLUSTER_LABELS_CSV.exists():
-            raise FileNotFoundError(f"Cluster labels file not found at {CLUSTER_LABELS_CSV}")
+            raise FileNotFoundError(
+                f"Cluster labels file not found at {CLUSTER_LABELS_CSV}"
+            )
         df_labels = pd.read_csv(CLUSTER_LABELS_CSV)
 
     # Load cleaned/imputed feature dataset from Module 6A
@@ -126,7 +130,9 @@ def profile_clusters(
     imputed_df = impute_missing_values(raw_df, features=REQUIRED_FEATURES)
 
     # Merge cluster_id onto feature dataset
-    merged = imputed_df.merge(df_labels[["company_id", "cluster_id"]], on="company_id", how="inner")
+    merged = imputed_df.merge(
+        df_labels[["company_id", "cluster_id"]], on="company_id", how="inner"
+    )
 
     # Name mapping resolution (custom names > default descriptive names)
     name_map = DEFAULT_CLUSTER_NAMES.copy()
@@ -145,11 +151,16 @@ def profile_clusters(
             row_dict = {
                 "cluster_id": cid,
                 "cluster_name": c_name,
-                "roe_mean": np.nan, "roe_median": np.nan,
-                "debt_to_equity_mean": np.nan, "debt_to_equity_median": np.nan,
-                "revenue_cagr_5yr_mean": np.nan, "revenue_cagr_5yr_median": np.nan,
-                "fcf_cagr_5yr_mean": np.nan, "fcf_cagr_5yr_median": np.nan,
-                "opm_mean": np.nan, "opm_median": np.nan
+                "roe_mean": np.nan,
+                "roe_median": np.nan,
+                "debt_to_equity_mean": np.nan,
+                "debt_to_equity_median": np.nan,
+                "revenue_cagr_5yr_mean": np.nan,
+                "revenue_cagr_5yr_median": np.nan,
+                "fcf_cagr_5yr_mean": np.nan,
+                "fcf_cagr_5yr_median": np.nan,
+                "opm_mean": np.nan,
+                "opm_median": np.nan,
             }
         else:
             row_dict = {
@@ -158,19 +169,31 @@ def profile_clusters(
                 "roe_mean": round(float(c_data["return_on_equity_pct"].mean()), 4),
                 "roe_median": round(float(c_data["return_on_equity_pct"].median()), 4),
                 "debt_to_equity_mean": round(float(c_data["debt_to_equity"].mean()), 4),
-                "debt_to_equity_median": round(float(c_data["debt_to_equity"].median()), 4),
-                "revenue_cagr_5yr_mean": round(float(c_data["revenue_cagr_5yr"].mean()), 4),
-                "revenue_cagr_5yr_median": round(float(c_data["revenue_cagr_5yr"].median()), 4),
+                "debt_to_equity_median": round(
+                    float(c_data["debt_to_equity"].median()), 4
+                ),
+                "revenue_cagr_5yr_mean": round(
+                    float(c_data["revenue_cagr_5yr"].mean()), 4
+                ),
+                "revenue_cagr_5yr_median": round(
+                    float(c_data["revenue_cagr_5yr"].median()), 4
+                ),
                 "fcf_cagr_5yr_mean": round(float(c_data["fcf_cagr_5yr"].mean()), 4),
                 "fcf_cagr_5yr_median": round(float(c_data["fcf_cagr_5yr"].median()), 4),
-                "opm_mean": round(float(c_data["operating_profit_margin_pct"].mean()), 4),
-                "opm_median": round(float(c_data["operating_profit_margin_pct"].median()), 4)
+                "opm_mean": round(
+                    float(c_data["operating_profit_margin_pct"].mean()), 4
+                ),
+                "opm_median": round(
+                    float(c_data["operating_profit_margin_pct"].median()), 4
+                ),
             }
         profiles.append(row_dict)
 
     profile_df = pd.DataFrame(profiles)
     profile_df.to_csv(output_path, index=False)
-    logger.info(f"Saved cluster profiles to {output_path} ({len(profile_df)} clusters).")
+    logger.info(
+        f"Saved cluster profiles to {output_path} ({len(profile_df)} clusters)."
+    )
     return profile_df
 
 
@@ -178,10 +201,11 @@ def profile_clusters(
 # PART 3 — CORRELATION MATRIX & HEATMAP
 # =============================================================================
 
+
 def generate_correlation_heatmap(
     conn: Any = None,
     kpi_cols: List[str] = DEFAULT_10_KPIS,
-    output_path: Path = CORRELATION_HEATMAP_PNG
+    output_path: Path = CORRELATION_HEATMAP_PNG,
 ) -> pd.DataFrame:
     """
     Generate Pearson correlation matrix for exactly 10 KPIs across the latest year company data
@@ -216,7 +240,9 @@ def generate_correlation_heatmap(
             raise ValueError("financial_kpis table is empty.")
 
         # Take latest record per company_id based on id
-        latest_kpis = kpis_df.sort_values("id").groupby("company_id").last().reset_index()
+        latest_kpis = (
+            kpis_df.sort_values("id").groupby("company_id").last().reset_index()
+        )
 
         # Validate that required 10 KPIs exist in columns
         missing_kpis = [k for k in kpi_cols if k not in latest_kpis.columns]
@@ -244,10 +270,15 @@ def generate_correlation_heatmap(
             center=0,
             square=True,
             linewidths=0.5,
-            cbar_kws={"shrink": 0.8}
+            cbar_kws={"shrink": 0.8},
         )
 
-        plt.title("N100 10-KPI Pearson Correlation Heatmap (Latest Period)", fontsize=13, fontweight="bold", pad=12)
+        plt.title(
+            "N100 10-KPI Pearson Correlation Heatmap (Latest Period)",
+            fontsize=13,
+            fontweight="bold",
+            pad=12,
+        )
         plt.xticks(rotation=45, ha="right", fontsize=9)
         plt.yticks(rotation=0, fontsize=9)
         plt.tight_layout()
@@ -267,11 +298,12 @@ def generate_correlation_heatmap(
 # PART 4 — SECTOR-BASED OUTLIER DETECTION
 # =============================================================================
 
+
 def detect_sector_outliers(
     conn: Any = None,
     metrics: List[str] = REQUIRED_FEATURES,
     z_threshold: float = 3.0,
-    output_path: Path = OUTLIER_REPORT_CSV
+    output_path: Path = OUTLIER_REPORT_CSV,
 ) -> pd.DataFrame:
     """
     Perform Z-score outlier detection separately for each broad_sector.
@@ -299,60 +331,78 @@ def detect_sector_outliers(
 
     # Load company feature dataset
     df_feat = load_clustering_dataset(conn=conn)
-    
+
     # Map broad sector from sub_sector
-    df_feat["broad_sector"] = df_feat["sector"].map(SUB_SECTOR_TO_BROAD_SECTOR).fillna("Capital Goods & Engineering")
+    df_feat["broad_sector"] = (
+        df_feat["sector"]
+        .map(SUB_SECTOR_TO_BROAD_SECTOR)
+        .fillna("Capital Goods & Engineering")
+    )
 
     outliers = []
-    
+
     for broad_sec, group in df_feat.groupby("broad_sector"):
         for m in metrics:
             if m not in group.columns:
                 continue
-            
+
             vals = group[m].dropna()
             if len(vals) <= 1:
                 # 0 or 1 sample: standard deviation is undefined/0, skip without error
                 continue
-            
+
             sec_mean = vals.mean()
             sec_std = vals.std(ddof=1)  # sample standard deviation
-            
+
             for _, row in group.iterrows():
                 val = row[m]
                 if pd.isna(val):
                     continue
-                
+
                 if sec_std is None or pd.isna(sec_std) or sec_std == 0:
                     z_val = np.nan
                     is_outlier = False
                 else:
                     z_val = (val - sec_mean) / sec_std
                     is_outlier = abs(z_val) > z_threshold
-                
+
                 if is_outlier:
-                    outliers.append({
-                        "company_id": row["company_id"],
-                        "broad_sector": broad_sec,
-                        "metric": m,
-                        "value": round(float(val), 4),
-                        "sector_mean": round(float(sec_mean), 4),
-                        "sector_std": round(float(sec_std), 4),
-                        "z_score": round(float(z_val), 4),
-                        "outlier_flag": True
-                    })
+                    outliers.append(
+                        {
+                            "company_id": row["company_id"],
+                            "broad_sector": broad_sec,
+                            "metric": m,
+                            "value": round(float(val), 4),
+                            "sector_mean": round(float(sec_mean), 4),
+                            "sector_std": round(float(sec_std), 4),
+                            "z_score": round(float(z_val), 4),
+                            "outlier_flag": True,
+                        }
+                    )
 
     outlier_df = pd.DataFrame(outliers)
     if outlier_df.empty:
-        outlier_df = pd.DataFrame(columns=[
-            "company_id", "broad_sector", "metric", "value",
-            "sector_mean", "sector_std", "z_score", "outlier_flag"
-        ])
+        outlier_df = pd.DataFrame(
+            columns=[
+                "company_id",
+                "broad_sector",
+                "metric",
+                "value",
+                "sector_mean",
+                "sector_std",
+                "z_score",
+                "outlier_flag",
+            ]
+        )
     else:
-        outlier_df = outlier_df.sort_values(["broad_sector", "company_id", "metric"]).reset_index(drop=True)
+        outlier_df = outlier_df.sort_values(
+            ["broad_sector", "company_id", "metric"]
+        ).reset_index(drop=True)
 
     outlier_df.to_csv(output_path, index=False)
-    logger.info(f"Saved sector outlier report to {output_path} ({len(outlier_df)} outlier records).")
+    logger.info(
+        f"Saved sector outlier report to {output_path} ({len(outlier_df)} outlier records)."
+    )
     return outlier_df
 
 
@@ -360,10 +410,11 @@ def detect_sector_outliers(
 # PART 5 — PORTFOLIO STATISTICS
 # =============================================================================
 
+
 def calculate_portfolio_stats(
     conn: Any = None,
     kpis: List[str] = DEFAULT_10_KPIS,
-    output_path: Path = PORTFOLIO_STATS_CSV
+    output_path: Path = PORTFOLIO_STATS_CSV,
 ) -> pd.DataFrame:
     """
     Calculate P10, P25, P50, P75, P90, Mean, and Std for each required KPI
@@ -397,22 +448,32 @@ def calculate_portfolio_stats(
         if kpis_df.empty:
             raise ValueError("financial_kpis table is empty.")
 
-        latest_kpis = kpis_df.sort_values("id").groupby("company_id").last().reset_index()
+        latest_kpis = (
+            kpis_df.sort_values("id").groupby("company_id").last().reset_index()
+        )
 
         stats_rows = []
 
         for k in kpis:
             if k not in latest_kpis.columns:
-                logger.warning(f"KPI column '{k}' not found in financial_kpis. Skipping.")
+                logger.warning(
+                    f"KPI column '{k}' not found in financial_kpis. Skipping."
+                )
                 continue
 
             vals = latest_kpis[k].dropna()
             if vals.empty:
                 logger.warning(f"No valid non-null observations for KPI '{k}'.")
                 row = {
-                    "kpi": k, "count": 0,
-                    "P10": np.nan, "P25": np.nan, "P50": np.nan, "P75": np.nan, "P90": np.nan,
-                    "Mean": np.nan, "Std": np.nan
+                    "kpi": k,
+                    "count": 0,
+                    "P10": np.nan,
+                    "P25": np.nan,
+                    "P50": np.nan,
+                    "P75": np.nan,
+                    "P90": np.nan,
+                    "Mean": np.nan,
+                    "Std": np.nan,
                 }
             else:
                 p10 = float(np.percentile(vals, 10))
@@ -432,13 +493,15 @@ def calculate_portfolio_stats(
                     "P75": round(p75, 4),
                     "P90": round(p90, 4),
                     "Mean": round(mean_val, 4),
-                    "Std": round(std_val, 4)
+                    "Std": round(std_val, 4),
                 }
             stats_rows.append(row)
 
         stats_df = pd.DataFrame(stats_rows)
         stats_df.to_csv(output_path, index=False)
-        logger.info(f"Saved portfolio statistics to {output_path} ({len(stats_df)} KPIs analyzed).")
+        logger.info(
+            f"Saved portfolio statistics to {output_path} ({len(stats_df)} KPIs analyzed)."
+        )
         return stats_df
 
     finally:
@@ -450,9 +513,9 @@ def calculate_portfolio_stats(
 # MAIN PIPELINE EXECUTION
 # =============================================================================
 
+
 def run_cluster_profiling_pipeline(
-    conn: Any = None,
-    custom_names: Optional[Dict[int, str]] = None
+    conn: Any = None, custom_names: Optional[Dict[int, str]] = None
 ) -> Dict[str, Any]:
     """
     Run end-to-end Module 6B workflow: Cluster Profiling, Correlation Matrix,
@@ -492,7 +555,7 @@ def run_cluster_profiling_pipeline(
             "profiles_csv": CLUSTER_PROFILES_CSV,
             "heatmap_png": CORRELATION_HEATMAP_PNG,
             "outlier_csv": OUTLIER_REPORT_CSV,
-            "portfolio_csv": PORTFOLIO_STATS_CSV
+            "portfolio_csv": PORTFOLIO_STATS_CSV,
         }
 
     finally:

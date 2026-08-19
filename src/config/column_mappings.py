@@ -212,17 +212,17 @@ REQUIRED_COLUMNS: Dict[str, List[str]] = {
 def get_column_mapping(dataset_name: str) -> Dict[str, str]:
     """
     Get column mapping for a dataset.
-    
+
     Parameters
     ----------
     dataset_name : str
         Name of the dataset
-        
+
     Returns
     -------
     Dict[str, str]
         Column mapping dictionary
-        
+
     Raises
     ------
     ValueError
@@ -230,24 +230,24 @@ def get_column_mapping(dataset_name: str) -> Dict[str, str]:
     """
     if dataset_name not in COLUMN_MAPPINGS:
         raise ValueError(f"Unknown dataset: {dataset_name}")
-    
+
     return COLUMN_MAPPINGS[dataset_name]
 
 
 def get_required_columns(dataset_name: str) -> List[str]:
     """
     Get required columns for a dataset (after mapping).
-    
+
     Parameters
     ----------
     dataset_name : str
         Name of the dataset
-        
+
     Returns
     -------
     List[str]
         List of required column names
-        
+
     Raises
     ------
     ValueError
@@ -255,37 +255,37 @@ def get_required_columns(dataset_name: str) -> List[str]:
     """
     if dataset_name not in REQUIRED_COLUMNS:
         raise ValueError(f"Unknown dataset: {dataset_name}")
-    
+
     return REQUIRED_COLUMNS[dataset_name]
 
 
 def apply_column_mapping(df: pd.DataFrame, dataset_name: str) -> pd.DataFrame:
     """
     Apply column mapping to a DataFrame.
-    
+
     Parameters
     ----------
     df : pd.DataFrame
         DataFrame with source columns
     dataset_name : str
         Name of the dataset
-        
+
     Returns
     -------
     pd.DataFrame
         DataFrame with mapped column names
     """
     import pandas as pd
-    
+
     mapping = get_column_mapping(dataset_name)
-    
+
     # Create a mapping from normalized column names to original column names
     # Normalize by stripping whitespace and converting to lowercase
     column_name_map = {}
     for col in df.columns:
         normalized = str(col).strip().lower()
         column_name_map[normalized] = col
-    
+
     # Create rename dictionary by matching normalized names
     rename_dict = {}
     for source_col, target_col in mapping.items():
@@ -293,9 +293,9 @@ def apply_column_mapping(df: pd.DataFrame, dataset_name: str) -> pd.DataFrame:
         if normalized_source in column_name_map:
             original_col = column_name_map[normalized_source]
             rename_dict[original_col] = target_col
-    
+
     # Rename columns - only columns in the mapping are renamed
     # All other columns are kept as-is
     df = df.rename(columns=rename_dict)
-    
+
     return df

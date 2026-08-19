@@ -14,7 +14,7 @@ def donut_chart(
     title: str = "",
     hole: float = 0.4,
     height: int = 500,
-    color_sequence: Optional[List[str]] = None
+    color_sequence: Optional[List[str]] = None,
 ) -> None:
     """
     Render a donut chart.
@@ -38,29 +38,23 @@ def donut_chart(
         names=names_col,
         hole=hole,
         title=title,
-        color_discrete_sequence=color_sequence or px.colors.qualitative.Set3
+        color_discrete_sequence=color_sequence or px.colors.qualitative.Set3,
     )
 
     fig.update_traces(
         textposition="inside",
         textinfo="percent+label",
-        hovertemplate="<b>%{label}</b><br>" +
-                     "Value: %{value}<br>" +
-                     "Percentage: %{percent}<br>" +
-                     "<extra></extra>"
+        hovertemplate="<b>%{label}</b><br>"
+        + "Value: %{value}<br>"
+        + "Percentage: %{percent}<br>"
+        + "<extra></extra>",
     )
 
     fig.update_layout(
         showlegend=True,
-        legend=dict(
-            orientation="v",
-            yanchor="middle",
-            y=0.5,
-            xanchor="left",
-            x=1.02
-        ),
+        legend=dict(orientation="v", yanchor="middle", y=0.5, xanchor="left", x=1.02),
         height=height,
-        margin=dict(l=20, r=20, t=40, b=20)
+        margin=dict(l=20, r=20, t=40, b=20),
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -73,7 +67,7 @@ def bar_chart(
     title: str = "",
     orientation: str = "v",
     height: int = 400,
-    color: Optional[str] = None
+    color: Optional[str] = None,
 ) -> None:
     """
     Render a bar chart.
@@ -98,13 +92,13 @@ def bar_chart(
         orientation=orientation,
         title=title,
         color=color,
-        height=height
+        height=height,
     )
 
     fig.update_layout(
         xaxis_title=x_col.replace("_", " ").title(),
         yaxis_title=y_col.replace("_", " ").title(),
-        margin=dict(l=20, r=20, t=40, b=20)
+        margin=dict(l=20, r=20, t=40, b=20),
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -117,7 +111,7 @@ def line_chart(
     title: str = "",
     height: int = 400,
     color: Optional[str] = None,
-    markers: bool = True
+    markers: bool = True,
 ) -> None:
     """
     Render a line chart.
@@ -136,19 +130,13 @@ def line_chart(
         return
 
     fig = px.line(
-        data,
-        x=x_col,
-        y=y_col,
-        title=title,
-        color=color,
-        height=height,
-        markers=markers
+        data, x=x_col, y=y_col, title=title, color=color, height=height, markers=markers
     )
 
     fig.update_layout(
         xaxis_title=x_col.replace("_", " ").title(),
         yaxis_title=y_col.replace("_", " ").title(),
-        margin=dict(l=20, r=20, t=40, b=20)
+        margin=dict(l=20, r=20, t=40, b=20),
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -162,7 +150,7 @@ def scatter_chart(
     height: int = 500,
     color: Optional[str] = None,
     size: Optional[str] = None,
-    hover_data: Optional[List[str]] = None
+    hover_data: Optional[List[str]] = None,
 ) -> None:
     """
     Render a scatter chart.
@@ -189,13 +177,13 @@ def scatter_chart(
         color=color,
         size=size,
         hover_data=hover_data,
-        height=height
+        height=height,
     )
 
     fig.update_layout(
         xaxis_title=x_col.replace("_", " ").title(),
         yaxis_title=y_col.replace("_", " ").title(),
-        margin=dict(l=20, r=20, t=40, b=20)
+        margin=dict(l=20, r=20, t=40, b=20),
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -207,7 +195,7 @@ def gauge_chart(
     min_val: float = 0,
     max_val: float = 100,
     height: int = 300,
-    threshold_config: Optional[Dict[str, Any]] = None
+    threshold_config: Optional[Dict[str, Any]] = None,
 ) -> None:
     """
     Render a gauge chart.
@@ -222,27 +210,29 @@ def gauge_chart(
     """
     if threshold_config is None:
         threshold_config = {
-            'line': {'color': "red", 'width': 4},
-            'thickness': 0.75,
-            'value': max_val * 0.9
+            "line": {"color": "red", "width": 4},
+            "thickness": 0.75,
+            "value": max_val * 0.9,
         }
 
-    fig = go.Figure(go.Indicator(
-        mode = "gauge+number+delta",
-        value = value,
-        domain = {'x': [0, 1], 'y': [0, 1]},
-        title = {'text': title},
-        delta = {'reference': max_val * 0.5},
-        gauge = {
-            'axis': {'range': [min_val, max_val]},
-            'bar': {'color': "darkblue"},
-            'steps': [
-                {'range': [min_val, max_val * 0.5], 'color': "lightgray"},
-                {'range': [max_val * 0.5, max_val * 0.8], 'color': "gray"}
-            ],
-            'threshold': threshold_config
-        }
-    ))
+    fig = go.Figure(
+        go.Indicator(
+            mode="gauge+number+delta",
+            value=value,
+            domain={"x": [0, 1], "y": [0, 1]},
+            title={"text": title},
+            delta={"reference": max_val * 0.5},
+            gauge={
+                "axis": {"range": [min_val, max_val]},
+                "bar": {"color": "darkblue"},
+                "steps": [
+                    {"range": [min_val, max_val * 0.5], "color": "lightgray"},
+                    {"range": [max_val * 0.5, max_val * 0.8], "color": "gray"},
+                ],
+                "threshold": threshold_config,
+            },
+        )
+    )
 
     fig.update_layout(height=height)
     st.plotly_chart(fig, use_container_width=True)
@@ -254,7 +244,7 @@ def metric_trend_chart(
     value_col: str,
     title: str = "",
     height: int = 400,
-    show_points: bool = True
+    show_points: bool = True,
 ) -> None:
     """
     Render a metric trend chart over time.
@@ -272,18 +262,13 @@ def metric_trend_chart(
         return
 
     fig = px.line(
-        data,
-        x=date_col,
-        y=value_col,
-        title=title,
-        height=height,
-        markers=show_points
+        data, x=date_col, y=value_col, title=title, height=height, markers=show_points
     )
 
     fig.update_layout(
         xaxis_title=date_col.replace("_", " ").title(),
         yaxis_title=value_col.replace("_", " ").title(),
-        margin=dict(l=20, r=20, t=40, b=20)
+        margin=dict(l=20, r=20, t=40, b=20),
     )
 
     st.plotly_chart(fig, use_container_width=True)

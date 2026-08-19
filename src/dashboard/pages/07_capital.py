@@ -82,6 +82,7 @@ PATTERN_COLORS = {
 # DATA LOADING (cached)
 # =============================================================================
 
+
 @st.cache_data(ttl=600, show_spinner=False)
 def load_capital_allocation_data() -> pd.DataFrame:
     """
@@ -104,7 +105,9 @@ def load_capital_allocation_data() -> pd.DataFrame:
         required_cols = ["company_id", "company_name", "sector"]
         for col in required_cols:
             if col not in df.columns:
-                logger.error(f"Required column '{col}' missing from capital allocation data")
+                logger.error(
+                    f"Required column '{col}' missing from capital allocation data"
+                )
                 return pd.DataFrame()
 
         # Map capital_allocation_rating to pattern
@@ -119,10 +122,14 @@ def load_capital_allocation_data() -> pd.DataFrame:
                 "POOR": "Cash Accumulator",
                 "DISTRESSED": "Distress Signal",
             }
-            df["capital_allocation_pattern"] = df["capital_allocation_rating"].map(pattern_map)
+            df["capital_allocation_pattern"] = df["capital_allocation_rating"].map(
+                pattern_map
+            )
 
             # Fill unmapped values
-            df["capital_allocation_pattern"] = df["capital_allocation_pattern"].fillna("Mixed")
+            df["capital_allocation_pattern"] = df["capital_allocation_pattern"].fillna(
+                "Mixed"
+            )
         else:
             # If no rating column, create a default pattern based on available data
             df["capital_allocation_pattern"] = "Mixed"
@@ -174,16 +181,31 @@ def calculate_pattern_statistics(df: pd.DataFrame, pattern: str) -> Dict[str, An
         # Calculate statistics
         stats = {
             "count": len(pattern_df),
-            "avg_roe": pattern_df["roe"].mean() if "roe" in pattern_df.columns else np.nan,
-            "avg_revenue_cagr": pattern_df["revenue_cagr_5yr"].mean() if "revenue_cagr_5yr" in pattern_df.columns else np.nan,
-            "avg_fcf": pattern_df["free_cash_flow"].mean() if "free_cash_flow" in pattern_df.columns else np.nan,
+            "avg_roe": (
+                pattern_df["roe"].mean() if "roe" in pattern_df.columns else np.nan
+            ),
+            "avg_revenue_cagr": (
+                pattern_df["revenue_cagr_5yr"].mean()
+                if "revenue_cagr_5yr" in pattern_df.columns
+                else np.nan
+            ),
+            "avg_fcf": (
+                pattern_df["free_cash_flow"].mean()
+                if "free_cash_flow" in pattern_df.columns
+                else np.nan
+            ),
             "companies": pattern_df["company_name"].dropna().tolist(),
         }
 
-        logger.info(f"Calculated statistics for pattern '{pattern}': {stats['count']} companies")
+        logger.info(
+            f"Calculated statistics for pattern '{pattern}': {stats['count']} companies"
+        )
         return stats
     except Exception as e:
-        logger.error(f"Failed to calculate statistics for pattern {pattern}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Failed to calculate statistics for pattern {pattern}: {str(e)}",
+            exc_info=True,
+        )
         return {
             "count": 0,
             "avg_roe": np.nan,
@@ -228,6 +250,7 @@ def calculate_all_pattern_statistics(df: pd.DataFrame) -> pd.DataFrame:
 # VISUALIZATION
 # =============================================================================
 
+
 def build_treemap(df: pd.DataFrame) -> go.Figure:
     """
     Build interactive treemap visualization for capital allocation patterns.
@@ -249,12 +272,20 @@ def build_treemap(df: pd.DataFrame) -> go.Figure:
 
         # Prepare data for treemap
         # Group by pattern and count companies
-        pattern_counts = df.groupby("capital_allocation_pattern").size().reset_index(name="count")
+        pattern_counts = (
+            df.groupby("capital_allocation_pattern").size().reset_index(name="count")
+        )
 
         # Calculate average market cap per pattern
         if "market_cap" in df.columns:
-            pattern_market_cap = df.groupby("capital_allocation_pattern")["market_cap"].mean().reset_index()
-            pattern_counts = pattern_counts.merge(pattern_market_cap, on="capital_allocation_pattern", how="left")
+            pattern_market_cap = (
+                df.groupby("capital_allocation_pattern")["market_cap"]
+                .mean()
+                .reset_index()
+            )
+            pattern_counts = pattern_counts.merge(
+                pattern_market_cap, on="capital_allocation_pattern", how="left"
+            )
         else:
             pattern_counts["market_cap"] = 0
 
@@ -401,13 +432,16 @@ def build_pattern_statistics_chart(stats_df: pd.DataFrame) -> go.Figure:
         logger.info(f"Pattern statistics chart built for {len(stats_df)} patterns")
         return fig
     except Exception as e:
-        logger.error(f"Failed to build pattern statistics chart: {str(e)}", exc_info=True)
+        logger.error(
+            f"Failed to build pattern statistics chart: {str(e)}", exc_info=True
+        )
         return go.Figure()
 
 
 # =============================================================================
 # SIDEBAR SELECTION
 # =============================================================================
+
 
 def render_sidebar(patterns: List[str]) -> Optional[str]:
     """
@@ -438,7 +472,9 @@ def render_sidebar(patterns: List[str]) -> Optional[str]:
 
     # Display pattern description
     if selected_pattern in PATTERN_DESCRIPTIONS:
-        st.sidebar.info(f"**{selected_pattern}**: {PATTERN_DESCRIPTIONS[selected_pattern]}")
+        st.sidebar.info(
+            f"**{selected_pattern}**: {PATTERN_DESCRIPTIONS[selected_pattern]}"
+        )
 
     logger.info(f"Pattern selected: {selected_pattern}")
     return selected_pattern
@@ -447,6 +483,7 @@ def render_sidebar(patterns: List[str]) -> Optional[str]:
 # =============================================================================
 # MAIN
 # =============================================================================
+
 
 def main() -> None:
     """
@@ -467,8 +504,12 @@ def main() -> None:
         return
 
     # Get available patterns
-    available_patterns = capital_data["capital_allocation_pattern"].dropna().unique().tolist()
-    available_patterns = sorted([p for p in available_patterns if p in CAPITAL_PATTERNS])
+    available_patterns = (
+        capital_data["capital_allocation_pattern"].dropna().unique().tolist()
+    )
+    available_patterns = sorted(
+        [p for p in available_patterns if p in CAPITAL_PATTERNS]
+    )
 
     if not available_patterns:
         st.error("No capital allocation patterns found in the data.")
@@ -479,7 +520,9 @@ def main() -> None:
     selected_pattern = render_sidebar(available_patterns)
 
     if selected_pattern is None:
-        st.info("👈 Select a capital allocation pattern from the sidebar to view details")
+        st.info(
+            "👈 Select a capital allocation pattern from the sidebar to view details"
+        )
         return
 
     # Calculate statistics for all patterns
@@ -493,7 +536,9 @@ def main() -> None:
 
     # Display treemap
     st.subheader("📊 Capital Allocation Pattern Distribution")
-    st.markdown("**Treemap visualization** - Size represents number of companies in each pattern")
+    st.markdown(
+        "**Treemap visualization** - Size represents number of companies in each pattern"
+    )
 
     try:
         treemap_fig = build_treemap(capital_data)
@@ -510,7 +555,9 @@ def main() -> None:
 
     # Display pattern statistics chart
     st.subheader("📈 Pattern Statistics Comparison")
-    st.markdown("**Average ROE, Revenue CAGR, and FCF** across capital allocation patterns")
+    st.markdown(
+        "**Average ROE, Revenue CAGR, and FCF** across capital allocation patterns"
+    )
 
     try:
         stats_fig = build_pattern_statistics_chart(stats_df)
@@ -547,7 +594,9 @@ def main() -> None:
 
         with col3:
             if pd.notna(pattern_stats["avg_revenue_cagr"]):
-                st.metric("Average Revenue CAGR", f"{pattern_stats['avg_revenue_cagr']:.2f}%")
+                st.metric(
+                    "Average Revenue CAGR", f"{pattern_stats['avg_revenue_cagr']:.2f}%"
+                )
             else:
                 st.metric("Average Revenue CAGR", "N/A")
 
@@ -562,11 +611,22 @@ def main() -> None:
 
         if pattern_stats["companies"]:
             # Filter dataframe to show companies in this pattern
-            pattern_companies = capital_data[capital_data["capital_allocation_pattern"] == selected_pattern]
+            pattern_companies = capital_data[
+                capital_data["capital_allocation_pattern"] == selected_pattern
+            ]
 
             # Select columns to display
-            display_cols = ["company_name", "sector", "market_cap", "roe", "revenue_cagr_5yr", "free_cash_flow"]
-            display_cols = [col for col in display_cols if col in pattern_companies.columns]
+            display_cols = [
+                "company_name",
+                "sector",
+                "market_cap",
+                "roe",
+                "revenue_cagr_5yr",
+                "free_cash_flow",
+            ]
+            display_cols = [
+                col for col in display_cols if col in pattern_companies.columns
+            ]
 
             st.dataframe(
                 pattern_companies[display_cols],
@@ -582,8 +642,12 @@ def main() -> None:
             # Format for display
             display_stats = stats_df.copy()
             display_stats["avg_roe"] = display_stats["avg_roe"].round(2)
-            display_stats["avg_revenue_cagr"] = display_stats["avg_revenue_cagr"].round(2)
-            display_stats["avg_fcf"] = display_stats["avg_fcf"].apply(lambda x: f"₹{x:,.0f}" if pd.notna(x) else "N/A")
+            display_stats["avg_revenue_cagr"] = display_stats["avg_revenue_cagr"].round(
+                2
+            )
+            display_stats["avg_fcf"] = display_stats["avg_fcf"].apply(
+                lambda x: f"₹{x:,.0f}" if pd.notna(x) else "N/A"
+            )
 
             st.dataframe(
                 display_stats,
@@ -597,7 +661,9 @@ def main() -> None:
         "💡 **Tip:** Click on treemap blocks to zoom in. "
         "Patterns are classified based on financial characteristics including FCF, ROE, and growth metrics."
     )
-    logger.info(f"Capital Allocation page rendered successfully for pattern: {selected_pattern}")
+    logger.info(
+        f"Capital Allocation page rendered successfully for pattern: {selected_pattern}"
+    )
 
 
 if __name__ == "__main__":

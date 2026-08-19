@@ -42,4 +42,3 @@ __all__ = [
     "CAPITAL_ALLOCATION_MAP",
     "HEALTH_SCORE_TABLE",
 ]
-

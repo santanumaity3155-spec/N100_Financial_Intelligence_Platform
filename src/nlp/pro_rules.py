@@ -45,19 +45,19 @@ from src.nlp.pros_cons_generator import (
 # COMMON THRESHOLDS
 # =============================================================================
 
-PRO_01_ROE_MIN: float = 20.0          # ROE > 20% for >= 3 consecutive years
+PRO_01_ROE_MIN: float = 20.0  # ROE > 20% for >= 3 consecutive years
 PRO_01_REQUIRED_YEARS: int = 3
 
-PRO_02_REQUIRED_YEARS: int = 5        # FCF > 0 for >= 5 consecutive years
+PRO_02_REQUIRED_YEARS: int = 5  # FCF > 0 for >= 5 consecutive years
 
-PRO_04_REV_CAGR_MIN: float = 15.0     # Revenue CAGR 5yr > 15%
-PRO_05_OPM_MIN: float = 25.0          # Latest OPM > 25%
-PRO_06_PAT_CAGR_MIN: float = 20.0     # PAT CAGR 5yr > 20%
-PRO_07_ICR_MIN: float = 10.0          # ICR > 10 (or debt-free)
-PRO_08_YIELD_MIN: float = 2.0         # Dividend yield > 2%
-PRO_09_EPS_CAGR_MIN: float = 15.0     # EPS CAGR 5yr > 15%
-PRO_10_IMPROVING_VALUES: int = 4      # 3 consecutive YoY improvements
-PRO_12_TREND_PERIODS: int = 3         # project trend convention window
+PRO_04_REV_CAGR_MIN: float = 15.0  # Revenue CAGR 5yr > 15%
+PRO_05_OPM_MIN: float = 25.0  # Latest OPM > 25%
+PRO_06_PAT_CAGR_MIN: float = 20.0  # PAT CAGR 5yr > 20%
+PRO_07_ICR_MIN: float = 10.0  # ICR > 10 (or debt-free)
+PRO_08_YIELD_MIN: float = 2.0  # Dividend yield > 2%
+PRO_09_EPS_CAGR_MIN: float = 15.0  # EPS CAGR 5yr > 15%
+PRO_10_IMPROVING_VALUES: int = 4  # 3 consecutive YoY improvements
+PRO_12_TREND_PERIODS: int = 3  # project trend convention window
 
 # Very-small floating-point tolerance used to treat a D/E value as zero.
 DE_ZERO_EPSILON: float = 1e-9
@@ -165,12 +165,14 @@ class PRO_01(FinancialRule):
     description = "ROE > 20%% for at least 3 consecutive years"
 
     def evaluate(self, context: Any, conn: Optional[Any] = None) -> RuleResult:
+        """Evaluate functionality."""
         if context is None:
             return _untriggered(self, None, "No company context")
         roe_series = get_metric_history(context, "roe")
         if len(roe_series) < PRO_01_REQUIRED_YEARS:
             return _untriggered(
-                self, context,
+                self,
+                context,
                 f"Insufficient ROE history ({len(roe_series)} valid years, "
                 f"need >= {PRO_01_REQUIRED_YEARS})",
             )
@@ -179,7 +181,8 @@ class PRO_01(FinancialRule):
         )
         if run_len < PRO_01_REQUIRED_YEARS:
             return _untriggered(
-                self, context,
+                self,
+                context,
                 f"ROE > 20% for only {run_len} consecutive year(s) "
                 f"(need >= {PRO_01_REQUIRED_YEARS})",
             )
@@ -191,11 +194,14 @@ class PRO_01(FinancialRule):
             rule_id=self.rule_id,
             rule_type=self.rule_type,
             triggered=True,
-            text=("Consistently high return on equity above 20% demonstrates "
-                  "exceptional capital efficiency"),
+            text=(
+                "Consistently high return on equity above 20% demonstrates "
+                "exceptional capital efficiency"
+            ),
             confidence_pct=_clamp_conf(conf),
-            reason=(f"ROE > 20% for {run_len} consecutive years; "
-                    f"avg ROE={avg_roe:.1f}%"),
+            reason=(
+                f"ROE > 20% for {run_len} consecutive years; " f"avg ROE={avg_roe:.1f}%"
+            ),
         )
 
 
@@ -213,6 +219,7 @@ class PRO_02(FinancialRule):
     description = "FCF > 0 for at least 5 consecutive years"
 
     def evaluate(self, context: Any, conn: Optional[Any] = None) -> RuleResult:
+        """Evaluate functionality."""
         if context is None:
             return _untriggered(self, None, "No company context")
         fcf_series = get_metric_history(context, "free_cash_flow")
@@ -223,7 +230,8 @@ class PRO_02(FinancialRule):
         )
         if run_len < PRO_02_REQUIRED_YEARS:
             return _untriggered(
-                self, context,
+                self,
+                context,
                 f"Positive FCF for only {run_len} consecutive year(s) "
                 f"(need >= {PRO_02_REQUIRED_YEARS})",
             )
@@ -238,12 +246,18 @@ class PRO_02(FinancialRule):
             rule_id=self.rule_id,
             rule_type=self.rule_type,
             triggered=True,
-            text=("Strong free cash flow generation over 5 years signals "
-                  "healthy business fundamentals"),
+            text=(
+                "Strong free cash flow generation over 5 years signals "
+                "healthy business fundamentals"
+            ),
             confidence_pct=_clamp_conf(conf),
-            reason=(f"Positive FCF for {run_len} consecutive years; "
-                    f"avg FCF={avg_fcf:,.0f}"),
+            reason=(
+                f"Positive FCF for {run_len} consecutive years; "
+                f"avg FCF={avg_fcf:,.0f}"
+            ),
         )
+
+
 # =============================================================================
 # PRO_03 - Debt Free
 # =============================================================================
@@ -258,6 +272,7 @@ class PRO_03(FinancialRule):
     description = "Latest D/E = 0 (missing D/E is not treated as debt-free)"
 
     def evaluate(self, context: Any, conn: Optional[Any] = None) -> RuleResult:
+        """Evaluate functionality."""
         if context is None:
             return _untriggered(self, None, "No company context")
         latest_dict = _latest_of(context)
@@ -267,12 +282,14 @@ class PRO_03(FinancialRule):
                 self, context, "Latest D/E unavailable (not treated as debt-free)"
             )
         is_debt_free = (
-            de == 0 or de == 0.0
+            de == 0
+            or de == 0.0
             or (isinstance(de, (int, float)) and abs(float(de)) < DE_ZERO_EPSILON)
         )
         if not is_debt_free:
             return _untriggered(
-                self, context,
+                self,
+                context,
                 f"D/E = {float(de):.4f} (not debt-free)",
             )
         return RuleResult(
@@ -280,8 +297,10 @@ class PRO_03(FinancialRule):
             rule_id=self.rule_id,
             rule_type=self.rule_type,
             triggered=True,
-            text=("Debt-free balance sheet provides financial flexibility and "
-                  "eliminates interest burden"),
+            text=(
+                "Debt-free balance sheet provides financial flexibility and "
+                "eliminates interest burden"
+            ),
             confidence_pct=CONF_DEBT_FREE,
             reason=f"D/E = {float(de):.6f} (debt-free)",
         )
@@ -301,6 +320,7 @@ class PRO_04(FinancialRule):
     description = "Revenue CAGR 5yr > 15%%"
 
     def evaluate(self, context: Any, conn: Optional[Any] = None) -> RuleResult:
+        """Evaluate functionality."""
         if context is None:
             return _untriggered(self, None, "No company context")
         rev_cagr = safe_float(_trailing_of(context).get("revenue_cagr"))
@@ -314,7 +334,8 @@ class PRO_04(FinancialRule):
             return _untriggered(self, context, "Revenue CAGR 5yr unavailable")
         if rev_cagr <= PRO_04_REV_CAGR_MIN:
             return _untriggered(
-                self, context,
+                self,
+                context,
                 f"Revenue CAGR 5yr = {rev_cagr:.1f}% (<= 15%)",
             )
         conf = 60.0 + min((rev_cagr - PRO_04_REV_CAGR_MIN) * 1.5, 35.0)
@@ -323,11 +344,14 @@ class PRO_04(FinancialRule):
             rule_id=self.rule_id,
             rule_type=self.rule_type,
             triggered=True,
-            text=("Revenue growing at above 15% CAGR over 5 years reflects "
-                  "strong business momentum"),
+            text=(
+                "Revenue growing at above 15% CAGR over 5 years reflects "
+                "strong business momentum"
+            ),
             confidence_pct=_clamp_conf(conf),
             reason=f"Revenue CAGR 5yr = {rev_cagr:.1f}%",
         )
+
 
 # =============================================================================
 # PRO_05 - Strong Operating Margin
@@ -343,6 +367,7 @@ class PRO_05(FinancialRule):
     description = "Latest OPM > 25%%"
 
     def evaluate(self, context: Any, conn: Optional[Any] = None) -> RuleResult:
+        """Evaluate functionality."""
         if context is None:
             return _untriggered(self, None, "No company context")
         latest_dict = _latest_of(context)
@@ -356,7 +381,9 @@ class PRO_05(FinancialRule):
             return _untriggered(self, context, "OPM unavailable")
         if opm <= PRO_05_OPM_MIN:
             return _untriggered(
-                self, context, f"OPM = {opm:.1f}% (<= 25%)",
+                self,
+                context,
+                f"OPM = {opm:.1f}% (<= 25%)",
             )
         conf = 60.0 + min((opm - PRO_05_OPM_MIN) * 1.2, 35.0)
         return RuleResult(
@@ -364,8 +391,10 @@ class PRO_05(FinancialRule):
             rule_id=self.rule_id,
             rule_type=self.rule_type,
             triggered=True,
-            text=("Operating profit margin above 25% indicates strong pricing "
-                  "power and cost discipline"),
+            text=(
+                "Operating profit margin above 25% indicates strong pricing "
+                "power and cost discipline"
+            ),
             confidence_pct=_clamp_conf(conf),
             reason=f"OPM = {opm:.1f}%",
         )
@@ -385,6 +414,7 @@ class PRO_06(FinancialRule):
     description = "PAT CAGR 5yr > 20%%"
 
     def evaluate(self, context: Any, conn: Optional[Any] = None) -> RuleResult:
+        """Evaluate functionality."""
         if context is None:
             return _untriggered(self, None, "No company context")
         pat_cagr = safe_float(_trailing_of(context).get("profit_cagr"))
@@ -398,7 +428,8 @@ class PRO_06(FinancialRule):
             return _untriggered(self, context, "PAT CAGR 5yr unavailable")
         if pat_cagr <= PRO_06_PAT_CAGR_MIN:
             return _untriggered(
-                self, context,
+                self,
+                context,
                 f"PAT CAGR 5yr = {pat_cagr:.1f}% (<= 20%)",
             )
         conf = 60.0 + min((pat_cagr - PRO_06_PAT_CAGR_MIN) * 1.5, 35.0)
@@ -407,11 +438,15 @@ class PRO_06(FinancialRule):
             rule_id=self.rule_id,
             rule_type=self.rule_type,
             triggered=True,
-            text=("Net profit compounding at above 20% over 5 years creates "
-                  "significant shareholder value"),
+            text=(
+                "Net profit compounding at above 20% over 5 years creates "
+                "significant shareholder value"
+            ),
             confidence_pct=_clamp_conf(conf),
             reason=f"PAT CAGR 5yr = {pat_cagr:.1f}%",
         )
+
+
 # =============================================================================
 # PRO_07 - Strong Interest Coverage / Debt Free
 # =============================================================================
@@ -426,6 +461,7 @@ class PRO_07(FinancialRule):
     description = "ICR > 10 OR Debt Free (missing values never pass)"
 
     def evaluate(self, context: Any, conn: Optional[Any] = None) -> RuleResult:
+        """Evaluate functionality."""
         if context is None:
             return _untriggered(self, None, "No company context")
         latest_dict = _latest_of(context)
@@ -434,7 +470,8 @@ class PRO_07(FinancialRule):
         is_debt_free = False
         if de is not None:
             is_debt_free = (
-                de == 0 or de == 0.0
+                de == 0
+                or de == 0.0
                 or (isinstance(de, (int, float)) and abs(float(de)) < DE_ZERO_EPSILON)
             )
         if is_debt_free:
@@ -443,8 +480,10 @@ class PRO_07(FinancialRule):
                 rule_id=self.rule_id,
                 rule_type=self.rule_type,
                 triggered=True,
-                text=("Very high interest coverage ratio reflects negligible "
-                      "financial stress from debt servicing"),
+                text=(
+                    "Very high interest coverage ratio reflects negligible "
+                    "financial stress from debt servicing"
+                ),
                 confidence_pct=CONF_DEBT_FREE,
                 reason="Debt-free (D/E = 0)",
             )
@@ -452,12 +491,14 @@ class PRO_07(FinancialRule):
         icr = safe_float(latest_dict.get("interest_coverage"))
         if icr is None:
             return _untriggered(
-                self, context,
+                self,
+                context,
                 "ICR unavailable and company is not debt-free",
             )
         if icr <= PRO_07_ICR_MIN:
             return _untriggered(
-                self, context,
+                self,
+                context,
                 f"ICR = {icr:.1f} (<= 10) and not debt-free",
             )
         conf = 60.0 + min((icr - PRO_07_ICR_MIN) * 1.2, 35.0)
@@ -466,11 +507,14 @@ class PRO_07(FinancialRule):
             rule_id=self.rule_id,
             rule_type=self.rule_type,
             triggered=True,
-            text=("Very high interest coverage ratio reflects negligible "
-                  "financial stress from debt servicing"),
+            text=(
+                "Very high interest coverage ratio reflects negligible "
+                "financial stress from debt servicing"
+            ),
             confidence_pct=_clamp_conf(conf),
             reason=f"ICR = {icr:.1f} (> 10)",
         )
+
 
 # =============================================================================
 # PRO_08 - Dividend Quality
@@ -486,6 +530,7 @@ class PRO_08(FinancialRule):
     description = "Dividend Yield > 2% AND FCF positive"
 
     def evaluate(self, context: Any, conn: Optional[Any] = None) -> RuleResult:
+        """Evaluate functionality."""
         if context is None:
             return _untriggered(self, None, "No company context")
         latest_dict = _latest_of(context)
@@ -506,9 +551,7 @@ class PRO_08(FinancialRule):
         if not (cond_yield and cond_fcf):
             reasons: List[str] = []
             if not cond_yield:
-                reasons.append(
-                    f"dividend yield = {div_yield:.1f}% (<= 2%)"
-                )
+                reasons.append(f"dividend yield = {div_yield:.1f}% (<= 2%)")
             if not cond_fcf:
                 reasons.append(
                     "FCF not positive" if fcf is not None else "FCF unavailable"
@@ -520,11 +563,15 @@ class PRO_08(FinancialRule):
             rule_id=self.rule_id,
             rule_type=self.rule_type,
             triggered=True,
-            text=("Consistent dividend yield above 2% backed by positive free "
-                  "cash flow"),
+            text=(
+                "Consistent dividend yield above 2% backed by positive free "
+                "cash flow"
+            ),
             confidence_pct=_clamp_conf(conf),
             reason=f"Dividend yield = {div_yield:.1f}%, FCF positive",
         )
+
+
 # =============================================================================
 # PRO_09 - Strong EPS Growth
 # =============================================================================
@@ -539,6 +586,7 @@ class PRO_09(FinancialRule):
     description = "EPS CAGR 5yr > 15%%"
 
     def evaluate(self, context: Any, conn: Optional[Any] = None) -> RuleResult:
+        """Evaluate functionality."""
         if context is None:
             return _untriggered(self, None, "No company context")
         eps_cagr = safe_float(_trailing_of(context).get("eps_cagr"))
@@ -552,7 +600,8 @@ class PRO_09(FinancialRule):
             return _untriggered(self, context, "EPS CAGR 5yr unavailable")
         if eps_cagr <= PRO_09_EPS_CAGR_MIN:
             return _untriggered(
-                self, context,
+                self,
+                context,
                 f"EPS CAGR 5yr = {eps_cagr:.1f}% (<= 15%)",
             )
         conf = 60.0 + min((eps_cagr - PRO_09_EPS_CAGR_MIN) * 1.5, 35.0)
@@ -561,8 +610,10 @@ class PRO_09(FinancialRule):
             rule_id=self.rule_id,
             rule_type=self.rule_type,
             triggered=True,
-            text=("Earnings per share growing above 15% CAGR indicates strong "
-                  "earnings quality and compounding"),
+            text=(
+                "Earnings per share growing above 15% CAGR indicates strong "
+                "earnings quality and compounding"
+            ),
             confidence_pct=_clamp_conf(conf),
             reason=f"EPS CAGR 5yr = {eps_cagr:.1f}%",
         )
@@ -582,19 +633,22 @@ class PRO_10(FinancialRule):
     description = "ROE improving for 3 consecutive YoY steps (4 values)"
 
     def evaluate(self, context: Any, conn: Optional[Any] = None) -> RuleResult:
+        """Evaluate functionality."""
         if context is None:
             return _untriggered(self, None, "No company context")
         roe_series = get_metric_history(context, "roe")
         if len(roe_series) < PRO_10_IMPROVING_VALUES:
             return _untriggered(
-                self, context,
+                self,
+                context,
                 f"Insufficient ROE history ({len(roe_series)} valid years, "
                 f"need >= {PRO_10_IMPROVING_VALUES} for 3 YoY steps)",
             )
         improving = is_improving(roe_series, periods=PRO_10_IMPROVING_VALUES)
         if not improving:
             return _untriggered(
-                self, context,
+                self,
+                context,
                 "ROE not improving for 3 consecutive years",
             )
         start_roe = roe_series[-PRO_10_IMPROVING_VALUES]
@@ -606,12 +660,18 @@ class PRO_10(FinancialRule):
             rule_id=self.rule_id,
             rule_type=self.rule_type,
             triggered=True,
-            text=("Return on equity improving for 3 consecutive years shows "
-                  "strengthening business quality"),
+            text=(
+                "Return on equity improving for 3 consecutive years shows "
+                "strengthening business quality"
+            ),
             confidence_pct=_clamp_conf(conf),
-            reason=(f"ROE improved from {start_roe:.1f}% to {end_roe:.1f}% "
-                    f"over 3 consecutive YoY steps"),
+            reason=(
+                f"ROE improved from {start_roe:.1f}% to {end_roe:.1f}% "
+                f"over 3 consecutive YoY steps"
+            ),
         )
+
+
 # =============================================================================
 # PRO_11 - Operating Leverage
 #
@@ -634,6 +694,7 @@ class PRO_11(FinancialRule):
     description = "Revenue CAGR > PAT CAGR (text contradicts the condition)"
 
     def evaluate(self, context: Any, conn: Optional[Any] = None) -> RuleResult:
+        """Evaluate functionality."""
         if context is None:
             return _untriggered(self, None, "No company context")
         rev_cagr = safe_float(_trailing_of(context).get("revenue_cagr"))
@@ -643,14 +704,16 @@ class PRO_11(FinancialRule):
         if pat_cagr is None:
             pat_cagr = safe_float(_latest_of(context).get("profit_cagr"))
         if rev_cagr is None or pat_cagr is None:
-            missing = [m for m, v in (("Revenue CAGR", rev_cagr),
-                                      ("PAT CAGR", pat_cagr)) if v is None]
-            return _untriggered(
-                self, context, f"{', '.join(missing)} unavailable"
-            )
+            missing = [
+                m
+                for m, v in (("Revenue CAGR", rev_cagr), ("PAT CAGR", pat_cagr))
+                if v is None
+            ]
+            return _untriggered(self, context, f"{', '.join(missing)} unavailable")
         if rev_cagr <= pat_cagr:
             return _untriggered(
-                self, context,
+                self,
+                context,
                 f"Revenue CAGR ({rev_cagr:.1f}%) <= PAT CAGR ({pat_cagr:.1f}%)",
             )
         gap = rev_cagr - pat_cagr
@@ -660,8 +723,10 @@ class PRO_11(FinancialRule):
             rule_id=self.rule_id,
             rule_type=self.rule_type,
             triggered=True,
-            text=("Revenue growing slower than profits shows improving "
-                  "operating leverage and scale benefits"),
+            text=(
+                "Revenue growing slower than profits shows improving "
+                "operating leverage and scale benefits"
+            ),
             confidence_pct=_clamp_conf(conf),
             reason=(
                 f"Revenue CAGR ({rev_cagr:.1f}%) > PAT CAGR ({pat_cagr:.1f}%). "
@@ -669,6 +734,7 @@ class PRO_11(FinancialRule):
                 "(text) conflicts with condition Revenue CAGR > PAT CAGR."
             ),
         )
+
 
 # =============================================================================
 # PRO_12 - Asset Growth + Declining Debt
@@ -684,21 +750,23 @@ class PRO_12(FinancialRule):
     description = "Assets increasing while borrowings decline (>= 3 years)"
 
     def evaluate(self, context: Any, conn: Optional[Any] = None) -> RuleResult:
+        """Evaluate functionality."""
         if context is None:
             return _untriggered(self, None, "No company context")
         assets_series = get_metric_history(context, "total_assets")
         borrowings_series = get_metric_history(context, "borrowings")
-        if len(assets_series) < PRO_12_TREND_PERIODS or \
-           len(borrowings_series) < PRO_12_TREND_PERIODS:
+        if (
+            len(assets_series) < PRO_12_TREND_PERIODS
+            or len(borrowings_series) < PRO_12_TREND_PERIODS
+        ):
             return _untriggered(
-                self, context,
+                self,
+                context,
                 f"Insufficient history (assets={len(assets_series)}, "
                 f"borrowings={len(borrowings_series)}, need >= "
                 f"{PRO_12_TREND_PERIODS} each)",
             )
-        assets_increasing = is_improving(
-            assets_series, periods=PRO_12_TREND_PERIODS
-        )
+        assets_increasing = is_improving(assets_series, periods=PRO_12_TREND_PERIODS)
         borrowings_declining = is_declining(
             borrowings_series, periods=PRO_12_TREND_PERIODS
         )
@@ -716,18 +784,25 @@ class PRO_12(FinancialRule):
         b1 = borrowings_series[-1]
         assets_change = ((a1 - a0) / a0) * 100.0 if a0 else 0.0
         borrowings_change = ((b1 - b0) / b0) * 100.0 if b0 else -100.0
-        conf = (60.0 + min(max(assets_change, 0.0) * 0.8, 20.0)
-                + min(max(-borrowings_change, 0.0) * 0.8, 15.0))
+        conf = (
+            60.0
+            + min(max(assets_change, 0.0) * 0.8, 20.0)
+            + min(max(-borrowings_change, 0.0) * 0.8, 15.0)
+        )
         return RuleResult(
             company_id=context.company_id,
             rule_id=self.rule_id,
             rule_type=self.rule_type,
             triggered=True,
-            text=("Growing asset base funded by internal accruals reflects "
-                  "self-sustaining growth"),
+            text=(
+                "Growing asset base funded by internal accruals reflects "
+                "self-sustaining growth"
+            ),
             confidence_pct=_clamp_conf(conf),
-            reason=(f"Assets growing ({assets_change:+.1f}%) and borrowings "
-                    f"declining ({borrowings_change:+.1f}%)"),
+            reason=(
+                f"Assets growing ({assets_change:+.1f}%) and borrowings "
+                f"declining ({borrowings_change:+.1f}%)"
+            ),
         )
 
 
@@ -754,7 +829,6 @@ PRO_RULES_LIST: List[Any] = [
 def get_pro_rule_instances() -> List[FinancialRule]:
     """Return one instantiated rule for each of the 12 Pro rules."""
     return [cls() for cls in PRO_RULES_LIST]
-
 
 
 # ---------------------------------------------------------------------------

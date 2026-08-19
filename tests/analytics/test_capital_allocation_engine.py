@@ -8,7 +8,7 @@ import sys
 import os
 
 # Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 import pytest
 from src.analytics.cashflow_kpis import (
@@ -17,7 +17,7 @@ from src.analytics.cashflow_kpis import (
     RATING_GOOD,
     RATING_MODERATE,
     RATING_WEAK,
-    RATING_DISTRESSED
+    RATING_DISTRESSED,
 )
 
 

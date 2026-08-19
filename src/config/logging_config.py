@@ -24,15 +24,13 @@ LOG_FILE = LOG_DIR / "application.log"
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
-    handlers=[
-        logging.FileHandler(LOG_FILE, encoding="utf-8"),
-        logging.StreamHandler()
-    ]
+    handlers=[logging.FileHandler(LOG_FILE, encoding="utf-8"), logging.StreamHandler()],
 )
 
 # =============================================================================
 # LOGGER FACTORY
 # =============================================================================
+
 
 def get_logger(name: str) -> logging.Logger:
     """

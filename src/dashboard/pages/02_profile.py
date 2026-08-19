@@ -61,6 +61,7 @@ logger = get_logger(__name__)
 # DATA RETRIEVAL HELPERS (Cached)
 # =============================================================================
 
+
 @st.cache_data(ttl=600, show_spinner=False)
 def load_company_master_list() -> pd.DataFrame:
     """
@@ -160,7 +161,9 @@ def load_company_full_intelligence(ticker: str) -> Dict[str, Any]:
                 "fcf_conversion": compute_fcf_conversion(raw_cf, raw_pl),
                 "distress": compute_distress_flag(raw_cf),
                 "deleveraging": compute_deleveraging_flag(raw_cf, raw_bs),
-                "capital_allocation_label": compute_capital_allocation_label(raw_cf, raw_pl),
+                "capital_allocation_label": compute_capital_allocation_label(
+                    raw_cf, raw_pl
+                ),
             }
 
         # 5. Pros & Cons (Module 2D)
@@ -176,7 +179,9 @@ def load_company_full_intelligence(ticker: str) -> Dict[str, Any]:
         res["peer_percentiles_df"] = get_company_peer_percentiles(ticker)
 
     except Exception as e:
-        logger.error(f"Error compiling intelligence for {ticker}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Error compiling intelligence for {ticker}: {str(e)}", exc_info=True
+        )
 
     return res
 
@@ -184,6 +189,7 @@ def load_company_full_intelligence(ticker: str) -> Dict[str, Any]:
 # =============================================================================
 # FORMATTING UTILITIES
 # =============================================================================
+
 
 def format_currency(val: Any) -> str:
     """Format numeric value as currency in ₹ Crores."""
@@ -221,6 +227,7 @@ def format_num(val: Any, decimals: int = 2) -> str:
 # =============================================================================
 # SECTION RENDERERS
 # =============================================================================
+
 
 def render_company_selector(companies_df: pd.DataFrame) -> Optional[str]:
     """
@@ -280,7 +287,9 @@ def render_section_1_header(profile: Optional[Dict[str, Any]], ticker: str) -> N
     st.markdown("## 🏢 Company Intelligence Header")
 
     if not profile:
-        st.warning(f"⚠️ Company details for **{ticker}** could not be loaded from company master records.")
+        st.warning(
+            f"⚠️ Company details for **{ticker}** could not be loaded from company master records."
+        )
         return
 
     name = profile.get("name", ticker)
@@ -408,7 +417,9 @@ def render_section_3_kpis(
         )
         st.metric(
             label="Operating Margin (OPM)",
-            value=format_pct(latest_pl.get("opm_percentage") or latest_ratio.get("operating_margin")),
+            value=format_pct(
+                latest_pl.get("opm_percentage") or latest_ratio.get("operating_margin")
+            ),
             help="Operating profit margin percentage",
         )
 
@@ -453,7 +464,11 @@ def render_section_4_profitability(
 
     with col1:
         st.markdown("#### Revenue & Net Profit Trend (₹ Crores)")
-        if not pl_clean.empty and "sales" in pl_clean.columns and "net_profit" in pl_clean.columns:
+        if (
+            not pl_clean.empty
+            and "sales" in pl_clean.columns
+            and "net_profit" in pl_clean.columns
+        ):
             fig = go.Figure()
             fig.add_trace(
                 go.Bar(
@@ -475,7 +490,9 @@ def render_section_4_profitability(
                 barmode="group",
                 height=350,
                 margin=dict(l=20, r=20, t=30, b=20),
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                legend=dict(
+                    orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1
+                ),
                 xaxis_title="Financial Period",
                 yaxis_title="Amount (₹ Cr)",
             )
@@ -509,7 +526,9 @@ def render_section_4_profitability(
             fig.update_layout(
                 height=350,
                 margin=dict(l=20, r=20, t=30, b=20),
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                legend=dict(
+                    orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1
+                ),
                 xaxis_title="Financial Period",
                 yaxis_title="Percentage (%)",
             )
@@ -640,7 +659,11 @@ def render_section_7_capital_allocation(detail: Dict[str, Any]) -> None:
 
     with c3:
         if changed and prev_pattern:
-            st.metric(label="Pattern Status", value="🔄 Shifted", delta=f"Prev: {prev_pattern}")
+            st.metric(
+                label="Pattern Status",
+                value="🔄 Shifted",
+                delta=f"Prev: {prev_pattern}",
+            )
         else:
             st.metric(label="Pattern Status", value="✅ Stable", delta="No Shift")
 
@@ -691,7 +714,9 @@ def render_section_9_peer_position(percentiles_df: pd.DataFrame, ticker: str) ->
     st.markdown("#### Metric Percentile Rankings Within Peer Group")
 
     # Render clean dataframe of metrics
-    display_df = percentiles_df[["metric", "metric_value", "percentile_rank", "period"]].copy()
+    display_df = percentiles_df[
+        ["metric", "metric_value", "percentile_rank", "period"]
+    ].copy()
     display_df.columns = ["Metric", "Value", "Percentile Rank (0-1)", "Period"]
     display_df["Percentile Rank (0-1)"] = display_df["Percentile Rank (0-1)"].apply(
         lambda x: f"{float(x):.2f}" if x is not None and not pd.isna(x) else "N/A"
@@ -736,6 +761,7 @@ def render_section_10_historical_trend(
 # MAIN ENTRY POINT
 # =============================================================================
 
+
 def main() -> None:
     """Main execution function for Company Intelligence dashboard page."""
     logger.info("Accessing Company Intelligence Dashboard page")
@@ -751,7 +777,9 @@ def main() -> None:
     selected_ticker = render_company_selector(companies_df)
 
     if not selected_ticker:
-        st.info("👈 Please select a company from the sidebar dropdown to display financial intelligence.")
+        st.info(
+            "👈 Please select a company from the sidebar dropdown to display financial intelligence."
+        )
         return
 
     # Load all company intelligence with loading spinner
@@ -759,21 +787,29 @@ def main() -> None:
         intel = load_company_full_intelligence(selected_ticker)
 
     if not intel or not intel.get("profile"):
-        st.error(f"❌ Intelligence records for ticker **{selected_ticker}** could not be compiled.")
+        st.error(
+            f"❌ Intelligence records for ticker **{selected_ticker}** could not be compiled."
+        )
         st.info("Please select another company from the list.")
         return
 
     # Render all 11 sections
     render_section_1_header(intel.get("profile"), selected_ticker)
     render_section_2_health(intel.get("health"))
-    render_section_3_kpis(intel.get("ratios_df"), intel.get("pl_df"), intel.get("cf_df"))
-    render_section_4_profitability(intel.get("pl_df"), intel.get("ratios_df"), selected_ticker)
+    render_section_3_kpis(
+        intel.get("ratios_df"), intel.get("pl_df"), intel.get("cf_df")
+    )
+    render_section_4_profitability(
+        intel.get("pl_df"), intel.get("ratios_df"), selected_ticker
+    )
     render_section_5_cashflow_intelligence(intel.get("cashflow_intel", {}))
     render_section_6_pros_cons(intel.get("pros_cons", {}))
     render_section_7_capital_allocation(intel.get("capital_allocation", {}))
     render_section_8_valuation(intel.get("valuation", {}))
     render_section_9_peer_position(intel.get("peer_percentiles_df"), selected_ticker)
-    render_section_10_historical_trend(intel.get("pl_df"), intel.get("bs_df"), intel.get("cf_df"))
+    render_section_10_historical_trend(
+        intel.get("pl_df"), intel.get("bs_df"), intel.get("cf_df")
+    )
 
     # Footer
     st.caption(

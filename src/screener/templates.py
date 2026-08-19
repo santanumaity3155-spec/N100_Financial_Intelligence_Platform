@@ -22,6 +22,7 @@ logger = get_logger(__name__)
 # SCREEN TEMPLATE MANAGER
 # =============================================================================
 
+
 class ScreenTemplateManager:
     """
     Manages custom screen templates in the database.
@@ -391,14 +392,12 @@ class ScreenTemplateManager:
             conn = get_connection()
             cursor = conn.cursor()
 
-            cursor.execute(
-                f"""
+            cursor.execute(f"""
                 SELECT id, name, description, filters, sort_by, sort_order, rank_by,
                        created_at, updated_at
                 FROM {SCREEN_TEMPLATES_TABLE}
                 ORDER BY updated_at DESC
-                """
-            )
+                """)
             rows = cursor.fetchall()
 
             templates = []
@@ -410,17 +409,19 @@ class ScreenTemplateManager:
                 except (json.JSONDecodeError, TypeError):
                     filter_count = 0
 
-                templates.append({
-                    "id": row["id"],
-                    "name": row["name"],
-                    "description": row["description"],
-                    "filter_count": filter_count,
-                    "sort_by": row["sort_by"],
-                    "sort_order": row["sort_order"],
-                    "rank_by": row["rank_by"],
-                    "created_at": row["created_at"],
-                    "updated_at": row["updated_at"],
-                })
+                templates.append(
+                    {
+                        "id": row["id"],
+                        "name": row["name"],
+                        "description": row["description"],
+                        "filter_count": filter_count,
+                        "sort_by": row["sort_by"],
+                        "sort_order": row["sort_order"],
+                        "rank_by": row["rank_by"],
+                        "created_at": row["created_at"],
+                        "updated_at": row["updated_at"],
+                    }
+                )
 
             logger.info(f"Listed {len(templates)} screen templates")
             return templates

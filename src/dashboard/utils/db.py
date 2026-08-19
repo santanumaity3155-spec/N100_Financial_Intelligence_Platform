@@ -43,7 +43,7 @@ def find_database() -> Optional[Path]:
         if db_path.exists() and db_path.is_file():
             logger.info(f"Database found at: {db_path.absolute()}")
             return db_path
-    
+
     logger.warning("Database file not found in any of the expected locations")
     return None
 
@@ -56,16 +56,16 @@ DB_PATH = find_database()
 def get_connection():
     """
     Context manager for database connections.
-    
+
     Provides safe connection creation and automatic closing.
     Uses singleton pattern for connection reuse within the same session.
-    
+
     Yields:
         sqlite3.Connection: Database connection object
-        
+
     Raises:
         sqlite3.Error: If database connection fails
-        
+
     Example:
         with get_connection() as conn:
             df = pd.read_sql_query("SELECT * FROM companies", conn)
@@ -73,28 +73,30 @@ def get_connection():
     conn = None
     try:
         if DB_PATH is None:
-            raise sqlite3.Error("Database file not found. Please ensure the database exists.")
-        
+            raise sqlite3.Error(
+                "Database file not found. Please ensure the database exists."
+            )
+
         logger.debug("Opening database connection")
         start_time = time.time()
-        
+
         conn = sqlite3.connect(
             str(DB_PATH),
             check_same_thread=False,  # Allow multi-threading for Streamlit
-            timeout=30  # 30 second timeout for long queries
+            timeout=30,  # 30 second timeout for long queries
         )
-        
+
         # Enable foreign keys
         conn.execute("PRAGMA foreign_keys = ON")
-        
+
         # Set row factory for dict-like access
         conn.row_factory = sqlite3.Row
-        
+
         elapsed = time.time() - start_time
         logger.info(f"Database connection opened successfully in {elapsed:.3f}s")
-        
+
         yield conn
-        
+
     except sqlite3.Error as e:
         logger.error(f"Database connection error: {str(e)}", exc_info=True)
         raise
@@ -111,7 +113,7 @@ def get_connection():
 def get_companies() -> pd.DataFrame:
     """
     Retrieve company master data from the database.
-    
+
     Returns:
         pd.DataFrame: DataFrame containing company information with columns:
             - ticker: Company ticker symbol (company_id)
@@ -120,19 +122,19 @@ def get_companies() -> pd.DataFrame:
             - industry: Industry classification
             - isin: ISIN number (isin_code)
             - listed_date: Date of listing
-             
+
     Returns empty DataFrame if:
         - Database is unavailable
         - Table doesn't exist
         - No data found
-         
+
     Example:
         df = get_companies()
         print(df.head())
     """
     logger.info("Executing query: get_companies()")
     start_time = time.time()
-    
+
     try:
         with get_connection() as conn:
             query = """
@@ -146,14 +148,16 @@ def get_companies() -> pd.DataFrame:
                 FROM companies
                 ORDER BY company_id
             """
-            
+
             df = pd.read_sql_query(query, conn)
-            
+
             elapsed = time.time() - start_time
-            logger.info(f"Query executed successfully in {elapsed:.3f}s, returned {len(df)} rows")
-            
+            logger.info(
+                f"Query executed successfully in {elapsed:.3f}s, returned {len(df)} rows"
+            )
+
             return df
-            
+
     except sqlite3.Error as e:
         logger.error(f"Error in get_companies(): {str(e)}", exc_info=True)
         return pd.DataFrame()
@@ -166,11 +170,11 @@ def get_companies() -> pd.DataFrame:
 def get_ratios(ticker: str, year: Optional[int] = None) -> pd.DataFrame:
     """
     Retrieve financial ratios for a specific company.
-    
+
     Args:
         ticker: Company ticker symbol (e.g., 'RELIANCE', 'TCS')
         year: Optional year filter (e.g., 2024). If None, returns all years.
-    
+
     Returns:
         pd.DataFrame: DataFrame containing financial ratios with columns:
             - ticker: Company ticker
@@ -182,25 +186,25 @@ def get_ratios(ticker: str, year: Optional[int] = None) -> pd.DataFrame:
             - debt_equity: Debt to Equity ratio
             - current_ratio: Current ratio
             - And other financial metrics
-             
+
     Returns empty DataFrame if:
         - Ticker is missing or empty
         - No data found for the ticker
         - Database is unavailable
-         
+
     Example:
         df = get_ratios('RELIANCE', year=2024)
     """
     logger.info(f"Executing query: get_ratios(ticker={ticker}, year={year})")
     start_time = time.time()
-    
+
     # Validate input
     if not ticker or not isinstance(ticker, str):
         logger.warning(f"Invalid ticker provided: {ticker}")
         return pd.DataFrame()
-    
+
     ticker = ticker.strip().upper()
-    
+
     try:
         with get_connection() as conn:
             # Base query - pe_ratio and pb_ratio are in financial_kpis, not financial_ratios
@@ -232,32 +236,40 @@ def get_ratios(ticker: str, year: Optional[int] = None) -> pd.DataFrame:
                 WHERE r.company_id = ?
             """
             params = [ticker]
-            
+
             # Add year filter if provided (convert int year to period format)
             if year is not None:
                 # Try to match year to period format (e.g., 2024 -> 'Mar 2024')
                 # This is a best-effort match since period format varies
                 query += " AND r.period LIKE ?"
                 params.append(f"%{year}%")
-            
+
             query += " ORDER BY r.period DESC"
-            
+
             df = pd.read_sql_query(query, conn, params=params)
-            
+
             elapsed = time.time() - start_time
-            
+
             if df.empty:
-                logger.warning(f"No ratio data found for ticker: {ticker}, year: {year}")
+                logger.warning(
+                    f"No ratio data found for ticker: {ticker}, year: {year}"
+                )
             else:
-                logger.info(f"Query executed successfully in {elapsed:.3f}s, returned {len(df)} rows")
-            
+                logger.info(
+                    f"Query executed successfully in {elapsed:.3f}s, returned {len(df)} rows"
+                )
+
             return df
-            
+
     except sqlite3.Error as e:
-        logger.error(f"Database error in get_ratios() for {ticker}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Database error in get_ratios() for {ticker}: {str(e)}", exc_info=True
+        )
         return pd.DataFrame()
     except Exception as e:
-        logger.error(f"Unexpected error in get_ratios() for {ticker}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Unexpected error in get_ratios() for {ticker}: {str(e)}", exc_info=True
+        )
         return pd.DataFrame()
 
 
@@ -265,10 +277,10 @@ def get_ratios(ticker: str, year: Optional[int] = None) -> pd.DataFrame:
 def get_pl(ticker: str) -> pd.DataFrame:
     """
     Retrieve Profit and Loss statement for a specific company.
-    
+
     Args:
         ticker: Company ticker symbol (e.g., 'RELIANCE', 'TCS')
-    
+
     Returns:
         pd.DataFrame: DataFrame containing Profit & Loss data with columns:
             - ticker: Company ticker (company_id)
@@ -277,25 +289,25 @@ def get_pl(ticker: str) -> pd.DataFrame:
             - operating_profit: Operating profit
             - net_profit: Net profit
             - And other P&L line items
-            
+
     Returns empty DataFrame if:
         - Ticker is missing or empty
         - No data found for the ticker
         - Database is unavailable
-        
+
     Example:
         df = get_pl('RELIANCE')
     """
     logger.info(f"Executing query: get_pl(ticker={ticker})")
     start_time = time.time()
-    
+
     # Validate input
     if not ticker or not isinstance(ticker, str):
         logger.warning(f"Invalid ticker provided: {ticker}")
         return pd.DataFrame()
-    
+
     ticker = ticker.strip().upper()
-    
+
     try:
         with get_connection() as conn:
             # Note: profit_loss table uses 'company_id' and 'period' columns
@@ -319,23 +331,29 @@ def get_pl(ticker: str) -> pd.DataFrame:
                 WHERE company_id = ?
                 ORDER BY period DESC
             """
-            
+
             df = pd.read_sql_query(query, conn, params=[ticker])
-            
+
             elapsed = time.time() - start_time
-            
+
             if df.empty:
                 logger.warning(f"No P&L data found for ticker: {ticker}")
             else:
-                logger.info(f"Query executed successfully in {elapsed:.3f}s, returned {len(df)} rows")
-            
+                logger.info(
+                    f"Query executed successfully in {elapsed:.3f}s, returned {len(df)} rows"
+                )
+
             return df
-            
+
     except sqlite3.Error as e:
-        logger.error(f"Database error in get_pl() for {ticker}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Database error in get_pl() for {ticker}: {str(e)}", exc_info=True
+        )
         return pd.DataFrame()
     except Exception as e:
-        logger.error(f"Unexpected error in get_pl() for {ticker}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Unexpected error in get_pl() for {ticker}: {str(e)}", exc_info=True
+        )
         return pd.DataFrame()
 
 
@@ -343,10 +361,10 @@ def get_pl(ticker: str) -> pd.DataFrame:
 def get_bs(ticker: str) -> pd.DataFrame:
     """
     Retrieve Balance Sheet data for a specific company.
-    
+
     Args:
         ticker: Company ticker symbol (e.g., 'RELIANCE', 'TCS')
-    
+
     Returns:
         pd.DataFrame: DataFrame containing Balance Sheet data with columns:
             - ticker: Company ticker (company_id)
@@ -354,25 +372,25 @@ def get_bs(ticker: str) -> pd.DataFrame:
             - total_assets: Total assets
             - total_liabilities: Total liabilities
             - And other balance sheet items
-            
+
     Returns empty DataFrame if:
         - Ticker is missing or empty
         - No data found for the ticker
         - Database is unavailable
-        
+
     Example:
         df = get_bs('RELIANCE')
     """
     logger.info(f"Executing query: get_bs(ticker={ticker})")
     start_time = time.time()
-    
+
     # Validate input
     if not ticker or not isinstance(ticker, str):
         logger.warning(f"Invalid ticker provided: {ticker}")
         return pd.DataFrame()
-    
+
     ticker = ticker.strip().upper()
-    
+
     try:
         with get_connection() as conn:
             # Note: balance_sheet table uses 'company_id' and 'period' columns
@@ -395,23 +413,29 @@ def get_bs(ticker: str) -> pd.DataFrame:
                 WHERE company_id = ?
                 ORDER BY period DESC
             """
-            
+
             df = pd.read_sql_query(query, conn, params=[ticker])
-            
+
             elapsed = time.time() - start_time
-            
+
             if df.empty:
                 logger.warning(f"No balance sheet data found for ticker: {ticker}")
             else:
-                logger.info(f"Query executed successfully in {elapsed:.3f}s, returned {len(df)} rows")
-            
+                logger.info(
+                    f"Query executed successfully in {elapsed:.3f}s, returned {len(df)} rows"
+                )
+
             return df
-            
+
     except sqlite3.Error as e:
-        logger.error(f"Database error in get_bs() for {ticker}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Database error in get_bs() for {ticker}: {str(e)}", exc_info=True
+        )
         return pd.DataFrame()
     except Exception as e:
-        logger.error(f"Unexpected error in get_bs() for {ticker}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Unexpected error in get_bs() for {ticker}: {str(e)}", exc_info=True
+        )
         return pd.DataFrame()
 
 
@@ -419,10 +443,10 @@ def get_bs(ticker: str) -> pd.DataFrame:
 def get_cf(ticker: str) -> pd.DataFrame:
     """
     Retrieve Cash Flow statement for a specific company.
-    
+
     Args:
         ticker: Company ticker symbol (e.g., 'RELIANCE', 'TCS')
-    
+
     Returns:
         pd.DataFrame: DataFrame containing Cash Flow data with columns:
             - ticker: Company ticker (company_id)
@@ -433,25 +457,25 @@ def get_cf(ticker: str) -> pd.DataFrame:
             - free_cash_flow: Free cash flow
             - net_cash_flow: Net change in cash
             - And other cash flow items
-            
+
     Returns empty DataFrame if:
         - Ticker is missing or empty
         - No data found for the ticker
         - Database is unavailable
-        
+
     Example:
         df = get_cf('RELIANCE')
     """
     logger.info(f"Executing query: get_cf(ticker={ticker})")
     start_time = time.time()
-    
+
     # Validate input
     if not ticker or not isinstance(ticker, str):
         logger.warning(f"Invalid ticker provided: {ticker}")
         return pd.DataFrame()
-    
+
     ticker = ticker.strip().upper()
-    
+
     try:
         with get_connection() as conn:
             # Note: cash_flow table uses 'company_id' and 'period' columns
@@ -471,23 +495,29 @@ def get_cf(ticker: str) -> pd.DataFrame:
                 WHERE company_id = ?
                 ORDER BY period DESC
             """
-            
+
             df = pd.read_sql_query(query, conn, params=[ticker])
-            
+
             elapsed = time.time() - start_time
-            
+
             if df.empty:
                 logger.warning(f"No cash flow data found for ticker: {ticker}")
             else:
-                logger.info(f"Query executed successfully in {elapsed:.3f}s, returned {len(df)} rows")
-            
+                logger.info(
+                    f"Query executed successfully in {elapsed:.3f}s, returned {len(df)} rows"
+                )
+
             return df
-            
+
     except sqlite3.Error as e:
-        logger.error(f"Database error in get_cf() for {ticker}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Database error in get_cf() for {ticker}: {str(e)}", exc_info=True
+        )
         return pd.DataFrame()
     except Exception as e:
-        logger.error(f"Unexpected error in get_cf() for {ticker}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Unexpected error in get_cf() for {ticker}: {str(e)}", exc_info=True
+        )
         return pd.DataFrame()
 
 
@@ -495,7 +525,7 @@ def get_cf(ticker: str) -> pd.DataFrame:
 def get_sectors() -> pd.DataFrame:
     """
     Retrieve sector information from the database.
-    
+
     Returns:
         pd.DataFrame: DataFrame containing sector information with columns:
             - sector_id: Unique sector identifier
@@ -503,18 +533,18 @@ def get_sectors() -> pd.DataFrame:
             - sector_code: Sector code
             - company_count: Number of companies in sector
             - market_cap_total: Total market cap of sector
-            
+
     Returns empty DataFrame if:
         - Table doesn't exist
         - No data found
         - Database is unavailable
-        
+
     Example:
         df = get_sectors()
     """
     logger.info("Executing query: get_sectors()")
     start_time = time.time()
-    
+
     try:
         with get_connection() as conn:
             query = """
@@ -527,18 +557,20 @@ def get_sectors() -> pd.DataFrame:
                 FROM sectors
                 ORDER BY sector_name
             """
-            
+
             df = pd.read_sql_query(query, conn)
-            
+
             elapsed = time.time() - start_time
-            
+
             if df.empty:
                 logger.warning("No sector data found")
             else:
-                logger.info(f"Query executed successfully in {elapsed:.3f}s, returned {len(df)} rows")
-            
+                logger.info(
+                    f"Query executed successfully in {elapsed:.3f}s, returned {len(df)} rows"
+                )
+
             return df
-            
+
     except sqlite3.Error as e:
         logger.error(f"Database error in get_sectors(): {str(e)}", exc_info=True)
         return pd.DataFrame()
@@ -551,10 +583,10 @@ def get_sectors() -> pd.DataFrame:
 def get_peers(group_name: str) -> pd.DataFrame:
     """
     Retrieve peer group information.
-    
+
     Args:
         group_name: Name of the peer group (e.g., 'IT Services', 'Banking')
-    
+
     Returns:
         pd.DataFrame: DataFrame containing peer group data with columns:
             - group_name: Peer group name
@@ -563,25 +595,25 @@ def get_peers(group_name: str) -> pd.DataFrame:
             - sector: Company sector
             - market_cap: Market capitalization
             - rank: Rank within peer group
-            
+
     Returns empty DataFrame if:
         - group_name is missing or empty
         - No data found for the group
         - Database is unavailable
-        
+
     Example:
         df = get_peers('IT Services')
     """
     logger.info(f"Executing query: get_peers(group_name={group_name})")
     start_time = time.time()
-    
+
     # Validate input
     if not group_name or not isinstance(group_name, str):
         logger.warning(f"Invalid group_name provided: {group_name}")
         return pd.DataFrame()
-    
+
     group_name = group_name.strip()
-    
+
     try:
         with get_connection() as conn:
             query = """
@@ -596,23 +628,29 @@ def get_peers(group_name: str) -> pd.DataFrame:
                 WHERE group_name = ?
                 ORDER BY rank ASC
             """
-            
+
             df = pd.read_sql_query(query, conn, params=[group_name])
-            
+
             elapsed = time.time() - start_time
-            
+
             if df.empty:
                 logger.warning(f"No peer data found for group: {group_name}")
             else:
-                logger.info(f"Query executed successfully in {elapsed:.3f}s, returned {len(df)} rows")
-            
+                logger.info(
+                    f"Query executed successfully in {elapsed:.3f}s, returned {len(df)} rows"
+                )
+
             return df
-            
+
     except sqlite3.Error as e:
-        logger.error(f"Database error in get_peers() for {group_name}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Database error in get_peers() for {group_name}: {str(e)}", exc_info=True
+        )
         return pd.DataFrame()
     except Exception as e:
-        logger.error(f"Unexpected error in get_peers() for {group_name}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Unexpected error in get_peers() for {group_name}: {str(e)}", exc_info=True
+        )
         return pd.DataFrame()
 
 
@@ -620,10 +658,10 @@ def get_peers(group_name: str) -> pd.DataFrame:
 def get_valuation(ticker: str) -> pd.DataFrame:
     """
     Retrieve valuation data for a specific company.
-    
+
     Args:
         ticker: Company ticker symbol (e.g., 'RELIANCE', 'TCS')
-    
+
     Returns:
         pd.DataFrame: DataFrame containing valuation metrics with columns:
             - ticker: Company ticker
@@ -636,25 +674,25 @@ def get_valuation(ticker: str) -> pd.DataFrame:
             - price_to_book: Price to Book ratio
             - price_to_earnings: Price to Earnings ratio
             - And other valuation metrics
-            
+
     Returns empty DataFrame if:
         - Ticker is missing or empty
         - No data found for the ticker
         - Database is unavailable
-        
+
     Example:
         df = get_valuation('RELIANCE')
     """
     logger.info(f"Executing query: get_valuation(ticker={ticker})")
     start_time = time.time()
-    
+
     # Validate input
     if not ticker or not isinstance(ticker, str):
         logger.warning(f"Invalid ticker provided: {ticker}")
         return pd.DataFrame()
-    
+
     ticker = ticker.strip().upper()
-    
+
     try:
         with get_connection() as conn:
             query = """
@@ -678,23 +716,29 @@ def get_valuation(ticker: str) -> pd.DataFrame:
                 WHERE ticker = ?
                 ORDER BY year DESC
             """
-            
+
             df = pd.read_sql_query(query, conn, params=[ticker])
-            
+
             elapsed = time.time() - start_time
-            
+
             if df.empty:
                 logger.warning(f"No valuation data found for ticker: {ticker}")
             else:
-                logger.info(f"Query executed successfully in {elapsed:.3f}s, returned {len(df)} rows")
-            
+                logger.info(
+                    f"Query executed successfully in {elapsed:.3f}s, returned {len(df)} rows"
+                )
+
             return df
-            
+
     except sqlite3.Error as e:
-        logger.error(f"Database error in get_valuation() for {ticker}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Database error in get_valuation() for {ticker}: {str(e)}", exc_info=True
+        )
         return pd.DataFrame()
     except Exception as e:
-        logger.error(f"Unexpected error in get_valuation() for {ticker}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Unexpected error in get_valuation() for {ticker}: {str(e)}", exc_info=True
+        )
         return pd.DataFrame()
 
 
@@ -738,13 +782,11 @@ def get_company_master() -> pd.DataFrame:
         DataFrame with columns: company_id, company_name, sector, industry.
     """
     logger.info("Executing query: get_company_master()")
-    df = _read_df(
-        """
+    df = _read_df("""
         SELECT company_id, company_name, sector, industry
         FROM companies
         ORDER BY company_name
-        """
-    )
+        """)
     logger.info(f"get_company_master() returned {len(df)} rows")
     return df
 
@@ -760,14 +802,12 @@ def get_peer_groups_list() -> List[str]:
         Sorted list of distinct peer group names.
     """
     logger.info("Executing query: get_peer_groups_list()")
-    df = _read_df(
-        """
+    df = _read_df("""
         SELECT DISTINCT peer_group_name
         FROM peer_groups
         WHERE peer_group_name IS NOT NULL
         ORDER BY peer_group_name
-        """
-    )
+        """)
     groups = df["peer_group_name"].dropna().astype(str).tolist() if not df.empty else []
     logger.info(f"get_peer_groups_list() returned {len(groups)} groups")
     return groups
@@ -909,8 +949,12 @@ def get_all_screener_data(period: str = "Mar 2024") -> pd.DataFrame:
         df["company"] = df["company_name"]
 
         drop_cols = [
-            "operating_margin", "revenue_cagr", "profit_cagr",
-            "overall_score", "operating_activity", "investing_activity",
+            "operating_margin",
+            "revenue_cagr",
+            "profit_cagr",
+            "overall_score",
+            "operating_activity",
+            "investing_activity",
         ]
         df = df.drop(columns=[c for c in drop_cols if c in df.columns], errors="ignore")
 
@@ -940,14 +984,12 @@ def get_peer_group_metrics(period: str = "Mar 2024") -> pd.DataFrame:
     """
     logger.info(f"Building peer group metrics for period {period}")
     try:
-        peers = _read_df(
-            """
+        peers = _read_df("""
             SELECT pg.company_id, pg.peer_group_name, pg.is_benchmark
             FROM peer_groups pg
             WHERE pg.peer_group_name IS NOT NULL
             ORDER BY pg.peer_group_name, pg.is_benchmark DESC
-            """
-        )
+            """)
         screener_df = get_all_screener_data(period)
         if peers.empty or screener_df.empty:
             logger.warning("No peer group or screener data available")
@@ -963,32 +1005,32 @@ def get_peer_group_metrics(period: str = "Mar 2024") -> pd.DataFrame:
 def get_database_info() -> Dict[str, Any]:
     """
     Get information about the database.
-    
+
     Returns:
         Dict containing database information:
             - path: Database file path
             - exists: Whether database exists
             - size_mb: Database file size in MB
             - tables: List of tables in database
-            
+
     Example:
         info = get_database_info()
         print(f"Database size: {info['size_mb']} MB")
     """
     logger.info("Retrieving database information")
-    
+
     info = {
         "path": str(DB_PATH) if DB_PATH else None,
         "exists": DB_PATH.exists() if DB_PATH else False,
         "size_mb": 0.0,
-        "tables": []
+        "tables": [],
     }
-    
+
     if DB_PATH and DB_PATH.exists():
         # Get file size
         size_bytes = DB_PATH.stat().st_size
         info["size_mb"] = round(size_bytes / (1024 * 1024), 2)
-        
+
         # Get table names
         try:
             with get_connection() as conn:
@@ -999,22 +1041,22 @@ def get_database_info() -> Dict[str, Any]:
                 logger.info(f"Database contains {len(info['tables'])} tables")
         except Exception as e:
             logger.error(f"Error retrieving table list: {str(e)}")
-    
+
     return info
 
 
 def clear_cache():
     """
     Clear all Streamlit cache for database query functions.
-    
+
     This forces fresh data retrieval on next query.
     Useful for debugging or when data is updated.
     """
     logger.info("Clearing database query cache")
-    
+
     # Clear cache for all query functions
     st.cache_data.clear()
-    
+
     logger.info("Cache cleared successfully")
 
 
@@ -1049,10 +1091,14 @@ def get_raw_statement(ticker: str, table_name: str) -> pd.DataFrame:
 
     try:
         with get_connection() as conn:
-            query = f"SELECT * FROM {table_name} WHERE company_id = ? ORDER BY period DESC"
+            query = (
+                f"SELECT * FROM {table_name} WHERE company_id = ? ORDER BY period DESC"
+            )
             return pd.read_sql_query(query, conn, params=[ticker])
     except Exception as e:
-        logger.error(f"Error fetching raw statement {table_name} for {ticker}: {str(e)}")
+        logger.error(
+            f"Error fetching raw statement {table_name} for {ticker}: {str(e)}"
+        )
         return pd.DataFrame()
 
 
@@ -1119,7 +1165,7 @@ def get_company_pros_cons_signals(ticker: str) -> Dict[str, List[Dict[str, Any]]
                         "rule_id": str(row.get("rule_id", "N/A")),
                         "text": str(row.get("text", "")),
                         "confidence_pct": row.get("confidence_pct", None),
-                        "type": str(row.get("type", "")).lower()
+                        "type": str(row.get("type", "")).lower(),
                     }
                     if item["type"] == "pro":
                         pros.append(item)
@@ -1139,9 +1185,23 @@ def get_company_pros_cons_signals(ticker: str) -> Dict[str, List[Dict[str, Any]]
                 p_text = row.get("pros")
                 c_text = row.get("cons")
                 if p_text and not pd.isna(p_text) and str(p_text).lower() != "nan":
-                    pros.append({"rule_id": "DB_PRO", "text": str(p_text), "confidence_pct": None, "type": "pro"})
+                    pros.append(
+                        {
+                            "rule_id": "DB_PRO",
+                            "text": str(p_text),
+                            "confidence_pct": None,
+                            "type": "pro",
+                        }
+                    )
                 if c_text and not pd.isna(c_text) and str(c_text).lower() != "nan":
-                    cons.append({"rule_id": "DB_CON", "text": str(c_text), "confidence_pct": None, "type": "con"})
+                    cons.append(
+                        {
+                            "rule_id": "DB_CON",
+                            "text": str(c_text),
+                            "confidence_pct": None,
+                            "type": "con",
+                        }
+                    )
     except Exception as e:
         logger.error(f"Error querying pros_cons DB table for {ticker}: {str(e)}")
 
@@ -1162,7 +1222,7 @@ def get_company_capital_allocation_detail(ticker: str) -> Dict[str, Any]:
         "pattern": None,
         "latest_year": None,
         "previous_pattern": None,
-        "changed": False
+        "changed": False,
     }
 
     try:
@@ -1187,7 +1247,9 @@ def get_company_capital_allocation_detail(ticker: str) -> Dict[str, Any]:
                     res["previous_pattern"] = r_p.get("previous_pattern")
                     res["changed"] = bool(r_p.get("changed", False))
     except Exception as e:
-        logger.error(f"Error retrieving capital allocation detail for {ticker}: {str(e)}")
+        logger.error(
+            f"Error retrieving capital allocation detail for {ticker}: {str(e)}"
+        )
 
     return res
 
@@ -1210,7 +1272,7 @@ def get_company_valuation_detail(ticker: str) -> Dict[str, Any]:
         "sector_median_pe": None,
         "pe_vs_sector_median_pct": None,
         "valuation_flag": None,
-        "difference_pct": None
+        "difference_pct": None,
     }
 
     # Query DB market_cap or financial_ratios table first
@@ -1283,4 +1345,4 @@ def get_company_peer_percentiles(ticker: str) -> pd.DataFrame:
     except Exception as e:
         logger.error(f"CSV fallback error for peer percentiles of {ticker}: {str(e)}")
 
-    return pd.DataFrame()
+    return pd.DataFrame()

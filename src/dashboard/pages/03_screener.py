@@ -168,6 +168,7 @@ RESULT_COLUMNS: List[Tuple[str, str]] = [
 # DATA LOADING
 # =============================================================================
 
+
 @st.cache_data(ttl=600, show_spinner=False)
 def load_screener_data() -> pd.DataFrame:
     """
@@ -188,7 +189,10 @@ def load_screener_data() -> pd.DataFrame:
 # FILTER RANGE HELPERS
 # =============================================================================
 
-def _numeric_bounds(series: pd.Series, default: Tuple[float, float]) -> Tuple[float, float]:
+
+def _numeric_bounds(
+    series: pd.Series, default: Tuple[float, float]
+) -> Tuple[float, float]:
     """
     Compute safe numeric bounds from a series using percentiles.
 
@@ -244,7 +248,10 @@ def get_filter_ranges(data: pd.DataFrame) -> Dict[str, Tuple[float, float]]:
 # PRESET LOGIC
 # =============================================================================
 
-def apply_preset_values(preset: Dict[str, float], ranges: Dict[str, Tuple[float, float]]) -> Dict[str, float]:
+
+def apply_preset_values(
+    preset: Dict[str, float], ranges: Dict[str, Tuple[float, float]]
+) -> Dict[str, float]:
     """
     Clamp preset values to the dynamic slider ranges.
 
@@ -278,6 +285,7 @@ def apply_preset_values(preset: Dict[str, float], ranges: Dict[str, Tuple[float,
 # =============================================================================
 # FILTERING - REUSES SCREENER ENGINE
 # =============================================================================
+
 
 def build_filter_conditions(
     slider_values: Dict[str, float], ranges: Dict[str, Tuple[float, float]]
@@ -313,14 +321,20 @@ def build_filter_conditions(
             if value <= lo + eps:
                 continue
             conditions.append(
-                FilterCondition(field=col, operator=FilterOperator.GREATER_THAN_OR_EQUAL, value=value)
+                FilterCondition(
+                    field=col,
+                    operator=FilterOperator.GREATER_THAN_OR_EQUAL,
+                    value=value,
+                )
             )
         elif col in MAX_FILTERS:
             # Permissive bound -> no constraint
             if value >= hi - eps:
                 continue
             conditions.append(
-                FilterCondition(field=col, operator=FilterOperator.LESS_THAN_OR_EQUAL, value=value)
+                FilterCondition(
+                    field=col, operator=FilterOperator.LESS_THAN_OR_EQUAL, value=value
+                )
             )
     return conditions
 
@@ -361,12 +375,15 @@ def run_screener(data: pd.DataFrame, slider_values: Dict[str, float]) -> pd.Data
 # UI RENDERING
 # =============================================================================
 
+
 def _preset_state_key(col: str) -> str:
     """Return the session-state key for a filter slider."""
     return f"slider_{col}"
 
 
-def render_sidebar_filters(data: pd.DataFrame) -> Tuple[Dict[str, float], Optional[str]]:
+def render_sidebar_filters(
+    data: pd.DataFrame,
+) -> Tuple[Dict[str, float], Optional[str]]:
     """
     Render the sidebar filter sliders and preset buttons.
 
@@ -391,7 +408,9 @@ def render_sidebar_filters(data: pd.DataFrame) -> Tuple[Dict[str, float], Option
     selected_preset: Optional[str] = None
     for idx, preset_name in enumerate(PRESETS.keys()):
         col = preset_cols[idx % 2]
-        if col.button(preset_name, key=f"preset_{preset_name}", use_container_width=True):
+        if col.button(
+            preset_name, key=f"preset_{preset_name}", use_container_width=True
+        ):
             selected_preset = preset_name
             logger.info(f"Preset selected: {preset_name}")
 
@@ -513,6 +532,7 @@ def render_csv_export(result_df: pd.DataFrame) -> None:
 # MAIN
 # =============================================================================
 
+
 def main() -> None:
     """
     Render the Investment Screener screen.
@@ -529,7 +549,9 @@ def main() -> None:
         data = load_screener_data()
 
     if data.empty:
-        st.error("No financial data is available. Please check the database connection.")
+        st.error(
+            "No financial data is available. Please check the database connection."
+        )
         logger.error("Screener dataset empty - cannot render screen")
         return
 

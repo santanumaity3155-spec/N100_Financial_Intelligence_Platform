@@ -9,7 +9,7 @@ def render_year_selector(
     years: Optional[List[int]] = None,
     default_index: Optional[int] = None,
     key: str = "year_selector",
-    help_text: str = "Select a year to filter all analytics"
+    help_text: str = "Select a year to filter all analytics",
 ) -> int:
     """
     Render a year selector in the sidebar.
@@ -36,7 +36,7 @@ def render_year_selector(
         options=years,
         index=default_index,
         key=key,
-        help=help_text
+        help=help_text,
     )
 
     st.sidebar.markdown("---")
@@ -49,7 +49,7 @@ def render_company_selector(
     companies_df: pd.DataFrame,
     key: str = "company_selector",
     help_text: str = "Search for a company by name (case-insensitive)",
-    placeholder: str = "Type to search..."
+    placeholder: str = "Type to search...",
 ) -> Tuple[Optional[str], Optional[str]]:
     """
     Render a company search/selector in the sidebar.
@@ -70,7 +70,10 @@ def render_company_selector(
         return None, None
 
     # Ensure required columns exist
-    if 'company_id' not in companies_df.columns or 'company_name' not in companies_df.columns:
+    if (
+        "company_id" not in companies_df.columns
+        or "company_name" not in companies_df.columns
+    ):
         st.sidebar.error("Company data missing required columns")
         return None, None
 
@@ -79,16 +82,22 @@ def render_company_selector(
     company_names = sorted(set(company_names))
 
     # Search/autocomplete
-    search_query = st.sidebar.text_input(
-        "Search Company",
-        placeholder=placeholder,
-        help=help_text,
-        key=f"{key}_search"
-    ).strip().lower()
+    search_query = (
+        st.sidebar.text_input(
+            "Search Company",
+            placeholder=placeholder,
+            help=help_text,
+            key=f"{key}_search",
+        )
+        .strip()
+        .lower()
+    )
 
     # Filter companies
     if search_query:
-        filtered_names = [name for name in company_names if search_query in name.lower()]
+        filtered_names = [
+            name for name in company_names if search_query in name.lower()
+        ]
     else:
         filtered_names = company_names
 
@@ -100,7 +109,7 @@ def render_company_selector(
         "Select Company",
         options=filtered_names,
         help="Choose a company to view details",
-        key=f"{key}_select"
+        key=f"{key}_select",
     )
 
     # Get company_id
@@ -145,10 +154,7 @@ def render_sidebar_section(title: str, icon: str = "📋") -> None:
 
 
 def render_sidebar_metric(
-    label: str,
-    value: str,
-    delta: Optional[str] = None,
-    help_text: Optional[str] = None
+    label: str, value: str, delta: Optional[str] = None, help_text: Optional[str] = None
 ) -> None:
     """
     Render a metric in the sidebar.
@@ -160,18 +166,9 @@ def render_sidebar_metric(
         help_text: Optional help text
     """
     if help_text:
-        st.sidebar.metric(
-            label=label,
-            value=value,
-            delta=delta,
-            help=help_text
-        )
+        st.sidebar.metric(label=label, value=value, delta=delta, help=help_text)
     else:
-        st.sidebar.metric(
-            label=label,
-            value=value,
-            delta=delta
-        )
+        st.sidebar.metric(label=label, value=value, delta=delta)
 
 
 def render_sidebar_info(title: str, content: str, icon: str = "ℹ️") -> None:
@@ -205,10 +202,7 @@ def render_sidebar_warning(title: str, content: str, icon: str = "⚠️") -> No
 
 
 def render_collapsible_section(
-    title: str,
-    content_func: callable,
-    expanded: bool = False,
-    icon: str = "▶️"
+    title: str, content_func: callable, expanded: bool = False, icon: str = "▶️"
 ) -> None:
     """
     Render a collapsible section in the sidebar.
@@ -240,11 +234,7 @@ def render_sidebar_caption(text: str) -> None:
     st.sidebar.caption(text)
 
 
-def render_sidebar_info_box(
-    title: str,
-    content: str,
-    box_type: str = "info"
-) -> None:
+def render_sidebar_info_box(title: str, content: str, box_type: str = "info") -> None:
     """
     Render an info/warning/error/success box in the sidebar.
 
@@ -264,8 +254,7 @@ def render_sidebar_info_box(
 
 
 def render_sidebar_filter_reset(
-    key_prefix: str = "filter",
-    help_text: str = "Reset all filters to default values"
+    key_prefix: str = "filter", help_text: str = "Reset all filters to default values"
 ) -> bool:
     """
     Render a sidebar filter reset button.
@@ -281,14 +270,12 @@ def render_sidebar_filter_reset(
         "🔄 Reset Filters",
         help=help_text,
         use_container_width=True,
-        key=f"{key_prefix}_reset_sidebar"
+        key=f"{key_prefix}_reset_sidebar",
     )
 
 
 def render_sidebar_expanded_state(
-    label: str,
-    value: Any,
-    expanded: bool = False
+    label: str, value: Any, expanded: bool = False
 ) -> None:
     """
     Render expandable state information in the sidebar.

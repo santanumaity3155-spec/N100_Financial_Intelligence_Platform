@@ -24,22 +24,79 @@ from src.analytics.clustering import (
     run_kmeans_clustering,
     REQUIRED_FEATURES,
     DEFAULT_N_CLUSTERS,
-    DEFAULT_RANDOM_STATE
+    DEFAULT_RANDOM_STATE,
 )
 
 
 @pytest.fixture
 def sample_raw_df():
     """Create a sample dataset with missing values for unit testing."""
-    return pd.DataFrame({
-        "company_id": ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10"],
-        "sector": ["IT", "IT", "IT", "Banking", "Banking", "Banking", "Pharma", "Pharma", "Pharma", "Pharma"],
-        "return_on_equity_pct": [15.0, 20.0, np.nan, 12.0, 18.0, 14.0, 8.0, 10.0, 12.0, np.nan],
-        "debt_to_equity": [0.1, 0.2, 0.15, 1.5, 2.0, np.nan, 0.5, 0.4, 0.6, 0.5],
-        "revenue_cagr_5yr": [10.0, 12.0, 14.0, 8.0, np.nan, 9.0, 5.0, 6.0, 7.0, 8.0],
-        "fcf_cagr_5yr": [8.0, np.nan, 10.0, 5.0, 6.0, 4.0, np.nan, np.nan, np.nan, np.nan],  # Pharma all NaN for FCF
-        "operating_profit_margin_pct": [22.0, 25.0, 24.0, 18.0, 20.0, 19.0, 15.0, np.nan, 17.0, 16.0]
-    })
+    return pd.DataFrame(
+        {
+            "company_id": ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10"],
+            "sector": [
+                "IT",
+                "IT",
+                "IT",
+                "Banking",
+                "Banking",
+                "Banking",
+                "Pharma",
+                "Pharma",
+                "Pharma",
+                "Pharma",
+            ],
+            "return_on_equity_pct": [
+                15.0,
+                20.0,
+                np.nan,
+                12.0,
+                18.0,
+                14.0,
+                8.0,
+                10.0,
+                12.0,
+                np.nan,
+            ],
+            "debt_to_equity": [0.1, 0.2, 0.15, 1.5, 2.0, np.nan, 0.5, 0.4, 0.6, 0.5],
+            "revenue_cagr_5yr": [
+                10.0,
+                12.0,
+                14.0,
+                8.0,
+                np.nan,
+                9.0,
+                5.0,
+                6.0,
+                7.0,
+                8.0,
+            ],
+            "fcf_cagr_5yr": [
+                8.0,
+                np.nan,
+                10.0,
+                5.0,
+                6.0,
+                4.0,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
+            ],  # Pharma all NaN for FCF
+            "operating_profit_margin_pct": [
+                22.0,
+                25.0,
+                24.0,
+                18.0,
+                20.0,
+                19.0,
+                15.0,
+                np.nan,
+                17.0,
+                16.0,
+            ],
+        }
+    )
 
 
 def test_required_features_list():
@@ -50,7 +107,7 @@ def test_required_features_list():
         "debt_to_equity",
         "revenue_cagr_5yr",
         "fcf_cagr_5yr",
-        "operating_profit_margin_pct"
+        "operating_profit_margin_pct",
     ]
     assert REQUIRED_FEATURES == expected
 
@@ -58,13 +115,15 @@ def test_required_features_list():
 def test_missing_value_imputation_sector_median(sample_raw_df):
     """Test 2 & 3: Imputation uses sector medians and falls back to overall median."""
     imputed = impute_missing_values(sample_raw_df)
-    
+
     # 0 NaNs remaining
     assert not imputed[REQUIRED_FEATURES].isna().any().any()
     assert len(imputed) == len(sample_raw_df)
 
     # IT sector ROE for C3 should be median of C1 (15.0) and C2 (20.0) -> 17.5
-    c3_roe = imputed.loc[imputed["company_id"] == "C3", "return_on_equity_pct"].values[0]
+    c3_roe = imputed.loc[imputed["company_id"] == "C3", "return_on_equity_pct"].values[
+        0
+    ]
     assert pytest.approx(c3_roe) == 17.5
 
     # Pharma FCF CAGR was all NaN -> overall median fallback
@@ -86,10 +145,10 @@ def test_kmeans_cluster_count(sample_raw_df):
     """Test 5 & 7: KMeans creates requested number of clusters with valid cluster IDs."""
     imputed = impute_missing_values(sample_raw_df)
     X_scaled, _ = scale_features(imputed)
-    
+
     km = run_kmeans(X_scaled, n_clusters=5, random_state=42)
     assert len(km.cluster_centers_) == 5
-    
+
     unique_ids = set(np.unique(km.labels_))
     assert unique_ids.issubset({0, 1, 2, 3, 4})
 
@@ -142,7 +201,7 @@ def test_elbow_calculation_range(sample_raw_df):
     for k in k_range:
         assert k in inertia_dict
         assert inertia_dict[k] > 0
-    
+
     # Inertia should be monotonically decreasing
     inertias = [inertia_dict[k] for k in k_range]
     for i in range(len(inertias) - 1):
@@ -161,16 +220,18 @@ def test_empty_input_handling():
 
 def test_invalid_feature_values_handling():
     """Test 13: Infinite or non-numeric values are handled or rejected properly."""
-    df_invalid = pd.DataFrame({
-        "company_id": ["C1", "C2"],
-        "sector": ["IT", "IT"],
-        "return_on_equity_pct": [10.0, np.inf],
-        "debt_to_equity": [0.1, 0.2],
-        "revenue_cagr_5yr": [5.0, 6.0],
-        "fcf_cagr_5yr": [4.0, 5.0],
-        "operating_profit_margin_pct": [15.0, 16.0]
-    })
-    
+    df_invalid = pd.DataFrame(
+        {
+            "company_id": ["C1", "C2"],
+            "sector": ["IT", "IT"],
+            "return_on_equity_pct": [10.0, np.inf],
+            "debt_to_equity": [0.1, 0.2],
+            "revenue_cagr_5yr": [5.0, 6.0],
+            "fcf_cagr_5yr": [4.0, 5.0],
+            "operating_profit_margin_pct": [15.0, 16.0],
+        }
+    )
+
     with pytest.raises(ValueError):
         impute_missing_values(df_invalid)
 
@@ -183,17 +244,24 @@ def test_output_columns_and_formatting(sample_raw_df, tmp_path):
     distances = compute_centroid_distances(X_scaled, km.labels_, km.cluster_centers_)
 
     out_csv = tmp_path / "cluster_labels.csv"
-    out_df = generate_cluster_output(imputed, km.labels_, distances, output_path=out_csv)
+    out_df = generate_cluster_output(
+        imputed, km.labels_, distances, output_path=out_csv
+    )
 
     assert out_csv.exists()
     assert len(out_df) == len(sample_raw_df)
 
-    expected_cols = ["company_id", "cluster_id", "cluster_name", "distance_from_centroid"]
+    expected_cols = [
+        "company_id",
+        "cluster_id",
+        "cluster_name",
+        "distance_from_centroid",
+    ]
     assert list(out_df.columns) == expected_cols
 
     # Verify cluster_name format
     assert out_df["cluster_name"].iloc[0] == f"Cluster {out_df['cluster_id'].iloc[0]}"
-    
+
     # Verify no duplicate company_ids
     assert out_df["company_id"].nunique() == len(out_df)
 
@@ -201,7 +269,7 @@ def test_output_columns_and_formatting(sample_raw_df, tmp_path):
 def test_end_to_end_pipeline():
     """Test full integration pipeline against database."""
     res = run_kmeans_clustering(n_clusters=5, random_state=42)
-    
+
     assert res["cluster_labels_df"] is not None
     assert len(res["cluster_labels_df"]) == 94
     assert res["csv_path"].exists()

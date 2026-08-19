@@ -48,14 +48,25 @@ from src.nlp.pro_rules import (  # noqa: E402
     PRO_12,
     get_pro_rule_instances,
 )
+
 try:
     from tests.nlp.test_pros_cons_generator import make_context  # noqa: E402
 except ImportError:
     from .test_pros_cons_generator import make_context  # noqa: E402
 
 EXPECTED_PRO_IDS = [
-    "PRO_01", "PRO_02", "PRO_03", "PRO_04", "PRO_05", "PRO_06",
-    "PRO_07", "PRO_08", "PRO_09", "PRO_10", "PRO_11", "PRO_12",
+    "PRO_01",
+    "PRO_02",
+    "PRO_03",
+    "PRO_04",
+    "PRO_05",
+    "PRO_06",
+    "PRO_07",
+    "PRO_08",
+    "PRO_09",
+    "PRO_10",
+    "PRO_11",
+    "PRO_12",
 ]
 
 
@@ -114,12 +125,15 @@ class TestPRO01:
         assert "Insufficient" in result.reason
 
     def test_confidence_rises_with_streak(self):
-        base = PRO_01().evaluate(make_context(
-            latest={"roe": 21.0},
-            history={"roe": [21.0, 22.0, 23.0]}))
-        strong = PRO_01().evaluate(make_context(
-            latest={"roe": 40.0},
-            history={"roe": [35.0, 38.0, 40.0, 41.0, 42.0, 43.0]}))
+        base = PRO_01().evaluate(
+            make_context(latest={"roe": 21.0}, history={"roe": [21.0, 22.0, 23.0]})
+        )
+        strong = PRO_01().evaluate(
+            make_context(
+                latest={"roe": 40.0},
+                history={"roe": [35.0, 38.0, 40.0, 41.0, 42.0, 43.0]},
+            )
+        )
         assert strong.confidence_pct >= base.confidence_pct
 
     def test_nan_handling(self):
@@ -175,6 +189,8 @@ class TestPRO02:
             history={"free_cash_flow": [10.0, 20.0, 30.0, 40.0]},
         )
         _assert_not_triggered(PRO_02().evaluate(ctx))
+
+
 # =============================================================================
 # PRO_03 - Debt Free
 # =============================================================================
@@ -182,20 +198,22 @@ class TestPRO02:
 
 class TestPRO03:
     def test_de_zero(self):
-        _assert_triggered(PRO_03().evaluate(
-            make_context(latest={"debt_to_equity": 0})))
+        _assert_triggered(PRO_03().evaluate(make_context(latest={"debt_to_equity": 0})))
 
     def test_de_zero_float(self):
-        _assert_triggered(PRO_03().evaluate(
-            make_context(latest={"debt_to_equity": 0.0})))
+        _assert_triggered(
+            PRO_03().evaluate(make_context(latest={"debt_to_equity": 0.0}))
+        )
 
     def test_de_very_small_treated_as_zero(self):
-        _assert_triggered(PRO_03().evaluate(
-            make_context(latest={"debt_to_equity": 1e-10})))
+        _assert_triggered(
+            PRO_03().evaluate(make_context(latest={"debt_to_equity": 1e-10}))
+        )
 
     def test_de_positive(self):
-        _assert_not_triggered(PRO_03().evaluate(
-            make_context(latest={"debt_to_equity": 0.5})))
+        _assert_not_triggered(
+            PRO_03().evaluate(make_context(latest={"debt_to_equity": 0.5}))
+        )
 
     def test_de_missing_not_debt_free(self):
         result = PRO_03().evaluate(make_context(latest={}))
@@ -203,12 +221,14 @@ class TestPRO03:
         assert "unavailable" in result.reason.lower()
 
     def test_de_nan_not_debt_free(self):
-        _assert_not_triggered(PRO_03().evaluate(
-            make_context(latest={"debt_to_equity": np.nan})))
+        _assert_not_triggered(
+            PRO_03().evaluate(make_context(latest={"debt_to_equity": np.nan}))
+        )
 
     def test_de_inf_not_debt_free(self):
-        _assert_not_triggered(PRO_03().evaluate(
-            make_context(latest={"debt_to_equity": np.inf})))
+        _assert_not_triggered(
+            PRO_03().evaluate(make_context(latest={"debt_to_equity": np.inf}))
+        )
 
 
 # =============================================================================
@@ -218,16 +238,19 @@ class TestPRO03:
 
 class TestPRO04:
     def test_cagr_above_15(self):
-        _assert_triggered(PRO_04().evaluate(
-            make_context(trailing={"revenue_cagr": 20.0})))
+        _assert_triggered(
+            PRO_04().evaluate(make_context(trailing={"revenue_cagr": 20.0}))
+        )
 
     def test_cagr_exactly_15(self):
-        _assert_not_triggered(PRO_04().evaluate(
-            make_context(trailing={"revenue_cagr": 15.0})))
+        _assert_not_triggered(
+            PRO_04().evaluate(make_context(trailing={"revenue_cagr": 15.0}))
+        )
 
     def test_cagr_below_15(self):
-        _assert_not_triggered(PRO_04().evaluate(
-            make_context(trailing={"revenue_cagr": 10.0})))
+        _assert_not_triggered(
+            PRO_04().evaluate(make_context(trailing={"revenue_cagr": 10.0}))
+        )
 
     def test_fallback_recalc(self):
         ctx = make_context(
@@ -242,6 +265,8 @@ class TestPRO04:
         result = PRO_04().evaluate(ctx)
         _assert_not_triggered(result)
         assert "unavailable" in result.reason.lower()
+
+
 # =============================================================================
 # PRO_05 - Strong Operating Margin
 # =============================================================================
@@ -258,8 +283,9 @@ class TestPRO05:
         _assert_not_triggered(PRO_05().evaluate(make_context(latest={"opm": 20.0})))
 
     def test_fallback_calculation(self):
-        ctx = make_context(latest={"opm": None, "revenue": 1000.0,
-                                   "operating_profit": 300.0})
+        ctx = make_context(
+            latest={"opm": None, "revenue": 1000.0, "operating_profit": 300.0}
+        )
         _assert_triggered(PRO_05().evaluate(ctx))
 
     def test_uses_opm_not_npm(self):
@@ -268,8 +294,9 @@ class TestPRO05:
         _assert_not_triggered(PRO_05().evaluate(ctx))
 
     def test_missing_opm(self):
-        ctx = make_context(latest={"opm": None, "revenue": None,
-                                   "operating_profit": None})
+        ctx = make_context(
+            latest={"opm": None, "revenue": None, "operating_profit": None}
+        )
         result = PRO_05().evaluate(ctx)
         _assert_not_triggered(result)
         assert "unavailable" in result.reason.lower()
@@ -282,16 +309,19 @@ class TestPRO05:
 
 class TestPRO06:
     def test_pat_cagr_above_20(self):
-        _assert_triggered(PRO_06().evaluate(
-            make_context(trailing={"profit_cagr": 25.0})))
+        _assert_triggered(
+            PRO_06().evaluate(make_context(trailing={"profit_cagr": 25.0}))
+        )
 
     def test_pat_cagr_exactly_20(self):
-        _assert_not_triggered(PRO_06().evaluate(
-            make_context(trailing={"profit_cagr": 20.0})))
+        _assert_not_triggered(
+            PRO_06().evaluate(make_context(trailing={"profit_cagr": 20.0}))
+        )
 
     def test_pat_cagr_below_20(self):
-        _assert_not_triggered(PRO_06().evaluate(
-            make_context(trailing={"profit_cagr": 10.0})))
+        _assert_not_triggered(
+            PRO_06().evaluate(make_context(trailing={"profit_cagr": 10.0}))
+        )
 
     def test_fallback_recalc(self):
         ctx = make_context(
@@ -314,16 +344,19 @@ class TestPRO06:
 
 class TestPRO07:
     def test_icr_above_10(self):
-        _assert_triggered(PRO_07().evaluate(
-            make_context(latest={"interest_coverage": 15.0})))
+        _assert_triggered(
+            PRO_07().evaluate(make_context(latest={"interest_coverage": 15.0}))
+        )
 
     def test_icr_exactly_10(self):
-        _assert_not_triggered(PRO_07().evaluate(
-            make_context(latest={"interest_coverage": 10.0})))
+        _assert_not_triggered(
+            PRO_07().evaluate(make_context(latest={"interest_coverage": 10.0}))
+        )
 
     def test_icr_below_10(self):
-        _assert_not_triggered(PRO_07().evaluate(
-            make_context(latest={"interest_coverage": 5.0})))
+        _assert_not_triggered(
+            PRO_07().evaluate(make_context(latest={"interest_coverage": 5.0}))
+        )
 
     def test_debt_free_qualifies(self):
         ctx = make_context(latest={"debt_to_equity": 0.0, "interest_coverage": None})
@@ -336,14 +369,14 @@ class TestPRO07:
         assert "unavailable" in result.reason.lower()
 
     def test_icr_nan_not_infinity(self):
-        ctx = make_context(latest={"debt_to_equity": 0.5,
-                                   "interest_coverage": np.nan})
+        ctx = make_context(latest={"debt_to_equity": 0.5, "interest_coverage": np.nan})
         _assert_not_triggered(PRO_07().evaluate(ctx))
 
     def test_icr_inf_not_infinity(self):
-        ctx = make_context(latest={"debt_to_equity": 0.5,
-                                   "interest_coverage": np.inf})
+        ctx = make_context(latest={"debt_to_equity": 0.5, "interest_coverage": np.inf})
         _assert_not_triggered(PRO_07().evaluate(ctx))
+
+
 # =============================================================================
 # PRO_08 - Dividend Quality
 # =============================================================================
@@ -379,8 +412,9 @@ class TestPRO08:
         _assert_not_triggered(PRO_08().evaluate(ctx))
 
     def test_missing_yield(self):
-        ctx = make_context(trailing={"dividend_yield": None},
-                           latest={"free_cash_flow": 100.0})
+        ctx = make_context(
+            trailing={"dividend_yield": None}, latest={"free_cash_flow": 100.0}
+        )
         result = PRO_08().evaluate(ctx)
         _assert_not_triggered(result)
         assert "unavailable" in result.reason.lower()
@@ -398,16 +432,17 @@ class TestPRO08:
 
 class TestPRO09:
     def test_eps_cagr_above_15(self):
-        _assert_triggered(PRO_09().evaluate(
-            make_context(trailing={"eps_cagr": 20.0})))
+        _assert_triggered(PRO_09().evaluate(make_context(trailing={"eps_cagr": 20.0})))
 
     def test_eps_cagr_exactly_15(self):
-        _assert_not_triggered(PRO_09().evaluate(
-            make_context(trailing={"eps_cagr": 15.0})))
+        _assert_not_triggered(
+            PRO_09().evaluate(make_context(trailing={"eps_cagr": 15.0}))
+        )
 
     def test_eps_cagr_below_15(self):
-        _assert_not_triggered(PRO_09().evaluate(
-            make_context(trailing={"eps_cagr": 8.0})))
+        _assert_not_triggered(
+            PRO_09().evaluate(make_context(trailing={"eps_cagr": 8.0}))
+        )
 
     def test_fallback_recalc(self):
         ctx = make_context(
@@ -430,28 +465,33 @@ class TestPRO09:
 
 class TestPRO10:
     def test_3_consecutive_improvements(self):
-        ctx = make_context(latest={"roe": 21.0},
-                           history={"roe": [12.0, 15.0, 18.0, 21.0]})
+        ctx = make_context(
+            latest={"roe": 21.0}, history={"roe": [12.0, 15.0, 18.0, 21.0]}
+        )
         _assert_triggered(PRO_10().evaluate(ctx))
 
     def test_only_2_improvements(self):
-        ctx = make_context(latest={"roe": 15.0},
-                           history={"roe": [12.0, 13.0, 15.0, 12.0]})
+        ctx = make_context(
+            latest={"roe": 15.0}, history={"roe": [12.0, 13.0, 15.0, 12.0]}
+        )
         _assert_not_triggered(PRO_10().evaluate(ctx))
 
     def test_flat_value_breaks(self):
-        ctx = make_context(latest={"roe": 14.0},
-                           history={"roe": [12.0, 13.0, 14.0, 14.0]})
+        ctx = make_context(
+            latest={"roe": 14.0}, history={"roe": [12.0, 13.0, 14.0, 14.0]}
+        )
         _assert_not_triggered(PRO_10().evaluate(ctx))
 
     def test_declining_value(self):
-        ctx = make_context(latest={"roe": 12.0},
-                           history={"roe": [21.0, 18.0, 15.0, 12.0]})
+        ctx = make_context(
+            latest={"roe": 12.0}, history={"roe": [21.0, 18.0, 15.0, 12.0]}
+        )
         _assert_not_triggered(PRO_10().evaluate(ctx))
 
     def test_missing_year(self):
-        ctx = make_context(latest={"roe": 21.0},
-                           history={"roe": [12.0, 20.0, None, 15.0, 18.0, 21.0]})
+        ctx = make_context(
+            latest={"roe": 21.0}, history={"roe": [12.0, 20.0, None, 15.0, 18.0, 21.0]}
+        )
         result = PRO_10().evaluate(ctx)
         # Missing year produces a compressed series that must not invent
         # 3 uninterrupted improvements.
@@ -462,6 +502,8 @@ class TestPRO10:
         result = PRO_10().evaluate(ctx)
         _assert_not_triggered(result)
         assert "Insufficient" in result.reason
+
+
 # =============================================================================
 # PRO_11 - Operating Leverage (spec contradiction documented)
 # =============================================================================
@@ -504,24 +546,30 @@ class TestPRO11:
 
 class TestPRO12:
     def test_assets_up_debt_down(self):
-        ctx = make_context(history={
-            "total_assets": [100.0, 110.0, 120.0, 130.0, 140.0],
-            "borrowings": [60.0, 50.0, 40.0, 30.0, 20.0],
-        })
+        ctx = make_context(
+            history={
+                "total_assets": [100.0, 110.0, 120.0, 130.0, 140.0],
+                "borrowings": [60.0, 50.0, 40.0, 30.0, 20.0],
+            }
+        )
         _assert_triggered(PRO_12().evaluate(ctx))
 
     def test_assets_declining(self):
-        ctx = make_context(history={
-            "total_assets": [100.0, 125.0, 120.0, 105.0],
-            "borrowings": [60.0, 50.0, 40.0, 30.0],
-        })
+        ctx = make_context(
+            history={
+                "total_assets": [100.0, 125.0, 120.0, 105.0],
+                "borrowings": [60.0, 50.0, 40.0, 30.0],
+            }
+        )
         _assert_not_triggered(PRO_12().evaluate(ctx))
 
     def test_debt_increasing(self):
-        ctx = make_context(history={
-            "total_assets": [100.0, 110.0, 120.0, 130.0],
-            "borrowings": [20.0, 30.0, 40.0, 50.0],
-        })
+        ctx = make_context(
+            history={
+                "total_assets": [100.0, 110.0, 120.0, 130.0],
+                "borrowings": [20.0, 30.0, 40.0, 50.0],
+            }
+        )
         _assert_not_triggered(PRO_12().evaluate(ctx))
 
     def test_missing_historical_data(self):
@@ -535,6 +583,7 @@ class TestPRO12:
         result = PRO_12().evaluate(ctx)
         _assert_not_triggered(result)
 
+
 # =============================================================================
 # Edge cases (must never crash)
 # =============================================================================
@@ -542,8 +591,18 @@ class TestPRO12:
 
 class TestEdgeCases:
     RULES = [
-        PRO_01(), PRO_02(), PRO_03(), PRO_04(), PRO_05(), PRO_06(),
-        PRO_07(), PRO_08(), PRO_09(), PRO_10(), PRO_11(), PRO_12(),
+        PRO_01(),
+        PRO_02(),
+        PRO_03(),
+        PRO_04(),
+        PRO_05(),
+        PRO_06(),
+        PRO_07(),
+        PRO_08(),
+        PRO_09(),
+        PRO_10(),
+        PRO_11(),
+        PRO_12(),
     ]
 
     def test_none_context_never_crashes(self):
@@ -572,8 +631,10 @@ class TestEdgeCases:
     def test_unsorted_years_never_crash(self):
         ctx = make_context(
             history_years=[2022, 2020, 2021, 2019],
-            history={"roe": [28.0, 22.0, 25.0, 20.0],
-                     "total_assets": [140.0, 100.0, 120.0, 90.0]},
+            history={
+                "roe": [28.0, 22.0, 25.0, 20.0],
+                "total_assets": [140.0, 100.0, 120.0, 90.0],
+            },
         )
         for rule in self.RULES:
             result = rule.evaluate(ctx)
@@ -581,10 +642,12 @@ class TestEdgeCases:
             assert 0.0 <= result.confidence_pct <= 100.0
 
     def test_all_inf_nan_history_never_crash(self):
-        ctx = make_context(history={
-            "roe": [np.nan, np.inf],
-            "free_cash_flow": [-np.inf, np.nan],
-        })
+        ctx = make_context(
+            history={
+                "roe": [np.nan, np.inf],
+                "free_cash_flow": [-np.inf, np.nan],
+            }
+        )
         for rule in self.RULES:
             result = rule.evaluate(ctx)
             assert isinstance(result, RuleResult)
@@ -601,8 +664,10 @@ class TestEdgeCases:
             latest={"roe": 30.0},
             history={"roe": [18.0, 22.0, 25.0, 28.0, 30.0]},
         )
-        assert PRO_01().evaluate(ctx).confidence_pct == \
+        assert (
             PRO_01().evaluate(ctx).confidence_pct
+            == PRO_01().evaluate(ctx).confidence_pct
+        )
 
 
 # =============================================================================
@@ -647,12 +712,12 @@ class TestRegistry:
         ctx = make_context(
             latest={"roe": 30.0, "opm": 30.0},
             history={"roe": [18.0, 22.0, 25.0, 28.0, 30.0]},
-            trailing={"revenue_cagr": 20.0, "profit_cagr": 25.0,
-                      "eps_cagr": 20.0},
+            trailing={"revenue_cagr": 20.0, "profit_cagr": 25.0, "eps_cagr": 20.0},
         )
         rows = [r.to_dict() for r in evaluate_rules_for_company(ctx) if r.triggered]
-        df = pd.DataFrame(rows, columns=[
-            "company_id", "type", "rule_id", "text", "confidence_pct"])
+        df = pd.DataFrame(
+            rows, columns=["company_id", "type", "rule_id", "text", "confidence_pct"]
+        )
         assert all(df["type"] == "pro")
         valid, issues = validate_output_schema(df)
         assert valid, issues

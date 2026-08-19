@@ -80,15 +80,16 @@ KPI_COLUMNS: List[Tuple[str, str]] = [
 ]
 
 # Colors for row highlighting
-COLOR_SELECTED = "#D4E6F1"   # Light blue
+COLOR_SELECTED = "#D4E6F1"  # Light blue
 COLOR_BENCHMARK = "#E8DAEF"  # Light purple
-COLOR_BEST = "#D5F5E3"       # Light green
-COLOR_WORST = "#FADBD8"      # Light red
+COLOR_BEST = "#D5F5E3"  # Light green
+COLOR_WORST = "#FADBD8"  # Light red
 
 
 # =============================================================================
 # DATA LOADING (cached)
 # =============================================================================
+
 
 @st.cache_data(ttl=600, show_spinner=False)
 def load_peer_groups() -> List[str]:
@@ -178,6 +179,7 @@ def load_benchmark_flags(peer_group: str) -> Dict[str, bool]:
 # PERCENTILE COMPUTATION (reuses Peer Engine)
 # =============================================================================
 
+
 def compute_peer_percentiles(group_df: pd.DataFrame) -> pd.DataFrame:
     """
     Compute within-group percentile ranks for every radar metric.
@@ -219,6 +221,7 @@ def compute_peer_percentiles(group_df: pd.DataFrame) -> pd.DataFrame:
 # RADAR CHART (Plotly Scatterpolar)
 # =============================================================================
 
+
 def build_radar_chart(
     group_df: pd.DataFrame,
     selected_id: str,
@@ -248,6 +251,7 @@ def build_radar_chart(
         Plotly figure. Returns an empty figure on error.
     """
     import time
+
     start_time = time.time()
 
     # -------------------------------------------------------------------------
@@ -318,7 +322,9 @@ def build_radar_chart(
 
         # Check if percentile column exists
         if pct_col not in group_df.columns:
-            logger.debug(f"Radar chart: percentile column '{pct_col}' missing, using 0.0")
+            logger.debug(
+                f"Radar chart: percentile column '{pct_col}' missing, using 0.0"
+            )
             company_values.append(0.0)
             continue
 
@@ -475,6 +481,7 @@ def build_radar_chart(
 # KPI TABLE
 # =============================================================================
 
+
 def prepare_kpi_table(group_df: pd.DataFrame) -> pd.DataFrame:
     """
     Prepare the display-ready KPI comparison table.
@@ -590,16 +597,13 @@ def render_kpi_table(
 
     # Drop internal helper columns for display
     display_cols = [label for label, _ in KPI_COLUMNS if label in table.columns]
-    styled = (
-        table[display_cols]
-        .style.apply(
-            _row_style,
-            axis=1,
-            selected_id=str(selected_id),
-            benchmark_ids=benchmark_ids,
-            best_id=best_id,
-            worst_id=worst_id,
-        )
+    styled = table[display_cols].style.apply(
+        _row_style,
+        axis=1,
+        selected_id=str(selected_id),
+        benchmark_ids=benchmark_ids,
+        best_id=best_id,
+        worst_id=worst_id,
     )
 
     st.dataframe(
@@ -636,14 +640,14 @@ def render_kpi_table(
         )
 
     logger.info(
-        f"KPI table rendered for {len(table)} companies "
-        f"(selected={selected_id})"
+        f"KPI table rendered for {len(table)} companies " f"(selected={selected_id})"
     )
 
 
 # =============================================================================
 # SIDEBAR SELECTION
 # =============================================================================
+
 
 def render_sidebar(groups: List[str]) -> Tuple[Optional[str], Optional[str]]:
     """
@@ -686,11 +690,15 @@ def render_sidebar(groups: List[str]) -> Tuple[Optional[str], Optional[str]]:
 
     # Case-insensitive search filter
     st.sidebar.subheader("🔍 Search Company")
-    query = st.sidebar.text_input(
-        "Type to filter companies",
-        placeholder="e.g. tcs",
-        help="Search is case-insensitive and matches company names.",
-    ).strip().lower()
+    query = (
+        st.sidebar.text_input(
+            "Type to filter companies",
+            placeholder="e.g. tcs",
+            help="Search is case-insensitive and matches company names.",
+        )
+        .strip()
+        .lower()
+    )
 
     filtered_names = company_names
     if query:
@@ -723,6 +731,7 @@ def render_sidebar(groups: List[str]) -> Tuple[Optional[str], Optional[str]]:
 # =============================================================================
 # MAIN
 # =============================================================================
+
 
 def main() -> None:
     """
@@ -761,9 +770,7 @@ def main() -> None:
 
         # Benchmark flags
         benchmark_flags = load_benchmark_flags(selected_group)
-        benchmark_ids = {
-            cid for cid, is_b in benchmark_flags.items() if is_b
-        }
+        benchmark_ids = {cid for cid, is_b in benchmark_flags.items() if is_b}
 
         # Company name for the selected id
         try:

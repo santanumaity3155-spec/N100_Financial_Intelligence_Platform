@@ -17,7 +17,12 @@ import pandas as pd
 import pytest
 
 from src.screener.engine import ScreenerEngine, screen_companies, run_preset_screener
-from src.screener.filters import FilterCondition, FilterGroup, FilterOperator, FilterValidator
+from src.screener.filters import (
+    FilterCondition,
+    FilterGroup,
+    FilterOperator,
+    FilterValidator,
+)
 from src.screener.presets import (
     PRESET_SCREENERS,
     get_preset_screener,
@@ -28,32 +33,34 @@ from src.screener.templates import ScreenTemplateManager
 from src.screener.exporter import ScreenerExporter
 from src.screener.constants import VALID_SCREEN_FIELDS
 
-
 # =============================================================================
 # FIXTURES
 # =============================================================================
 
+
 @pytest.fixture
 def sample_dataframe() -> pd.DataFrame:
     """Create a sample DataFrame for testing."""
-    return pd.DataFrame({
-        "company_id": ["TCS", "INFY", "RELIANCE", "HDFC", "ICICIBANK"],
-        "company_name": ["TCS", "Infosys", "Reliance", "HDFC Bank", "ICICI Bank"],
-        "sector": ["IT", "IT", "Energy", "Banking", "Banking"],
-        "industry": ["Software", "Software", "Refinery", "Banking", "Banking"],
-        "period": ["2024-03", "2024-03", "2024-03", "2024-03", "2024-03"],
-        "roe": [25.0, 22.0, 15.0, 18.0, 16.0],
-        "roa": [18.0, 15.0, 10.0, 12.0, 11.0],
-        "revenue_cagr_3yr": [12.0, 14.0, 8.0, 10.0, 9.0],
-        "pat_cagr_3yr": [15.0, 16.0, 10.0, 12.0, 11.0],
-        "free_cash_flow": [5000.0, 3000.0, 8000.0, 4000.0, 3500.0],
-        "debt_to_equity": [0.1, 0.2, 0.4, 0.3, 0.5],
-        "pe_ratio": [25.0, 22.0, 18.0, 20.0, 15.0],
-        "pb_ratio": [5.0, 4.5, 2.0, 2.5, 2.2],
-        "dividend_yield": [2.0, 2.5, 1.5, 1.8, 2.2],
-        "overall_score": [85.0, 80.0, 70.0, 75.0, 72.0],
-        "rating": ["Excellent", "Strong", "Healthy", "Strong", "Healthy"],
-    })
+    return pd.DataFrame(
+        {
+            "company_id": ["TCS", "INFY", "RELIANCE", "HDFC", "ICICIBANK"],
+            "company_name": ["TCS", "Infosys", "Reliance", "HDFC Bank", "ICICI Bank"],
+            "sector": ["IT", "IT", "Energy", "Banking", "Banking"],
+            "industry": ["Software", "Software", "Refinery", "Banking", "Banking"],
+            "period": ["2024-03", "2024-03", "2024-03", "2024-03", "2024-03"],
+            "roe": [25.0, 22.0, 15.0, 18.0, 16.0],
+            "roa": [18.0, 15.0, 10.0, 12.0, 11.0],
+            "revenue_cagr_3yr": [12.0, 14.0, 8.0, 10.0, 9.0],
+            "pat_cagr_3yr": [15.0, 16.0, 10.0, 12.0, 11.0],
+            "free_cash_flow": [5000.0, 3000.0, 8000.0, 4000.0, 3500.0],
+            "debt_to_equity": [0.1, 0.2, 0.4, 0.3, 0.5],
+            "pe_ratio": [25.0, 22.0, 18.0, 20.0, 15.0],
+            "pb_ratio": [5.0, 4.5, 2.0, 2.5, 2.2],
+            "dividend_yield": [2.0, 2.5, 1.5, 1.8, 2.2],
+            "overall_score": [85.0, 80.0, 70.0, 75.0, 72.0],
+            "rating": ["Excellent", "Strong", "Healthy", "Strong", "Healthy"],
+        }
+    )
 
 
 @pytest.fixture
@@ -76,6 +83,7 @@ def temp_db() -> sqlite3.Connection:
 # =============================================================================
 # FILTER TESTS
 # =============================================================================
+
 
 class TestFilterOperator:
     """Tests for FilterOperator enum."""
@@ -246,6 +254,7 @@ class TestFilterValidator:
 # SCREENER ENGINE TESTS
 # =============================================================================
 
+
 class TestScreenerEngine:
     """Tests for ScreenerEngine class."""
 
@@ -339,8 +348,12 @@ class TestScreenerEngine:
 
     def test_rank_companies(self, screener_engine: ScreenerEngine):
         """Test ranking companies."""
-        screener_engine.apply_filters([{"field": "overall_score", "operator": ">=", "value": 0}])
-        ranked_data = screener_engine.rank_companies(rank_by="overall_score", ascending=False)
+        screener_engine.apply_filters(
+            [{"field": "overall_score", "operator": ">=", "value": 0}]
+        )
+        ranked_data = screener_engine.rank_companies(
+            rank_by="overall_score", ascending=False
+        )
 
         assert "rank" in ranked_data.columns
         assert ranked_data["rank"].iloc[0] == 1
@@ -392,6 +405,7 @@ class TestScreenerEngine:
 # PRESET SCREENER TESTS
 # =============================================================================
 
+
 class TestPresetScreeners:
     """Tests for preset screener functionality."""
 
@@ -438,6 +452,7 @@ class TestPresetScreeners:
 # =============================================================================
 # SCREEN TEMPLATE MANAGER TESTS
 # =============================================================================
+
 
 class TestScreenTemplateManager:
     """Tests for ScreenTemplateManager class."""
@@ -500,7 +515,10 @@ class TestScreenTemplateManager:
             manager = ScreenTemplateManager()
 
             # Save a screen
-            manager.save_screen(name="To Delete", filters=[{"field": "roe", "operator": ">=", "value": 10}])
+            manager.save_screen(
+                name="To Delete",
+                filters=[{"field": "roe", "operator": ">=", "value": 10}],
+            )
 
             # Delete it
             result = manager.delete_screen("To Delete")
@@ -528,13 +546,19 @@ class TestScreenTemplateManager:
                 )
             """)
             temp_db.commit()
-            
+
             manager = ScreenTemplateManager()
 
             # Save a couple of screens
-            result1 = manager.save_screen(name="Screen 1", filters=[{"field": "roe", "operator": ">=", "value": 10}])
-            result2 = manager.save_screen(name="Screen 2", filters=[{"field": "pe_ratio", "operator": "<=", "value": 20}])
-            
+            result1 = manager.save_screen(
+                name="Screen 1",
+                filters=[{"field": "roe", "operator": ">=", "value": 10}],
+            )
+            result2 = manager.save_screen(
+                name="Screen 2",
+                filters=[{"field": "pe_ratio", "operator": "<=", "value": 20}],
+            )
+
             # Verify saves succeeded
             assert result1["success"] is True
             assert result2["success"] is True
@@ -551,13 +575,17 @@ class TestScreenTemplateManager:
 
             assert manager.get_screen_count() == 0
 
-            manager.save_screen(name="Screen 1", filters=[{"field": "roe", "operator": ">=", "value": 10}])
+            manager.save_screen(
+                name="Screen 1",
+                filters=[{"field": "roe", "operator": ">=", "value": 10}],
+            )
             assert manager.get_screen_count() == 1
 
 
 # =============================================================================
 # EXPORTER TESTS
 # =============================================================================
+
 
 class TestScreenerExporter:
     """Tests for ScreenerExporter class."""
@@ -640,6 +668,7 @@ class TestScreenerExporter:
 # INTEGRATION TESTS
 # =============================================================================
 
+
 class TestIntegration:
     """Integration tests for the screener module."""
 
@@ -690,7 +719,16 @@ class TestIntegration:
     def test_convenience_functions(self, sample_dataframe: pd.DataFrame):
         """Test convenience functions."""
         with patch.object(ScreenerEngine, "load_data", return_value=None):
-            with patch.object(ScreenerEngine, "screen_companies", return_value={"success": True, "results": [{"test": "data"}], "count": 1, "stats": {}}) as mock_screen:
+            with patch.object(
+                ScreenerEngine,
+                "screen_companies",
+                return_value={
+                    "success": True,
+                    "results": [{"test": "data"}],
+                    "count": 1,
+                    "stats": {},
+                },
+            ) as mock_screen:
                 result = screen_companies(
                     filters=[{"field": "roe", "operator": ">=", "value": 18}]
                 )
@@ -715,19 +753,22 @@ class TestIntegration:
 # PERFORMANCE TESTS
 # =============================================================================
 
+
 class TestPerformance:
     """Performance tests for the screener."""
 
     def test_large_dataset_filtering(self):
         """Test filtering performance with large dataset."""
         # Create a large DataFrame (1000 rows)
-        large_df = pd.DataFrame({
-            "company_id": [f"COMP_{i}" for i in range(1000)],
-            "company_name": [f"Company {i}" for i in range(1000)],
-            "roe": [i % 100 for i in range(1000)],
-            "debt_to_equity": [i % 10 / 10 for i in range(1000)],
-            "pe_ratio": [i % 50 for i in range(1000)],
-        })
+        large_df = pd.DataFrame(
+            {
+                "company_id": [f"COMP_{i}" for i in range(1000)],
+                "company_name": [f"Company {i}" for i in range(1000)],
+                "roe": [i % 100 for i in range(1000)],
+                "debt_to_equity": [i % 10 / 10 for i in range(1000)],
+                "pe_ratio": [i % 50 for i in range(1000)],
+            }
+        )
 
         engine = ScreenerEngine()
         engine.data = large_df
@@ -741,13 +782,15 @@ class TestPerformance:
 
     def test_multiple_filters_performance(self):
         """Test performance with multiple filters."""
-        df = pd.DataFrame({
-            "company_id": [f"COMP_{i}" for i in range(500)],
-            "roe": [i % 100 for i in range(500)],
-            "debt_to_equity": [i % 10 / 10 for i in range(500)],
-            "pe_ratio": [i % 50 for i in range(500)],
-            "pb_ratio": [i % 20 for i in range(500)],
-        })
+        df = pd.DataFrame(
+            {
+                "company_id": [f"COMP_{i}" for i in range(500)],
+                "roe": [i % 100 for i in range(500)],
+                "debt_to_equity": [i % 10 / 10 for i in range(500)],
+                "pe_ratio": [i % 50 for i in range(500)],
+                "pb_ratio": [i % 20 for i in range(500)],
+            }
+        )
 
         engine = ScreenerEngine()
         engine.data = df
@@ -767,6 +810,7 @@ class TestPerformance:
 # =============================================================================
 # EDGE CASE TESTS
 # =============================================================================
+
 
 class TestEdgeCases:
     """Edge case tests."""

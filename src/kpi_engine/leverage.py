@@ -26,7 +26,7 @@ logger = get_logger(__name__)
 class LeverageCalculator:
     """
     Calculates leverage KPIs from financial data.
-    
+
     This class provides methods to calculate various leverage metrics
     based on balance sheet and profit & loss data to assess financial risk.
     """
@@ -34,7 +34,7 @@ class LeverageCalculator:
     def __init__(self, db_path: Optional[str] = None):
         """
         Initialize the LeverageCalculator.
-        
+
         Parameters
         ----------
         db_path : str, optional
@@ -46,29 +46,29 @@ class LeverageCalculator:
     def calculate_all(self, company_id: str, period: str) -> Dict[str, Any]:
         """
         Calculate all leverage KPIs for a company in a specific period.
-        
+
         Parameters
         ----------
         company_id : str
             Company identifier
         period : str
             Financial period (e.g., '2024-Q1', 'FY2024')
-            
+
         Returns
         -------
         Dict[str, Any]
             Dictionary containing all calculated leverage KPIs
         """
         logger.info(f"Calculating leverage KPIs for {company_id}, period {period}")
-        
+
         # Fetch required data
         pl_data = self._fetch_profit_loss_data(company_id, period)
         bs_data = self._fetch_balance_sheet_data(company_id, period)
-        
+
         if pl_data.empty or bs_data.empty:
             logger.warning(f"Insufficient data for {company_id}, period {period}")
             return {}
-        
+
         # Calculate all KPIs
         results = {
             "company_id": company_id,
@@ -78,21 +78,23 @@ class LeverageCalculator:
             "interest_coverage": self.calculate_interest_coverage(pl_data),
             "financial_leverage": self.calculate_financial_leverage(bs_data),
         }
-        
-        logger.info(f"Calculated {len([v for v in results.values() if v is not None])} leverage KPIs")
+
+        logger.info(
+            f"Calculated {len([v for v in results.values() if v is not None])} leverage KPIs"
+        )
         return results
 
     def calculate_debt_to_equity(self, bs_data: pd.DataFrame) -> Optional[float]:
         """
         Calculate Debt to Equity Ratio.
-        
+
         Formula: Debt to Equity = Total Debt / Shareholders' Equity
-        
+
         Parameters
         ----------
         bs_data : pd.DataFrame
             Balance Sheet data
-            
+
         Returns
         -------
         Optional[float]
@@ -103,34 +105,39 @@ class LeverageCalculator:
             if bs_data.empty:
                 logger.warning("Debt to Equity calculation: Empty dataframe provided")
                 return None
-            
+
             # Using borrowings as proxy for total debt
-            total_debt = bs_data.get('borrowings', pd.Series([None])).iloc[0]
-            
+            total_debt = bs_data.get("borrowings", pd.Series([None])).iloc[0]
+
             # Try equity_capital first, then fall back to share_capital + reserves
-            equity = bs_data.get('equity_capital', pd.Series([None])).iloc[0]
-            
+            equity = bs_data.get("equity_capital", pd.Series([None])).iloc[0]
+
             if equity is None or pd.isna(equity):
                 # Fallback: use share_capital + reserves as proxy for equity
-                share_capital = bs_data.get('share_capital', pd.Series([0])).iloc[0]
-                reserves = bs_data.get('reserves', pd.Series([0])).iloc[0]
-                equity = (share_capital if share_capital and not pd.isna(share_capital) else 0) + \
-                        (reserves if reserves and not pd.isna(reserves) else 0)
-            
+                share_capital = bs_data.get("share_capital", pd.Series([0])).iloc[0]
+                reserves = bs_data.get("reserves", pd.Series([0])).iloc[0]
+                equity = (
+                    share_capital if share_capital and not pd.isna(share_capital) else 0
+                ) + (reserves if reserves and not pd.isna(reserves) else 0)
+
             if total_debt is None or pd.isna(total_debt):
                 logger.warning("Debt to Equity calculation: Missing debt data")
                 return None
-            
+
             if equity is None or pd.isna(equity) or equity == 0:
-                logger.warning("Debt to Equity calculation: Equity is zero or not available")
+                logger.warning(
+                    "Debt to Equity calculation: Equity is zero or not available"
+                )
                 return None
-            
+
             ratio = total_debt / equity
             logger.debug(f"Debt to Equity calculated: {ratio:.2f}")
             return round(ratio, 2)
-            
+
         except IndexError as e:
-            logger.error(f"Debt to Equity calculation failed - IndexError (empty dataframe): {str(e)}")
+            logger.error(
+                f"Debt to Equity calculation failed - IndexError (empty dataframe): {str(e)}"
+            )
             return None
         except Exception as e:
             logger.error(f"Debt to Equity calculation failed: {str(e)}")
@@ -139,14 +146,14 @@ class LeverageCalculator:
     def calculate_debt_ratio(self, bs_data: pd.DataFrame) -> Optional[float]:
         """
         Calculate Debt Ratio.
-        
+
         Formula: Debt Ratio = Total Debt / Total Assets
-        
+
         Parameters
         ----------
         bs_data : pd.DataFrame
             Balance Sheet data
-            
+
         Returns
         -------
         Optional[float]
@@ -157,29 +164,31 @@ class LeverageCalculator:
             if bs_data.empty:
                 logger.warning("Debt Ratio calculation: Empty dataframe provided")
                 return None
-            
+
             # Using borrowings as proxy for total debt
-            total_debt = bs_data.get('borrowings', pd.Series([None])).iloc[0]
-            total_assets = bs_data.get('total_assets', pd.Series([None])).iloc[0]
-            
+            total_debt = bs_data.get("borrowings", pd.Series([None])).iloc[0]
+            total_assets = bs_data.get("total_assets", pd.Series([None])).iloc[0]
+
             if total_debt is None or pd.isna(total_debt):
                 logger.warning("Debt Ratio calculation: Missing debt data")
                 return None
-            
+
             if total_assets is None or pd.isna(total_assets):
                 logger.warning("Debt Ratio calculation: Missing total_assets data")
                 return None
-            
+
             if total_assets == 0:
                 logger.warning("Debt Ratio calculation: Total assets is zero")
                 return None
-            
+
             ratio = total_debt / total_assets
             logger.debug(f"Debt Ratio calculated: {ratio:.2f}")
             return round(ratio, 2)
-            
+
         except IndexError as e:
-            logger.error(f"Debt Ratio calculation failed - IndexError (empty dataframe): {str(e)}")
+            logger.error(
+                f"Debt Ratio calculation failed - IndexError (empty dataframe): {str(e)}"
+            )
             return None
         except Exception as e:
             logger.error(f"Debt Ratio calculation failed: {str(e)}")
@@ -188,15 +197,15 @@ class LeverageCalculator:
     def calculate_interest_coverage(self, pl_data: pd.DataFrame) -> Optional[float]:
         """
         Calculate Interest Coverage Ratio.
-        
+
         Formula: Interest Coverage = EBIT / Interest Expense
         Where EBIT = Operating Profit + Interest
-        
+
         Parameters
         ----------
         pl_data : pd.DataFrame
             Profit & Loss data
-            
+
         Returns
         -------
         Optional[float]
@@ -205,33 +214,43 @@ class LeverageCalculator:
         try:
             # Check if dataframe is empty
             if pl_data.empty:
-                logger.warning("Interest Coverage calculation: Empty dataframe provided")
+                logger.warning(
+                    "Interest Coverage calculation: Empty dataframe provided"
+                )
                 return None
-            
-            operating_profit = pl_data.get('operating_profit', pd.Series([None])).iloc[0]
-            interest = pl_data.get('interest', pd.Series([None])).iloc[0]
-            
+
+            operating_profit = pl_data.get("operating_profit", pd.Series([None])).iloc[
+                0
+            ]
+            interest = pl_data.get("interest", pd.Series([None])).iloc[0]
+
             if operating_profit is None or pd.isna(operating_profit):
-                logger.warning("Interest Coverage calculation: Missing operating_profit data")
+                logger.warning(
+                    "Interest Coverage calculation: Missing operating_profit data"
+                )
                 return None
-            
+
             if interest is None or pd.isna(interest):
                 logger.warning("Interest Coverage calculation: Missing interest data")
                 return None
-            
+
             if interest == 0:
-                logger.warning("Interest Coverage calculation: Interest expense is zero")
+                logger.warning(
+                    "Interest Coverage calculation: Interest expense is zero"
+                )
                 return None
-            
+
             # EBIT = Operating Profit + Interest (adding back interest)
             ebit = operating_profit + interest
-            
+
             coverage = ebit / interest
             logger.debug(f"Interest Coverage calculated: {coverage:.2f}")
             return round(coverage, 2)
-            
+
         except IndexError as e:
-            logger.error(f"Interest Coverage calculation failed - IndexError (empty dataframe): {str(e)}")
+            logger.error(
+                f"Interest Coverage calculation failed - IndexError (empty dataframe): {str(e)}"
+            )
             return None
         except Exception as e:
             logger.error(f"Interest Coverage calculation failed: {str(e)}")
@@ -240,14 +259,14 @@ class LeverageCalculator:
     def calculate_financial_leverage(self, bs_data: pd.DataFrame) -> Optional[float]:
         """
         Calculate Financial Leverage Ratio.
-        
+
         Formula: Financial Leverage = Total Assets / Shareholders' Equity
-        
+
         Parameters
         ----------
         bs_data : pd.DataFrame
             Balance Sheet data
-            
+
         Returns
         -------
         Optional[float]
@@ -256,35 +275,44 @@ class LeverageCalculator:
         try:
             # Check if dataframe is empty
             if bs_data.empty:
-                logger.warning("Financial Leverage calculation: Empty dataframe provided")
+                logger.warning(
+                    "Financial Leverage calculation: Empty dataframe provided"
+                )
                 return None
-            
-            total_assets = bs_data.get('total_assets', pd.Series([None])).iloc[0]
-            
+
+            total_assets = bs_data.get("total_assets", pd.Series([None])).iloc[0]
+
             # Try equity_capital first, then fall back to share_capital + reserves
-            equity = bs_data.get('equity_capital', pd.Series([None])).iloc[0]
-            
+            equity = bs_data.get("equity_capital", pd.Series([None])).iloc[0]
+
             if equity is None or pd.isna(equity):
                 # Fallback: use share_capital + reserves as proxy for equity
-                share_capital = bs_data.get('share_capital', pd.Series([0])).iloc[0]
-                reserves = bs_data.get('reserves', pd.Series([0])).iloc[0]
-                equity = (share_capital if share_capital and not pd.isna(share_capital) else 0) + \
-                        (reserves if reserves and not pd.isna(reserves) else 0)
-            
+                share_capital = bs_data.get("share_capital", pd.Series([0])).iloc[0]
+                reserves = bs_data.get("reserves", pd.Series([0])).iloc[0]
+                equity = (
+                    share_capital if share_capital and not pd.isna(share_capital) else 0
+                ) + (reserves if reserves and not pd.isna(reserves) else 0)
+
             if total_assets is None or pd.isna(total_assets):
-                logger.warning("Financial Leverage calculation: Missing total_assets data")
+                logger.warning(
+                    "Financial Leverage calculation: Missing total_assets data"
+                )
                 return None
-            
+
             if equity is None or pd.isna(equity) or equity == 0:
-                logger.warning("Financial Leverage calculation: Equity is zero or not available")
+                logger.warning(
+                    "Financial Leverage calculation: Equity is zero or not available"
+                )
                 return None
-            
+
             leverage = total_assets / equity
             logger.debug(f"Financial Leverage calculated: {leverage:.2f}")
             return round(leverage, 2)
-            
+
         except IndexError as e:
-            logger.error(f"Financial Leverage calculation failed - IndexError (empty dataframe): {str(e)}")
+            logger.error(
+                f"Financial Leverage calculation failed - IndexError (empty dataframe): {str(e)}"
+            )
             return None
         except Exception as e:
             logger.error(f"Financial Leverage calculation failed: {str(e)}")
@@ -293,14 +321,14 @@ class LeverageCalculator:
     def _fetch_profit_loss_data(self, company_id: str, period: str) -> pd.DataFrame:
         """
         Fetch profit & loss data from database.
-        
+
         Parameters
         ----------
         company_id : str
             Company identifier
         period : str
             Financial period
-            
+
         Returns
         -------
         pd.DataFrame
@@ -322,14 +350,14 @@ class LeverageCalculator:
     def _fetch_balance_sheet_data(self, company_id: str, period: str) -> pd.DataFrame:
         """
         Fetch balance sheet data from database.
-        
+
         Parameters
         ----------
         company_id : str
             Company identifier
         period : str
             Financial period
-            
+
         Returns
         -------
         pd.DataFrame
@@ -351,7 +379,7 @@ class LeverageCalculator:
     def get_kpi_descriptions(self) -> Dict[str, str]:
         """
         Get descriptions for all leverage KPIs.
-        
+
         Returns
         -------
         Dict[str, str]
@@ -367,7 +395,7 @@ class LeverageCalculator:
     def get_kpi_formulas(self) -> Dict[str, str]:
         """
         Get formulas for all leverage KPIs.
-        
+
         Returns
         -------
         Dict[str, str]

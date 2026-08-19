@@ -50,10 +50,10 @@ from src.health_score.constants import (
     CAPITAL_ALLOCATION_MAP,
 )
 
-
 # =============================================================================
 # FIXTURES
 # =============================================================================
+
 
 @pytest.fixture
 def engine():
@@ -67,82 +67,88 @@ def engine():
 @pytest.fixture
 def sample_profitability_row():
     """Sample row with profitability metrics."""
-    return pd.Series({
-        "company_id": "TCS",
-        "company_name": "Tata Consultancy Services",
-        "period": "FY2024",
-        "roe": 25.0,
-        "roce": 30.0,
-        "roa": 15.0,
-        "net_profit_margin": 20.0,
-        "operating_profit_margin": 25.0,
-        "debt_to_equity": 0.1,
-        "interest_coverage": 15.0,
-        "asset_turnover": 1.2,
-        "revenue_cagr_3yr": 15.0,
-        "pat_cagr_3yr": 12.0,
-        "eps_cagr_3yr": 14.0,
-        "free_cash_flow": 5000.0,
-        "fcf_margin": 15.0,
-        "cash_conversion": 120.0,
-        "cash_return_on_assets": 12.0,
-        "capital_allocation_rating": "EXCELLENT",
-        "high_leverage_flag": 0,
-    })
+    return pd.Series(
+        {
+            "company_id": "TCS",
+            "company_name": "Tata Consultancy Services",
+            "period": "FY2024",
+            "roe": 25.0,
+            "roce": 30.0,
+            "roa": 15.0,
+            "net_profit_margin": 20.0,
+            "operating_profit_margin": 25.0,
+            "debt_to_equity": 0.1,
+            "interest_coverage": 15.0,
+            "asset_turnover": 1.2,
+            "revenue_cagr_3yr": 15.0,
+            "pat_cagr_3yr": 12.0,
+            "eps_cagr_3yr": 14.0,
+            "free_cash_flow": 5000.0,
+            "fcf_margin": 15.0,
+            "cash_conversion": 120.0,
+            "cash_return_on_assets": 12.0,
+            "capital_allocation_rating": "EXCELLENT",
+            "high_leverage_flag": 0,
+        }
+    )
 
 
 @pytest.fixture
 def sample_leverage_row():
     """Sample row with high leverage metrics."""
-    return pd.Series({
-        "company_id": "HIGHD",
-        "company_name": "High Debt Corp",
-        "period": "FY2024",
-        "roe": 5.0,
-        "roce": 8.0,
-        "roa": 2.0,
-        "net_profit_margin": 5.0,
-        "operating_profit_margin": 8.0,
-        "debt_to_equity": 6.5,
-        "interest_coverage": 1.2,
-        "asset_turnover": 0.3,
-        "revenue_cagr_3yr": 2.0,
-        "pat_cagr_3yr": -5.0,
-        "eps_cagr_3yr": -3.0,
-        "free_cash_flow": -500.0,
-        "fcf_margin": -10.0,
-        "cash_conversion": 30.0,
-        "cash_return_on_assets": 1.0,
-        "capital_allocation_rating": "DISTRESSED",
-        "high_leverage_flag": 1,
-    })
+    return pd.Series(
+        {
+            "company_id": "HIGHD",
+            "company_name": "High Debt Corp",
+            "period": "FY2024",
+            "roe": 5.0,
+            "roce": 8.0,
+            "roa": 2.0,
+            "net_profit_margin": 5.0,
+            "operating_profit_margin": 8.0,
+            "debt_to_equity": 6.5,
+            "interest_coverage": 1.2,
+            "asset_turnover": 0.3,
+            "revenue_cagr_3yr": 2.0,
+            "pat_cagr_3yr": -5.0,
+            "eps_cagr_3yr": -3.0,
+            "free_cash_flow": -500.0,
+            "fcf_margin": -10.0,
+            "cash_conversion": 30.0,
+            "cash_return_on_assets": 1.0,
+            "capital_allocation_rating": "DISTRESSED",
+            "high_leverage_flag": 1,
+        }
+    )
 
 
 @pytest.fixture
 def sample_missing_data_row():
     """Sample row with missing metrics."""
-    return pd.Series({
-        "company_id": "MISSCO",
-        "company_name": "Missing Data Corp",
-        "period": "FY2024",
-        "roe": None,
-        "roce": None,
-        "roa": None,
-        "net_profit_margin": 10.0,
-        "operating_profit_margin": None,
-        "debt_to_equity": None,
-        "interest_coverage": None,
-        "asset_turnover": None,
-        "revenue_cagr_3yr": None,
-        "pat_cagr_3yr": np.nan,
-        "eps_cagr_3yr": None,
-        "free_cash_flow": None,
-        "fcf_margin": None,
-        "cash_conversion": None,
-        "cash_return_on_assets": None,
-        "capital_allocation_rating": None,
-        "high_leverage_flag": None,
-    })
+    return pd.Series(
+        {
+            "company_id": "MISSCO",
+            "company_name": "Missing Data Corp",
+            "period": "FY2024",
+            "roe": None,
+            "roce": None,
+            "roa": None,
+            "net_profit_margin": 10.0,
+            "operating_profit_margin": None,
+            "debt_to_equity": None,
+            "interest_coverage": None,
+            "asset_turnover": None,
+            "revenue_cagr_3yr": None,
+            "pat_cagr_3yr": np.nan,
+            "eps_cagr_3yr": None,
+            "free_cash_flow": None,
+            "fcf_margin": None,
+            "cash_conversion": None,
+            "cash_return_on_assets": None,
+            "capital_allocation_rating": None,
+            "high_leverage_flag": None,
+        }
+    )
 
 
 @pytest.fixture
@@ -195,41 +201,81 @@ def test_db():
     """)
 
     # Insert test companies
-    conn.execute("INSERT OR IGNORE INTO companies (company_id, company_name) VALUES (?, ?)",
-                 ("TCS", "Tata Consultancy Services"))
-    conn.execute("INSERT OR IGNORE INTO companies (company_id, company_name) VALUES (?, ?)",
-                 ("RELIANCE", "Reliance Industries"))
+    conn.execute(
+        "INSERT OR IGNORE INTO companies (company_id, company_name) VALUES (?, ?)",
+        ("TCS", "Tata Consultancy Services"),
+    )
+    conn.execute(
+        "INSERT OR IGNORE INTO companies (company_id, company_name) VALUES (?, ?)",
+        ("RELIANCE", "Reliance Industries"),
+    )
 
     # Insert test financial ratios
-    conn.execute("""
+    conn.execute(
+        """
         INSERT OR REPLACE INTO financial_ratios
         (company_id, company_name, period, roe, roce, roa, net_profit_margin,
          operating_profit_margin, debt_to_equity, interest_coverage, high_leverage_flag,
          asset_turnover, revenue_cagr_3yr, pat_cagr_3yr, eps_cagr_3yr,
          free_cash_flow, fcf_margin, cash_conversion, capital_allocation_rating, cash_return_on_assets)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        "TCS", "Tata Consultancy Services", "FY2024",
-        25.0, 30.0, 15.0, 20.0, 25.0,
-        0.1, 15.0, 0, 1.2,
-        15.0, 12.0, 14.0,
-        5000.0, 15.0, 120.0, "EXCELLENT", 12.0
-    ))
+    """,
+        (
+            "TCS",
+            "Tata Consultancy Services",
+            "FY2024",
+            25.0,
+            30.0,
+            15.0,
+            20.0,
+            25.0,
+            0.1,
+            15.0,
+            0,
+            1.2,
+            15.0,
+            12.0,
+            14.0,
+            5000.0,
+            15.0,
+            120.0,
+            "EXCELLENT",
+            12.0,
+        ),
+    )
 
-    conn.execute("""
+    conn.execute(
+        """
         INSERT OR REPLACE INTO financial_ratios
         (company_id, company_name, period, roe, roce, roa, net_profit_margin,
          operating_profit_margin, debt_to_equity, interest_coverage, high_leverage_flag,
          asset_turnover, revenue_cagr_3yr, pat_cagr_3yr, eps_cagr_3yr,
          free_cash_flow, fcf_margin, cash_conversion, capital_allocation_rating, cash_return_on_assets)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        "RELIANCE", "Reliance Industries", "FY2024",
-        10.0, 12.0, 6.0, 8.0, 12.0,
-        1.5, 4.0, 0, 0.8,
-        8.0, 10.0, 9.0,
-        2000.0, 5.0, 80.0, "GOOD", 6.0
-    ))
+    """,
+        (
+            "RELIANCE",
+            "Reliance Industries",
+            "FY2024",
+            10.0,
+            12.0,
+            6.0,
+            8.0,
+            12.0,
+            1.5,
+            4.0,
+            0,
+            0.8,
+            8.0,
+            10.0,
+            9.0,
+            2000.0,
+            5.0,
+            80.0,
+            "GOOD",
+            6.0,
+        ),
+    )
 
     conn.commit()
     conn.close()
@@ -247,6 +293,7 @@ def test_db():
 # TEST HELPER FUNCTIONS
 # =============================================================================
 
+
 class TestIsValidNumeric:
     """Tests for _is_valid_numeric helper."""
 
@@ -263,13 +310,13 @@ class TestIsValidNumeric:
         assert _is_valid_numeric(None) is False
 
     def test_nan(self):
-        assert _is_valid_numeric(float('nan')) is False
+        assert _is_valid_numeric(float("nan")) is False
 
     def test_inf(self):
-        assert _is_valid_numeric(float('inf')) is False
+        assert _is_valid_numeric(float("inf")) is False
 
     def test_neg_inf(self):
-        assert _is_valid_numeric(float('-inf')) is False
+        assert _is_valid_numeric(float("-inf")) is False
 
     def test_string(self):
         assert _is_valid_numeric("hello") is False
@@ -294,10 +341,10 @@ class TestSafeFloat:
         assert _safe_float(None) is None
 
     def test_nan(self):
-        assert _safe_float(float('nan')) is None
+        assert _safe_float(float("nan")) is None
 
     def test_inf(self):
-        assert _safe_float(float('inf')) is None
+        assert _safe_float(float("inf")) is None
 
     def test_string_number(self):
         assert _safe_float("25.5") == 25.5
@@ -374,6 +421,7 @@ class TestGetCagrValue:
 # TEST PROFITABILITY SCORE
 # =============================================================================
 
+
 class TestProfitabilityScore:
     """Tests for calculate_profitability_score."""
 
@@ -413,19 +461,29 @@ class TestProfitabilityScore:
         assert 35 <= score <= 45
 
     def test_negative_roe(self, engine):
-        row = pd.Series({
-            "roe": -30.0, "roce": -20.0, "roa": -15.0,
-            "net_profit_margin": -25.0, "operating_profit_margin": -10.0,
-        })
+        row = pd.Series(
+            {
+                "roe": -30.0,
+                "roce": -20.0,
+                "roa": -15.0,
+                "net_profit_margin": -25.0,
+                "operating_profit_margin": -10.0,
+            }
+        )
         score = engine.calculate_profitability_score(row)
         assert score is not None
         assert score < 40
 
     def test_invalid_values_ignored(self, engine):
-        row = pd.Series({
-            "roe": float('inf'), "roce": "INVALID", "roa": None,
-            "net_profit_margin": 15.0, "operating_profit_margin": np.nan,
-        })
+        row = pd.Series(
+            {
+                "roe": float("inf"),
+                "roce": "INVALID",
+                "roa": None,
+                "net_profit_margin": 15.0,
+                "operating_profit_margin": np.nan,
+            }
+        )
         score = engine.calculate_profitability_score(row)
         assert score is not None
         assert score > 0
@@ -434,6 +492,7 @@ class TestProfitabilityScore:
 # =============================================================================
 # TEST GROWTH SCORE
 # =============================================================================
+
 
 class TestGrowthScore:
     """Tests for calculate_growth_score."""
@@ -458,21 +517,25 @@ class TestGrowthScore:
         assert score is None
 
     def test_negative_cagr(self, engine):
-        row = pd.Series({
-            "revenue_cagr_3yr": -10.0,
-            "pat_cagr_3yr": -20.0,
-            "eps_cagr_3yr": -15.0,
-        })
+        row = pd.Series(
+            {
+                "revenue_cagr_3yr": -10.0,
+                "pat_cagr_3yr": -20.0,
+                "eps_cagr_3yr": -15.0,
+            }
+        )
         score = engine.calculate_growth_score(row)
         assert score is not None
         assert score < 40  # Negative CAGR should give low score
 
     def test_mixed_cagr(self, engine):
-        row = pd.Series({
-            "revenue_cagr_3yr": 20.0,
-            "pat_cagr_3yr": -5.0,
-            "eps_cagr_3yr": None,
-        })
+        row = pd.Series(
+            {
+                "revenue_cagr_3yr": 20.0,
+                "pat_cagr_3yr": -5.0,
+                "eps_cagr_3yr": None,
+            }
+        )
         score = engine.calculate_growth_score(row)
         assert score is not None
         assert 0 <= score <= 100
@@ -486,6 +549,7 @@ class TestGrowthScore:
 # =============================================================================
 # TEST CASH FLOW SCORE
 # =============================================================================
+
 
 class TestCashflowScore:
     """Tests for calculate_cashflow_score."""
@@ -506,13 +570,15 @@ class TestCashflowScore:
         assert score is None
 
     def test_negative_fcf(self, engine):
-        row = pd.Series({
-            "free_cash_flow": -1000.0,
-            "fcf_margin": -20.0,
-            "cash_conversion": 50.0,
-            "cash_return_on_assets": -5.0,
-            "capital_allocation_rating": "WEAK",
-        })
+        row = pd.Series(
+            {
+                "free_cash_flow": -1000.0,
+                "fcf_margin": -20.0,
+                "cash_conversion": 50.0,
+                "cash_return_on_assets": -5.0,
+                "capital_allocation_rating": "WEAK",
+            }
+        )
         score = engine.calculate_cashflow_score(row)
         assert score is not None
         assert score < 50
@@ -520,25 +586,29 @@ class TestCashflowScore:
     def test_all_ratings(self, engine):
         """Test all capital allocation ratings map correctly."""
         for rating, expected_score in CAPITAL_ALLOCATION_MAP.items():
-            row = pd.Series({
-                "free_cash_flow": 1000.0,
-                "fcf_margin": 20.0,
-                "cash_conversion": 100.0,
-                "cash_return_on_assets": 10.0,
-                "capital_allocation_rating": rating,
-            })
+            row = pd.Series(
+                {
+                    "free_cash_flow": 1000.0,
+                    "fcf_margin": 20.0,
+                    "cash_conversion": 100.0,
+                    "cash_return_on_assets": 10.0,
+                    "capital_allocation_rating": rating,
+                }
+            )
             score = engine.calculate_cashflow_score(row)
             assert score is not None
             assert 0 <= score <= 100
 
     def test_capital_allocation_none(self, engine):
-        row = pd.Series({
-            "free_cash_flow": 1000.0,
-            "fcf_margin": 20.0,
-            "cash_conversion": 100.0,
-            "cash_return_on_assets": 10.0,
-            "capital_allocation_rating": None,
-        })
+        row = pd.Series(
+            {
+                "free_cash_flow": 1000.0,
+                "fcf_margin": 20.0,
+                "cash_conversion": 100.0,
+                "cash_return_on_assets": 10.0,
+                "capital_allocation_rating": None,
+            }
+        )
         score = engine.calculate_cashflow_score(row)
         assert score is not None
 
@@ -546,6 +616,7 @@ class TestCashflowScore:
 # =============================================================================
 # TEST LEVERAGE SCORE
 # =============================================================================
+
 
 class TestLeverageScore:
     """Tests for calculate_leverage_score."""
@@ -567,32 +638,38 @@ class TestLeverageScore:
 
     def test_debt_free(self, engine):
         """Debt-free company (D/E=0, ICR=0) should score high."""
-        row = pd.Series({
-            "debt_to_equity": 0.0,
-            "interest_coverage": 0.0,
-            "high_leverage_flag": 0,
-        })
+        row = pd.Series(
+            {
+                "debt_to_equity": 0.0,
+                "interest_coverage": 0.0,
+                "high_leverage_flag": 0,
+            }
+        )
         score = engine.calculate_leverage_score(row)
         assert score is not None
         assert score > 80
 
     def test_negative_equity(self, engine):
         """Negative equity should apply heavy penalty."""
-        row = pd.Series({
-            "debt_to_equity": -5.0,
-            "interest_coverage": 2.0,
-            "high_leverage_flag": 1,
-        })
+        row = pd.Series(
+            {
+                "debt_to_equity": -5.0,
+                "interest_coverage": 2.0,
+                "high_leverage_flag": 1,
+            }
+        )
         score = engine.calculate_leverage_score(row)
         assert score is not None
         assert score < 50
 
     def test_very_high_leverage(self, engine):
-        row = pd.Series({
-            "debt_to_equity": 10.0,
-            "interest_coverage": 0.5,
-            "high_leverage_flag": 1,
-        })
+        row = pd.Series(
+            {
+                "debt_to_equity": 10.0,
+                "interest_coverage": 0.5,
+                "high_leverage_flag": 1,
+            }
+        )
         score = engine.calculate_leverage_score(row)
         assert score is not None
         assert score < 30
@@ -601,6 +678,7 @@ class TestLeverageScore:
 # =============================================================================
 # TEST EFFICIENCY SCORE
 # =============================================================================
+
 
 class TestEfficiencyScore:
     """Tests for calculate_efficiency_score."""
@@ -635,6 +713,7 @@ class TestEfficiencyScore:
 # TEST OVERALL SCORE
 # =============================================================================
 
+
 class TestOverallScore:
     """Tests for calculate_overall_score."""
 
@@ -650,7 +729,7 @@ class TestOverallScore:
         assert overall is not None
         assert 0 <= overall <= 100
         # Weighted: 80*0.30 + 70*0.20 + 75*0.20 + 85*0.15 + 65*0.15
-        expected = (80*0.30 + 70*0.20 + 75*0.20 + 85*0.15 + 65*0.15)
+        expected = 80 * 0.30 + 70 * 0.20 + 75 * 0.20 + 85 * 0.15 + 65 * 0.15
         assert overall == pytest.approx(expected, rel=0.01)
 
     def test_some_missing_categories(self, engine):
@@ -665,7 +744,7 @@ class TestOverallScore:
         assert overall is not None
         # Weighted: only profitability(0.30), cashflow(0.20), efficiency(0.15) = 0.65
         # Normalized: (80*0.30 + 70*0.20 + 60*0.15) / 0.65
-        expected = (80*0.30 + 70*0.20 + 60*0.15) / 0.65
+        expected = (80 * 0.30 + 70 * 0.20 + 60 * 0.15) / 0.65
         assert overall == pytest.approx(expected, rel=0.01)
 
     def test_all_missing_categories(self, engine):
@@ -709,6 +788,7 @@ class TestOverallScore:
 # =============================================================================
 # TEST RATING
 # =============================================================================
+
 
 class TestRating:
     """Tests for generate_rating."""
@@ -774,6 +854,7 @@ class TestRating:
 # TEST REMARKS
 # =============================================================================
 
+
 class TestRemarks:
     """Tests for generate_remarks."""
 
@@ -787,7 +868,12 @@ class TestRemarks:
     def test_poor_all_categories(self, engine):
         scores = {k: 10.0 for k in CATEGORY_WEIGHTS}
         remarks = engine.generate_remarks(scores)
-        assert "Poor" in remarks or "Weak" in remarks or "Critical" in remarks or "Negative" in remarks
+        assert (
+            "Poor" in remarks
+            or "Weak" in remarks
+            or "Critical" in remarks
+            or "Negative" in remarks
+        )
         assert len(remarks) > 10
 
     def test_mixed_scores(self, engine):
@@ -821,6 +907,7 @@ class TestRemarks:
 # =============================================================================
 # TEST PROCESS COMPANY ROW
 # =============================================================================
+
 
 class TestProcessCompanyRow:
     """Tests for _process_company_row."""
@@ -873,6 +960,7 @@ class TestProcessCompanyRow:
 # TEST CSV EXPORT
 # =============================================================================
 
+
 class TestCsvExport:
     """Tests for export_csv."""
 
@@ -911,9 +999,14 @@ class TestCsvExport:
 
     def test_export_multiple_records(self, engine):
         records = [
-            {"company_id": f"COMP{i}", "company_name": f"Company {i}",
-             "period": "FY2024", "overall_score": 80.0, "rating": "Strong",
-             "remarks": "Good"}
+            {
+                "company_id": f"COMP{i}",
+                "company_name": f"Company {i}",
+                "period": "FY2024",
+                "overall_score": 80.0,
+                "rating": "Strong",
+                "remarks": "Good",
+            }
             for i in range(5)
         ]
         csv_path = engine.export_csv(records)
@@ -930,27 +1023,30 @@ class TestCsvExport:
 # TEST DATABASE OPERATIONS
 # =============================================================================
 
+
 class TestDatabaseOperations:
     """Tests for save_to_database and table creation."""
 
     def test_save_single_record(self, engine, test_db):
-        with patch('src.health_score.engine.get_connection') as mock_conn:
+        with patch("src.health_score.engine.get_connection") as mock_conn:
             mock_conn.return_value = sqlite3.connect(test_db)
-            records = [{
-                "company_id": "TCS",
-                "company_name": "Tata Consultancy Services",
-                "period": "FY2024",
-                "profitability_score": 80.0,
-                "growth_score": 70.0,
-                "cashflow_score": 75.0,
-                "leverage_score": 85.0,
-                "efficiency_score": 65.0,
-                "overall_score": 76.0,
-                "rating": "Strong",
-                "remarks": "Good performance",
-                "created_at": "2024-01-01T00:00:00",
-                "updated_at": "2024-01-01T00:00:00",
-            }]
+            records = [
+                {
+                    "company_id": "TCS",
+                    "company_name": "Tata Consultancy Services",
+                    "period": "FY2024",
+                    "profitability_score": 80.0,
+                    "growth_score": 70.0,
+                    "cashflow_score": 75.0,
+                    "leverage_score": 85.0,
+                    "efficiency_score": 65.0,
+                    "overall_score": 76.0,
+                    "rating": "Strong",
+                    "remarks": "Good performance",
+                    "created_at": "2024-01-01T00:00:00",
+                    "updated_at": "2024-01-01T00:00:00",
+                }
+            ]
             stats = engine.save_to_database(records)
             assert stats["inserted"] == 1
             assert stats["skipped"] == 0
@@ -961,23 +1057,25 @@ class TestDatabaseOperations:
         assert stats["skipped"] == 0
 
     def test_save_duplicate_handling(self, engine, test_db):
-        with patch('src.health_score.engine.get_connection') as mock_conn:
+        with patch("src.health_score.engine.get_connection") as mock_conn:
             mock_conn.return_value = sqlite3.connect(test_db)
-            records = [{
-                "company_id": "TCS",
-                "company_name": "Tata Consultancy Services",
-                "period": "FY2024",
-                "profitability_score": 80.0,
-                "growth_score": 70.0,
-                "cashflow_score": 75.0,
-                "leverage_score": 85.0,
-                "efficiency_score": 65.0,
-                "overall_score": 76.0,
-                "rating": "Strong",
-                "remarks": "Good",
-                "created_at": "2024-01-01T00:00:00",
-                "updated_at": "2024-01-01T00:00:00",
-            }]
+            records = [
+                {
+                    "company_id": "TCS",
+                    "company_name": "Tata Consultancy Services",
+                    "period": "FY2024",
+                    "profitability_score": 80.0,
+                    "growth_score": 70.0,
+                    "cashflow_score": 75.0,
+                    "leverage_score": 85.0,
+                    "efficiency_score": 65.0,
+                    "overall_score": 76.0,
+                    "rating": "Strong",
+                    "remarks": "Good",
+                    "created_at": "2024-01-01T00:00:00",
+                    "updated_at": "2024-01-01T00:00:00",
+                }
+            ]
             # First insert
             stats1 = engine.save_to_database(records)
             assert stats1["inserted"] == 1
@@ -988,24 +1086,26 @@ class TestDatabaseOperations:
 
     def test_table_auto_creation(self, engine, test_db):
         """Table should be created automatically on save."""
-        with patch('src.health_score.engine.get_connection') as mock_conn:
+        with patch("src.health_score.engine.get_connection") as mock_conn:
             conn = sqlite3.connect(test_db)
             mock_conn.return_value = conn
-            records = [{
-                "company_id": "TCS",
-                "company_name": "TCS",
-                "period": "FY2024",
-                "profitability_score": 80.0,
-                "growth_score": 70.0,
-                "cashflow_score": 75.0,
-                "leverage_score": 85.0,
-                "efficiency_score": 65.0,
-                "overall_score": 76.0,
-                "rating": "Strong",
-                "remarks": "Good",
-                "created_at": "2024-01-01T00:00:00",
-                "updated_at": "2024-01-01T00:00:00",
-            }]
+            records = [
+                {
+                    "company_id": "TCS",
+                    "company_name": "TCS",
+                    "period": "FY2024",
+                    "profitability_score": 80.0,
+                    "growth_score": 70.0,
+                    "cashflow_score": 75.0,
+                    "leverage_score": 85.0,
+                    "efficiency_score": 65.0,
+                    "overall_score": 76.0,
+                    "rating": "Strong",
+                    "remarks": "Good",
+                    "created_at": "2024-01-01T00:00:00",
+                    "updated_at": "2024-01-01T00:00:00",
+                }
+            ]
             engine.save_to_database(records)
 
             # Verify table exists
@@ -1019,10 +1119,11 @@ class TestDatabaseOperations:
 # TEST END-TO-END PIPELINE
 # =============================================================================
 
+
 class TestPipeline:
     """End-to-end pipeline tests."""
 
-    @patch('src.health_score.engine.get_connection')
+    @patch("src.health_score.engine.get_connection")
     def test_run_with_data(self, mock_get_conn, engine, test_db):
         conn = sqlite3.connect(test_db)
         mock_get_conn.return_value = conn
@@ -1033,7 +1134,7 @@ class TestPipeline:
         assert stats["companies_processed"] > 0
         assert stats["errors"] == []
 
-    @patch('src.health_score.engine.get_connection')
+    @patch("src.health_score.engine.get_connection")
     def test_run_statistics(self, mock_get_conn, engine, test_db):
         conn = sqlite3.connect(test_db)
         mock_get_conn.return_value = conn
@@ -1043,7 +1144,7 @@ class TestPipeline:
         assert engine.pipeline_stats["end_time"] is not None
         assert engine.pipeline_stats["companies_processed"] > 0
 
-    @patch('src.health_score.engine.get_connection')
+    @patch("src.health_score.engine.get_connection")
     def test_pipeline_creates_csv(self, mock_get_conn, engine, test_db):
         conn = sqlite3.connect(test_db)
         mock_get_conn.return_value = conn
@@ -1058,7 +1159,7 @@ class TestPipeline:
             lines = f.readlines()
             assert len(lines) > 1  # Header + at least 1 data row
 
-    @patch('src.health_score.engine.get_connection')
+    @patch("src.health_score.engine.get_connection")
     def test_pipeline_duplicate_handling(self, mock_get_conn, engine, test_db):
         conn = sqlite3.connect(test_db)
         mock_get_conn.return_value = conn
@@ -1069,7 +1170,7 @@ class TestPipeline:
 
     def test_run_with_empty_database(self, engine):
         """Pipeline should handle empty database gracefully."""
-        with patch('src.health_score.engine.get_connection') as mock_conn:
+        with patch("src.health_score.engine.get_connection") as mock_conn:
             mock_db = sqlite3.connect(":memory:")
             mock_db.execute("""
                 CREATE TABLE IF NOT EXISTS financial_ratios (
@@ -1081,20 +1182,26 @@ class TestPipeline:
             mock_conn.return_value = mock_db
 
             stats = engine.run()
-            assert stats["status"] == "completed" or stats["status"] == "completed_no_data"
+            assert (
+                stats["status"] == "completed" or stats["status"] == "completed_no_data"
+            )
 
 
 # =============================================================================
 # TEST RUN_HEALTH_SCORE_PIPELINE CONVENIENCE FUNCTION
 # =============================================================================
 
+
 class TestRunHealthScorePipeline:
     """Tests for run_health_score_pipeline convenience function."""
 
-    @patch('src.health_score.engine.HealthScoreEngine')
+    @patch("src.health_score.engine.HealthScoreEngine")
     def test_convenience_function(self, mock_engine_class):
         mock_instance = MagicMock()
-        mock_instance.run.return_value = {"status": "completed", "companies_processed": 10}
+        mock_instance.run.return_value = {
+            "status": "completed",
+            "companies_processed": 10,
+        }
         mock_engine_class.return_value = mock_instance
 
         result = run_health_score_pipeline()
@@ -1106,32 +1213,35 @@ class TestRunHealthScorePipeline:
 # TEST GET_HEALTH_SCORE_STATISTICS
 # =============================================================================
 
+
 class TestGetHealthScoreStatistics:
     """Tests for get_health_score_statistics."""
 
     def test_statistics_with_data(self, engine, test_db):
-        with patch('src.health_score.engine.get_connection') as mock_conn:
+        with patch("src.health_score.engine.get_connection") as mock_conn:
             mock_conn.return_value = sqlite3.connect(test_db)
             # First save some data
-            records = [{
-                "company_id": "TCS",
-                "company_name": "TCS",
-                "period": "FY2024",
-                "profitability_score": 80.0,
-                "growth_score": 70.0,
-                "cashflow_score": 75.0,
-                "leverage_score": 85.0,
-                "efficiency_score": 65.0,
-                "overall_score": 76.0,
-                "rating": "Strong",
-                "remarks": "Good",
-                "created_at": "2024-01-01T00:00:00",
-                "updated_at": "2024-01-01T00:00:00",
-            }]
+            records = [
+                {
+                    "company_id": "TCS",
+                    "company_name": "TCS",
+                    "period": "FY2024",
+                    "profitability_score": 80.0,
+                    "growth_score": 70.0,
+                    "cashflow_score": 75.0,
+                    "leverage_score": 85.0,
+                    "efficiency_score": 65.0,
+                    "overall_score": 76.0,
+                    "rating": "Strong",
+                    "remarks": "Good",
+                    "created_at": "2024-01-01T00:00:00",
+                    "updated_at": "2024-01-01T00:00:00",
+                }
+            ]
             engine.save_to_database(records)
 
     def test_statistics_empty_db(self):
-        with patch('src.health_score.engine.get_connection') as mock_conn:
+        with patch("src.health_score.engine.get_connection") as mock_conn:
             mock_db = sqlite3.connect(":memory:")
             mock_conn.return_value = mock_db
             # Create table with all required columns
@@ -1158,7 +1268,9 @@ class TestGetHealthScoreStatistics:
             assert "total_records" in stats
 
     def test_statistics_error_handling(self):
-        with patch('src.health_score.engine.get_connection', side_effect=Exception("DB Error")):
+        with patch(
+            "src.health_score.engine.get_connection", side_effect=Exception("DB Error")
+        ):
             stats = get_health_score_statistics()
             assert stats == {}
 
@@ -1166,6 +1278,7 @@ class TestGetHealthScoreStatistics:
 # =============================================================================
 # TEST CONSTANTS VALIDATION
 # =============================================================================
+
 
 class TestConstants:
     """Test that constants are properly defined."""
@@ -1210,90 +1323,123 @@ class TestConstants:
 # TEST EDGE CASES AND INVALID VALUES
 # =============================================================================
 
+
 class TestEdgeCases:
     """Test edge cases and invalid values."""
 
     def test_infinite_values_handled(self, engine):
-        row = pd.Series({
-            "roe": float('inf'),
-            "roce": float('-inf'),
-            "asset_turnover": float('inf'),
-            "debt_to_equity": float('inf'),
-            "free_cash_flow": float('inf'),
-            "revenue_cagr_3yr": float('inf'),
-        })
+        row = pd.Series(
+            {
+                "roe": float("inf"),
+                "roce": float("-inf"),
+                "asset_turnover": float("inf"),
+                "debt_to_equity": float("inf"),
+                "free_cash_flow": float("inf"),
+                "revenue_cagr_3yr": float("inf"),
+            }
+        )
         # Should not crash - invalid values should be skipped
         result, warnings = engine._process_company_row(row)
         assert result is None or isinstance(result, dict)
 
     def test_nan_values_handled(self, engine):
-        row = pd.Series({
-            "roe": np.nan,
-            "roce": np.nan,
-            "asset_turnover": np.nan,
-            "debt_to_equity": np.nan,
-        })
+        row = pd.Series(
+            {
+                "roe": np.nan,
+                "roce": np.nan,
+                "asset_turnover": np.nan,
+                "debt_to_equity": np.nan,
+            }
+        )
         result, warnings = engine._process_company_row(row)
         assert result is None
 
     def test_string_in_place_of_number(self, engine):
-        row = pd.Series({
-            "company_id": "TEST",
-            "company_name": "Test Corp",
-            "period": "FY2024",
-            "roe": "NOT_A_NUMBER",
-            "net_profit_margin": "25%",  # String with %
-        })
+        row = pd.Series(
+            {
+                "company_id": "TEST",
+                "company_name": "Test Corp",
+                "period": "FY2024",
+                "roe": "NOT_A_NUMBER",
+                "net_profit_margin": "25%",  # String with %
+            }
+        )
         result, warnings = engine._process_company_row(row)
         # Should handle gracefully - string values should be skipped
         assert result is not None or len(warnings) > 0
 
     def test_mixed_valid_invalid(self, engine):
-        row = pd.Series({
-            "company_id": "TEST",
-            "company_name": "Test Corp",
-            "period": "FY2024",
-            "roe": 15.0,
-            "roce": float('nan'),
-            "roa": float('-inf'),
-            "net_profit_margin": 10.0,
-            "operating_profit_margin": None,
-            "debt_to_equity": 0.5,
-            "asset_turnover": 1.0,
-            "revenue_cagr_3yr": 10.0,
-            "free_cash_flow": 100.0,
-            "cash_conversion": 80.0,
-        })
+        row = pd.Series(
+            {
+                "company_id": "TEST",
+                "company_name": "Test Corp",
+                "period": "FY2024",
+                "roe": 15.0,
+                "roce": float("nan"),
+                "roa": float("-inf"),
+                "net_profit_margin": 10.0,
+                "operating_profit_margin": None,
+                "debt_to_equity": 0.5,
+                "asset_turnover": 1.0,
+                "revenue_cagr_3yr": 10.0,
+                "free_cash_flow": 100.0,
+                "cash_conversion": 80.0,
+            }
+        )
         result, warnings = engine._process_company_row(row)
         assert result is not None
         assert 0 <= result["overall_score"] <= 100
 
     def test_duplicate_detection(self, engine):
         records = [
-            {"company_id": "A", "company_name": "A", "period": "FY2024",
-             "profitability_score": 80.0, "growth_score": 70.0, "cashflow_score": 75.0,
-             "leverage_score": 85.0, "efficiency_score": 65.0, "overall_score": 76.0,
-             "rating": "Strong", "remarks": "Good", "created_at": "now", "updated_at": "now"},
-            {"company_id": "A", "company_name": "A", "period": "FY2024",
-             "profitability_score": 80.0, "growth_score": 70.0, "cashflow_score": 75.0,
-             "leverage_score": 85.0, "efficiency_score": 65.0, "overall_score": 76.0,
-             "rating": "Strong", "remarks": "Good", "created_at": "now", "updated_at": "now"},
+            {
+                "company_id": "A",
+                "company_name": "A",
+                "period": "FY2024",
+                "profitability_score": 80.0,
+                "growth_score": 70.0,
+                "cashflow_score": 75.0,
+                "leverage_score": 85.0,
+                "efficiency_score": 65.0,
+                "overall_score": 76.0,
+                "rating": "Strong",
+                "remarks": "Good",
+                "created_at": "now",
+                "updated_at": "now",
+            },
+            {
+                "company_id": "A",
+                "company_name": "A",
+                "period": "FY2024",
+                "profitability_score": 80.0,
+                "growth_score": 70.0,
+                "cashflow_score": 75.0,
+                "leverage_score": 85.0,
+                "efficiency_score": 65.0,
+                "overall_score": 76.0,
+                "rating": "Strong",
+                "remarks": "Good",
+                "created_at": "now",
+                "updated_at": "now",
+            },
         ]
-        with patch('src.health_score.engine.get_connection') as mock_conn:
+        with patch("src.health_score.engine.get_connection") as mock_conn:
             mock_db = sqlite3.connect(":memory:")
             mock_conn.return_value = mock_db
             stats = engine.save_to_database(records)
 
     def test_very_large_values(self, engine):
-        row = pd.Series({
-            "company_id": "BIG",
-            "company_name": "Big Corp",
-            "period": "FY2024",
-            "roe": 1000.0,
-            "roce": 2000.0,
-            "net_profit_margin": 500.0,
-            "asset_turnover": 100.0,
-        })
+        row = pd.Series(
+            {
+                "company_id": "BIG",
+                "company_name": "Big Corp",
+                "period": "FY2024",
+                "roe": 1000.0,
+                "roce": 2000.0,
+                "net_profit_margin": 500.0,
+                "asset_turnover": 100.0,
+            }
+        )
         result, warnings = engine._process_company_row(row)
         assert result is not None
         assert result["overall_score"] <= 100
@@ -1303,6 +1449,7 @@ class TestEdgeCases:
 # TEST PERFORMANCE
 # =============================================================================
 
+
 class TestPerformance:
     """Performance-related tests."""
 
@@ -1310,28 +1457,32 @@ class TestPerformance:
         """Process multiple rows efficiently."""
         rows = []
         for i in range(100):
-            rows.append(pd.Series({
-                "company_id": f"COMP{i}",
-                "company_name": f"Company {i}",
-                "period": "FY2024",
-                "roe": 15.0 + (i * 0.1),
-                "roce": 20.0,
-                "roa": 10.0,
-                "net_profit_margin": 15.0,
-                "operating_profit_margin": 18.0,
-                "debt_to_equity": 0.5,
-                "interest_coverage": 5.0,
-                "high_leverage_flag": 0,
-                "asset_turnover": 1.0,
-                "revenue_cagr_3yr": 10.0,
-                "pat_cagr_3yr": 8.0,
-                "eps_cagr_3yr": 9.0,
-                "free_cash_flow": 1000.0,
-                "fcf_margin": 10.0,
-                "cash_conversion": 90.0,
-                "cash_return_on_assets": 8.0,
-                "capital_allocation_rating": "GOOD",
-            }))
+            rows.append(
+                pd.Series(
+                    {
+                        "company_id": f"COMP{i}",
+                        "company_name": f"Company {i}",
+                        "period": "FY2024",
+                        "roe": 15.0 + (i * 0.1),
+                        "roce": 20.0,
+                        "roa": 10.0,
+                        "net_profit_margin": 15.0,
+                        "operating_profit_margin": 18.0,
+                        "debt_to_equity": 0.5,
+                        "interest_coverage": 5.0,
+                        "high_leverage_flag": 0,
+                        "asset_turnover": 1.0,
+                        "revenue_cagr_3yr": 10.0,
+                        "pat_cagr_3yr": 8.0,
+                        "eps_cagr_3yr": 9.0,
+                        "free_cash_flow": 1000.0,
+                        "fcf_margin": 10.0,
+                        "cash_conversion": 90.0,
+                        "cash_return_on_assets": 8.0,
+                        "capital_allocation_rating": "GOOD",
+                    }
+                )
+            )
 
         results = []
         for row in rows:
@@ -1348,6 +1499,7 @@ class TestPerformance:
 # TEST LOGGING
 # =============================================================================
 
+
 class TestLogging:
     """Test logging functionality."""
 
@@ -1357,7 +1509,7 @@ class TestLogging:
 
     def test_logging_summary(self, engine):
         """Verify pipeline logging works."""
-        with patch('src.health_score.engine.get_connection') as mock_conn:
+        with patch("src.health_score.engine.get_connection") as mock_conn:
             mock_db = sqlite3.connect(":memory:")
             mock_db.execute("""
                 CREATE TABLE financial_ratios (
@@ -1383,4 +1535,3 @@ class TestLogging:
 
 if __name__ == "__main__":
     pytest.main(["-v", __file__])
-

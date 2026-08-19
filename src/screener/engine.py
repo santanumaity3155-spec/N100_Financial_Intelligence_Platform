@@ -34,7 +34,12 @@ from src.screener.constants import (
     VALID_SCREEN_FIELDS,
     SUPPORTED_RANK_FIELDS,
 )
-from src.screener.filters import FilterCondition, FilterGroup, FilterOperator, FilterValidator
+from src.screener.filters import (
+    FilterCondition,
+    FilterGroup,
+    FilterOperator,
+    FilterValidator,
+)
 from src.screener.exporter import ScreenerExporter
 from src.screener.templates import ScreenTemplateManager
 
@@ -44,6 +49,7 @@ logger = get_logger(__name__)
 # =============================================================================
 # SCREENER ENGINE
 # =============================================================================
+
 
 class ScreenerEngine:
     """
@@ -478,7 +484,9 @@ class ScreenerEngine:
 
         try:
             # Sort by rank field
-            ranked_data = data.sort_values(by=rank_by, ascending=ascending, na_position="last")
+            ranked_data = data.sort_values(
+                by=rank_by, ascending=ascending, na_position="last"
+            )
 
             # Add rank column (1-based)
             ranked_data = ranked_data.copy()
@@ -563,6 +571,7 @@ class ScreenerEngine:
             # Step 2: Load preset or custom screen if specified
             if preset_id:
                 from src.screener.presets import get_preset_screener
+
                 preset = get_preset_screener(preset_id)
                 filters = preset.get("filters", [])
                 filter_logic = "AND"
@@ -773,6 +782,7 @@ class ScreenerEngine:
 # =============================================================================
 # CONVENIENCE FUNCTIONS
 # =============================================================================
+
 
 def screen_companies(
     filters: Optional[Union[List[Dict[str, Any]], FilterGroup]] = None,

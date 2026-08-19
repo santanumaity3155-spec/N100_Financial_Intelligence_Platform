@@ -41,8 +41,13 @@ def test_compute_year_classifications(db_conn):
     assert isinstance(df_2024, pd.DataFrame)
     assert not df_2024.empty
     expected_cols = [
-        'company_id', 'company_name', 'sector', 'year',
-        'capital_allocation_rating', 'capital_allocation_pattern', 'has_data'
+        "company_id",
+        "company_name",
+        "sector",
+        "year",
+        "capital_allocation_rating",
+        "capital_allocation_pattern",
+        "has_data",
     ]
     for col in expected_cols:
         assert col in df_2024.columns
@@ -53,48 +58,56 @@ def test_compute_pattern_changes():
     changes_df, summary = compute_pattern_changes()
     assert isinstance(changes_df, pd.DataFrame)
     assert isinstance(summary, dict)
-    assert 'total_companies' in summary
-    assert summary['total_companies'] == 94
-    assert 'companies_changed_pattern' in summary
-    assert summary['companies_changed_pattern'] == len(changes_df)
+    assert "total_companies" in summary
+    assert summary["total_companies"] == 94
+    assert "companies_changed_pattern" in summary
+    assert summary["companies_changed_pattern"] == len(changes_df)
 
 
 def test_pattern_changes_year_ordering():
     changes_df, _ = compute_pattern_changes()
     if not changes_df.empty:
-        invalid_years = changes_df[changes_df['previous_year'] >= changes_df['latest_year']]
+        invalid_years = changes_df[
+            changes_df["previous_year"] >= changes_df["latest_year"]
+        ]
         assert invalid_years.empty, "Found rows where previous_year >= latest_year"
 
 
 def test_pattern_changes_only_diffs():
     changes_df, _ = compute_pattern_changes()
     if not changes_df.empty:
-        same_patterns = changes_df[changes_df['previous_pattern'] == changes_df['latest_pattern']]
-        assert same_patterns.empty, "Found rows where previous_pattern == latest_pattern"
+        same_patterns = changes_df[
+            changes_df["previous_pattern"] == changes_df["latest_pattern"]
+        ]
+        assert (
+            same_patterns.empty
+        ), "Found rows where previous_pattern == latest_pattern"
 
 
 def test_pattern_changes_valid_patterns():
     changes_df, _ = compute_pattern_changes()
     if not changes_df.empty:
-        for pattern in changes_df['previous_pattern']:
+        for pattern in changes_df["previous_pattern"]:
             assert pattern in SUPPORTED_PATTERNS, f"Invalid previous pattern: {pattern}"
-        for pattern in changes_df['latest_pattern']:
+        for pattern in changes_df["latest_pattern"]:
             assert pattern in SUPPORTED_PATTERNS, f"Invalid latest pattern: {pattern}"
 
 
 def test_no_duplicate_companies():
     changes_df, _ = compute_pattern_changes()
     if not changes_df.empty:
-        assert changes_df['company_id'].is_unique, "Duplicate companies found in pattern changes"
+        assert changes_df[
+            "company_id"
+        ].is_unique, "Duplicate companies found in pattern changes"
 
 
 def test_summary_reconciliation():
     _, summary = compute_pattern_changes()
-    total = summary['total_companies']
-    with_prev = summary['companies_with_previous_year']
-    insufficient = summary['companies_insufficient_history']
-    changed = summary['companies_changed_pattern']
-    unchanged = summary['companies_unchanged_pattern']
+    total = summary["total_companies"]
+    with_prev = summary["companies_with_previous_year"]
+    insufficient = summary["companies_insufficient_history"]
+    changed = summary["companies_changed_pattern"]
+    unchanged = summary["companies_unchanged_pattern"]
 
     assert total == with_prev + insufficient
     assert with_prev == changed + unchanged
@@ -104,8 +117,8 @@ def test_output_csv_generation(tmp_path):
     changes_df, summary = compute_pattern_changes()
     output_files = generate_output_files(changes_df, summary, output_dir=tmp_path)
 
-    assert 'pattern_changes' in output_files
-    changes_path = output_files['pattern_changes']
+    assert "pattern_changes" in output_files
+    changes_path = output_files["pattern_changes"]
     assert changes_path.exists()
 
     df_out = pd.read_csv(changes_path)
@@ -114,9 +127,9 @@ def test_output_csv_generation(tmp_path):
 
 def test_pipeline_execution():
     result = run_module4c_pipeline()
-    assert 'changes_df' in result
-    assert 'summary' in result
-    assert 'output_files' in result
+    assert "changes_df" in result
+    assert "summary" in result
+    assert "output_files" in result
     pattern_changes_file = OUTPUT_DIR / "pattern_changes.csv"
     assert pattern_changes_file.exists()
 
@@ -124,5 +137,5 @@ def test_pipeline_execution():
 def test_insufficient_history_handling(db_conn):
     # ATGL has missing cash flow data for historical years
     df_2024 = compute_year_classifications(2024, db_conn)
-    atgl_row = df_2024[df_2024['company_id'] == 'ATGL']
+    atgl_row = df_2024[df_2024["company_id"] == "ATGL"]
     assert not atgl_row.empty

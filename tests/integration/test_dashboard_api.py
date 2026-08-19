@@ -69,9 +69,9 @@ def test_dashboard_api_screener_data_consistency():
     api_tickers = [item["company_id"] for item in api_results]
     direct_tickers = [item.company_id for item in direct_results]
 
-    assert api_tickers == direct_tickers, (
-        f"Mismatch between API tickers ({len(api_tickers)}) and DB direct tickers ({len(direct_tickers)})"
-    )
+    assert (
+        api_tickers == direct_tickers
+    ), f"Mismatch between API tickers ({len(api_tickers)}) and DB direct tickers ({len(direct_tickers)})"
 
     # Verify core KPI values match for top result
     if api_results and direct_results:
@@ -81,7 +81,9 @@ def test_dashboard_api_screener_data_consistency():
         assert top_api["roe"] == top_direct.roe
         assert top_api["debt_to_equity"] == top_direct.debt_to_equity
 
-    print(f"\n[PASS] Dashboard <-> API Screener Data Consistency Verified for {len(api_tickers)} companies")
+    print(
+        f"\n[PASS] Dashboard <-> API Screener Data Consistency Verified for {len(api_tickers)} companies"
+    )
 
 
 def test_ports_availability():

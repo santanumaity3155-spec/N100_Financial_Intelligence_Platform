@@ -23,6 +23,7 @@ logger = get_logger(__name__)
 # HELPER FUNCTIONS
 # =============================================================================
 
+
 def _safe_get_value(df: pd.DataFrame, column: str, default: Any = None) -> Any:
     """
     Safely extract a value from a DataFrame.
@@ -45,7 +46,7 @@ def _safe_get_value(df: pd.DataFrame, column: str, default: Any = None) -> Any:
         return default
 
     series = df.get(column, pd.Series([default]))
-    if hasattr(series, 'iloc') and len(series) > 0:
+    if hasattr(series, "iloc") and len(series) > 0:
         value = series.iloc[0]
         return value if not pd.isna(value) else default
     return default
@@ -87,9 +88,9 @@ def _get_equity_reserves(bs_data: pd.DataFrame) -> Optional[float]:
     Optional[float]
         Sum of equity capital and reserves, or None if not available
     """
-    equity_capital = _safe_get_value(bs_data, 'equity_capital', 0)
-    reserves = _safe_get_value(bs_data, 'reserves', 0)
-    share_capital = _safe_get_value(bs_data, 'share_capital', 0)
+    equity_capital = _safe_get_value(bs_data, "equity_capital", 0)
+    reserves = _safe_get_value(bs_data, "reserves", 0)
+    share_capital = _safe_get_value(bs_data, "share_capital", 0)
 
     # Try equity_capital first, fall back to share_capital + reserves
     if equity_capital and equity_capital > 0:
@@ -119,7 +120,7 @@ def _get_company_sector(company_id: str) -> Optional[str]:
         query = "SELECT sector FROM companies WHERE company_id = ? LIMIT 1"
         cursor = conn.execute(query, (company_id,))
         result = cursor.fetchone()
-        return result['sector'] if result else None
+        return result["sector"] if result else None
     except Exception as e:
         logger.error(f"Failed to fetch sector for {company_id}: {str(e)}")
         return None
@@ -129,10 +130,11 @@ def _get_company_sector(company_id: str) -> Optional[str]:
 # PROFITABILITY RATIOS
 # =============================================================================
 
+
 def calculate_net_profit_margin(
     pl_data: pd.DataFrame,
     company_id: Optional[str] = None,
-    period: Optional[str] = None
+    period: Optional[str] = None,
 ) -> Optional[float]:
     """
     Calculate Net Profit Margin.
@@ -158,8 +160,8 @@ def calculate_net_profit_margin(
             logger.warning("Net Profit Margin calculation: Empty dataframe provided")
             return None
 
-        net_profit = _safe_get_value(pl_data, 'net_profit')
-        sales = _safe_get_value(pl_data, 'sales')
+        net_profit = _safe_get_value(pl_data, "net_profit")
+        sales = _safe_get_value(pl_data, "sales")
 
         if not _validate_numeric(net_profit, "net_profit"):
             return None
@@ -188,7 +190,7 @@ def calculate_net_profit_margin(
 def calculate_operating_profit_margin(
     pl_data: pd.DataFrame,
     company_id: Optional[str] = None,
-    period: Optional[str] = None
+    period: Optional[str] = None,
 ) -> Optional[float]:
     """
     Calculate Operating Profit Margin.
@@ -214,12 +216,14 @@ def calculate_operating_profit_margin(
     """
     try:
         if pl_data.empty:
-            logger.warning("Operating Profit Margin calculation: Empty dataframe provided")
+            logger.warning(
+                "Operating Profit Margin calculation: Empty dataframe provided"
+            )
             return None
 
-        operating_profit = _safe_get_value(pl_data, 'operating_profit')
-        sales = _safe_get_value(pl_data, 'sales')
-        opm_percentage = _safe_get_value(pl_data, 'opm_percentage')
+        operating_profit = _safe_get_value(pl_data, "operating_profit")
+        sales = _safe_get_value(pl_data, "sales")
+        opm_percentage = _safe_get_value(pl_data, "opm_percentage")
 
         if not _validate_numeric(operating_profit, "operating_profit"):
             return None
@@ -260,7 +264,7 @@ def calculate_roe(
     pl_data: pd.DataFrame,
     bs_data: pd.DataFrame,
     company_id: Optional[str] = None,
-    period: Optional[str] = None
+    period: Optional[str] = None,
 ) -> Optional[float]:
     """
     Calculate Return on Equity (ROE).
@@ -288,7 +292,7 @@ def calculate_roe(
             logger.warning("ROE calculation: Empty dataframe provided")
             return None
 
-        net_profit = _safe_get_value(pl_data, 'net_profit')
+        net_profit = _safe_get_value(pl_data, "net_profit")
         equity = _get_equity_reserves(bs_data)
 
         if not _validate_numeric(net_profit, "net_profit"):
@@ -302,8 +306,7 @@ def calculate_roe(
 
         roe = (net_profit / equity) * 100
         logger.debug(
-            f"ROE calculated: {roe:.2f}% "
-            f"(company_id={company_id}, period={period})"
+            f"ROE calculated: {roe:.2f}% " f"(company_id={company_id}, period={period})"
         )
         return round(roe, 2)
 
@@ -316,7 +319,7 @@ def calculate_roce(
     pl_data: pd.DataFrame,
     bs_data: pd.DataFrame,
     company_id: Optional[str] = None,
-    period: Optional[str] = None
+    period: Optional[str] = None,
 ) -> Optional[float]:
     """
     Calculate Return on Capital Employed (ROCE).
@@ -347,10 +350,10 @@ def calculate_roce(
             logger.warning("ROCE calculation: Empty dataframe provided")
             return None
 
-        operating_profit = _safe_get_value(pl_data, 'operating_profit')
-        other_income = _safe_get_value(pl_data, 'other_income', 0)
+        operating_profit = _safe_get_value(pl_data, "operating_profit")
+        other_income = _safe_get_value(pl_data, "other_income", 0)
         equity = _get_equity_reserves(bs_data)
-        borrowings = _safe_get_value(bs_data, 'borrowings', 0)
+        borrowings = _safe_get_value(bs_data, "borrowings", 0)
 
         if not _validate_numeric(operating_profit, "operating_profit"):
             return None
@@ -378,7 +381,7 @@ def calculate_roce(
 
         # Check if company is in Financials sector
         sector = _get_company_sector(company_id) if company_id else None
-        if sector and sector.lower() == 'financials':
+        if sector and sector.lower() == "financials":
             logger.debug(
                 f"ROCE calculation: Financials sector detected - "
                 f"using sector-relative benchmark handling "
@@ -401,7 +404,7 @@ def calculate_roa(
     pl_data: pd.DataFrame,
     bs_data: pd.DataFrame,
     company_id: Optional[str] = None,
-    period: Optional[str] = None
+    period: Optional[str] = None,
 ) -> Optional[float]:
     """
     Calculate Return on Assets (ROA).
@@ -429,8 +432,8 @@ def calculate_roa(
             logger.warning("ROA calculation: Empty dataframe provided")
             return None
 
-        net_profit = _safe_get_value(pl_data, 'net_profit')
-        total_assets = _safe_get_value(bs_data, 'total_assets')
+        net_profit = _safe_get_value(pl_data, "net_profit")
+        total_assets = _safe_get_value(bs_data, "total_assets")
 
         if not _validate_numeric(net_profit, "net_profit"):
             return None
@@ -446,8 +449,7 @@ def calculate_roa(
 
         roa = (net_profit / total_assets) * 100
         logger.debug(
-            f"ROA calculated: {roa:.2f}% "
-            f"(company_id={company_id}, period={period})"
+            f"ROA calculated: {roa:.2f}% " f"(company_id={company_id}, period={period})"
         )
         return round(roa, 2)
 
@@ -460,10 +462,11 @@ def calculate_roa(
 # LEVERAGE RATIOS
 # =============================================================================
 
+
 def calculate_debt_to_equity(
     bs_data: pd.DataFrame,
     company_id: Optional[str] = None,
-    period: Optional[str] = None
+    period: Optional[str] = None,
 ) -> tuple[Optional[float], bool]:
     """
     Calculate Debt to Equity Ratio.
@@ -493,7 +496,7 @@ def calculate_debt_to_equity(
             logger.warning("Debt to Equity calculation: Empty dataframe provided")
             return None, False
 
-        borrowings = _safe_get_value(bs_data, 'borrowings', 0)
+        borrowings = _safe_get_value(bs_data, "borrowings", 0)
         equity = _get_equity_reserves(bs_data)
 
         if equity is None or equity <= 0:
@@ -517,7 +520,7 @@ def calculate_debt_to_equity(
         high_leverage_flag = False
         if ratio > 5.0:
             sector = _get_company_sector(company_id) if company_id else None
-            if not sector or sector.lower() != 'financials':
+            if not sector or sector.lower() != "financials":
                 high_leverage_flag = True
                 logger.warning(
                     f"High leverage flag triggered: Debt to Equity = {ratio:.2f} "
@@ -538,7 +541,7 @@ def calculate_debt_to_equity(
 def calculate_interest_coverage(
     pl_data: pd.DataFrame,
     company_id: Optional[str] = None,
-    period: Optional[str] = None
+    period: Optional[str] = None,
 ) -> tuple[Optional[float], Optional[str], bool]:
     """
     Calculate Interest Coverage Ratio.
@@ -567,9 +570,9 @@ def calculate_interest_coverage(
             logger.warning("Interest Coverage calculation: Empty dataframe provided")
             return None, None, False
 
-        operating_profit = _safe_get_value(pl_data, 'operating_profit')
-        other_income = _safe_get_value(pl_data, 'other_income', 0)
-        interest = _safe_get_value(pl_data, 'interest')
+        operating_profit = _safe_get_value(pl_data, "operating_profit")
+        other_income = _safe_get_value(pl_data, "other_income", 0)
+        interest = _safe_get_value(pl_data, "interest")
 
         if not _validate_numeric(operating_profit, "operating_profit"):
             return None, None, False
@@ -619,7 +622,7 @@ def calculate_interest_coverage(
 def calculate_net_debt(
     bs_data: pd.DataFrame,
     company_id: Optional[str] = None,
-    period: Optional[str] = None
+    period: Optional[str] = None,
 ) -> Optional[float]:
     """
     Calculate Net Debt.
@@ -645,8 +648,8 @@ def calculate_net_debt(
             logger.warning("Net Debt calculation: Empty dataframe provided")
             return None
 
-        borrowings = _safe_get_value(bs_data, 'borrowings', 0)
-        investments = _safe_get_value(bs_data, 'investments', 0)
+        borrowings = _safe_get_value(bs_data, "borrowings", 0)
+        investments = _safe_get_value(bs_data, "investments", 0)
 
         borrowings = borrowings if borrowings and not pd.isna(borrowings) else 0
         investments = investments if investments and not pd.isna(investments) else 0
@@ -668,11 +671,12 @@ def calculate_net_debt(
 # EFFICIENCY RATIOS
 # =============================================================================
 
+
 def calculate_asset_turnover(
     pl_data: pd.DataFrame,
     bs_data: pd.DataFrame,
     company_id: Optional[str] = None,
-    period: Optional[str] = None
+    period: Optional[str] = None,
 ) -> Optional[float]:
     """
     Calculate Asset Turnover Ratio.
@@ -700,8 +704,8 @@ def calculate_asset_turnover(
             logger.warning("Asset Turnover calculation: Empty dataframe provided")
             return None
 
-        sales = _safe_get_value(pl_data, 'sales')
-        total_assets = _safe_get_value(bs_data, 'total_assets')
+        sales = _safe_get_value(pl_data, "sales")
+        total_assets = _safe_get_value(bs_data, "total_assets")
 
         if not _validate_numeric(sales, "sales"):
             return None
@@ -731,10 +735,8 @@ def calculate_asset_turnover(
 # UTILITY FUNCTIONS
 # =============================================================================
 
-def calculate_all_ratios(
-    company_id: str,
-    period: str
-) -> Dict[str, Any]:
+
+def calculate_all_ratios(company_id: str, period: str) -> Dict[str, Any]:
     """
     Calculate all financial ratios for a company in a specific period.
 
@@ -755,8 +757,12 @@ def calculate_all_ratios(
     try:
         # Fetch required data
         conn = get_connection()
-        pl_query = "SELECT * FROM profit_loss WHERE company_id = ? AND period = ? LIMIT 1"
-        bs_query = "SELECT * FROM balance_sheet WHERE company_id = ? AND period = ? LIMIT 1"
+        pl_query = (
+            "SELECT * FROM profit_loss WHERE company_id = ? AND period = ? LIMIT 1"
+        )
+        bs_query = (
+            "SELECT * FROM balance_sheet WHERE company_id = ? AND period = ? LIMIT 1"
+        )
 
         pl_df = pd.read_sql_query(pl_query, conn, params=(company_id, period))
         bs_df = pd.read_sql_query(bs_query, conn, params=(company_id, period))
@@ -772,19 +778,25 @@ def calculate_all_ratios(
         }
 
         # Profitability ratios
-        results["net_profit_margin"] = calculate_net_profit_margin(pl_df, company_id, period)
-        results["operating_profit_margin"] = calculate_operating_profit_margin(pl_df, company_id, period)
+        results["net_profit_margin"] = calculate_net_profit_margin(
+            pl_df, company_id, period
+        )
+        results["operating_profit_margin"] = calculate_operating_profit_margin(
+            pl_df, company_id, period
+        )
         results["roe"] = calculate_roe(pl_df, bs_df, company_id, period)
         results["roce"] = calculate_roce(pl_df, bs_df, company_id, period)
         results["roa"] = calculate_roa(pl_df, bs_df, company_id, period)
 
         # Leverage ratios
-        debt_to_equity, high_leverage_flag = calculate_debt_to_equity(bs_df, company_id, period)
+        debt_to_equity, high_leverage_flag = calculate_debt_to_equity(
+            bs_df, company_id, period
+        )
         results["debt_to_equity"] = debt_to_equity
         results["high_leverage_flag"] = high_leverage_flag
 
-        interest_coverage, icr_label, interest_warning_flag = calculate_interest_coverage(
-            pl_df, company_id, period
+        interest_coverage, icr_label, interest_warning_flag = (
+            calculate_interest_coverage(pl_df, company_id, period)
         )
         results["interest_coverage"] = interest_coverage
         results["icr_label"] = icr_label
@@ -793,15 +805,21 @@ def calculate_all_ratios(
         results["net_debt"] = calculate_net_debt(bs_df, company_id, period)
 
         # Efficiency ratios
-        results["asset_turnover"] = calculate_asset_turnover(pl_df, bs_df, company_id, period)
+        results["asset_turnover"] = calculate_asset_turnover(
+            pl_df, bs_df, company_id, period
+        )
 
         calculated_count = len([v for v in results.values() if v is not None])
-        logger.info(f"Calculated {calculated_count} ratios for {company_id}, period {period}")
+        logger.info(
+            f"Calculated {calculated_count} ratios for {company_id}, period {period}"
+        )
 
         return results
 
     except Exception as e:
-        logger.error(f"Failed to calculate all ratios for {company_id}, period {period}: {str(e)}")
+        logger.error(
+            f"Failed to calculate all ratios for {company_id}, period {period}: {str(e)}"
+        )
         return {}
 
 

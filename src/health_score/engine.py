@@ -81,6 +81,7 @@ HEALTH_SCORE_CSV_PATH = OUTPUT_DIR / HEALTH_SCORE_CSV_NAME
 # HELPER FUNCTIONS
 # =============================================================================
 
+
 def _is_valid_numeric(value: Any) -> bool:
     """Check if a value is a valid finite numeric value."""
     if value is None:
@@ -192,6 +193,7 @@ def _get_cagr_value(row: pd.Series, field: str) -> Optional[float]:
     if isinstance(value, str):
         try:
             import json
+
             parsed = json.loads(value)
             if isinstance(parsed, dict):
                 return _safe_float(parsed.get("value"))
@@ -204,6 +206,7 @@ def _get_cagr_value(row: pd.Series, field: str) -> Optional[float]:
 # =============================================================================
 # HEALTH SCORE ENGINE
 # =============================================================================
+
 
 class HealthScoreEngine:
     """
@@ -260,9 +263,7 @@ class HealthScoreEngine:
             self._file_handler = logging.FileHandler(
                 HEALTH_SCORE_LOG_PATH, encoding="utf-8", mode="a"
             )
-            formatter = logging.Formatter(
-                "%(asctime)s | %(levelname)s | %(message)s"
-            )
+            formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
             self._file_handler.setFormatter(formatter)
             self._file_handler.setLevel(logging.INFO)
 
@@ -293,9 +294,7 @@ class HealthScoreEngine:
             query = "SELECT * FROM financial_ratios ORDER BY company_id, period"
             self.data = pd.read_sql_query(query, conn)
 
-            logger.info(
-                f"Loaded {len(self.data)} records from financial_ratios table"
-            )
+            logger.info(f"Loaded {len(self.data)} records from financial_ratios table")
 
             if self.data.empty:
                 logger.warning("No data found in financial_ratios table")
@@ -304,23 +303,32 @@ class HealthScoreEngine:
             # Log available columns
             available_cols = list(self.data.columns)
             logger.info(f"Available columns: {available_cols}")
-            
+
             # Log which optional columns are missing (INFO level, not warning)
             optional_cols = {
-                'growth': ['revenue_cagr_3yr', 'pat_cagr_3yr', 'eps_cagr_3yr'],
-                'cashflow': ['free_cash_flow', 'fcf_margin', 'cash_conversion', 
-                            'cash_return_on_assets', 'capital_allocation_rating'],
-                'efficiency': ['asset_turnover'],
-                'leverage': ['interest_coverage', 'high_leverage_flag'],
-                'profitability': ['roce', 'net_profit_margin', 'operating_profit_margin']
+                "growth": ["revenue_cagr_3yr", "pat_cagr_3yr", "eps_cagr_3yr"],
+                "cashflow": [
+                    "free_cash_flow",
+                    "fcf_margin",
+                    "cash_conversion",
+                    "cash_return_on_assets",
+                    "capital_allocation_rating",
+                ],
+                "efficiency": ["asset_turnover"],
+                "leverage": ["interest_coverage", "high_leverage_flag"],
+                "profitability": [
+                    "roce",
+                    "net_profit_margin",
+                    "operating_profit_margin",
+                ],
             }
-            
+
             missing_optional = {}
             for category, cols in optional_cols.items():
                 missing = [c for c in cols if c not in available_cols]
                 if missing:
                     missing_optional[category] = missing
-            
+
             if missing_optional:
                 logger.info(
                     f"Optional columns not available in database schema: {missing_optional}. "
@@ -367,7 +375,9 @@ class HealthScoreEngine:
             return None
 
         avg_score = sum(scores) / len(scores)
-        logger.debug(f"Profitability score: {avg_score:.2f} (from {len(scores)} metrics)")
+        logger.debug(
+            f"Profitability score: {avg_score:.2f} (from {len(scores)} metrics)"
+        )
         return round(max(SCORE_MIN, min(SCORE_MAX, avg_score)), 2)
 
     def calculate_growth_score(self, row: pd.Series) -> Optional[float]:
@@ -445,7 +455,9 @@ class HealthScoreEngine:
         # 3. Cash Conversion
         cash_conv = _safe_float(row.get("cash_conversion"))
         if cash_conv is not None:
-            score = _normalize_score(cash_conv, CASH_CONVERSION_MIN, CASH_CONVERSION_MAX)
+            score = _normalize_score(
+                cash_conv, CASH_CONVERSION_MIN, CASH_CONVERSION_MAX
+            )
             if score is not None:
                 scores.append(score)
 
@@ -546,7 +558,9 @@ class HealthScoreEngine:
                 if int(high_leverage) == 1:
                     metrics_available = True
                     score -= HIGH_LEVERAGE_PENALTY * 0.5
-                    logger.debug("High leverage flag triggered, applying additional penalty")
+                    logger.debug(
+                        "High leverage flag triggered, applying additional penalty"
+                    )
             except (ValueError, TypeError):
                 pass
 
@@ -582,7 +596,9 @@ class HealthScoreEngine:
         logger.debug(f"Efficiency score: {score:.2f} (asset_turnover={asset_turn:.2f})")
         return score
 
-    def calculate_overall_score(self, scores: Dict[str, Optional[float]]) -> Optional[float]:
+    def calculate_overall_score(
+        self, scores: Dict[str, Optional[float]]
+    ) -> Optional[float]:
         """
         Calculate overall weighted Financial Health Score.
 
@@ -827,7 +843,7 @@ class HealthScoreEngine:
                 # Track missing metrics for summary statistics
                 if cat in self.pipeline_stats["missing_metrics_summary"]:
                     self.pipeline_stats["missing_metrics_summary"][cat] += 1
-        
+
         # Only add to warnings list if ALL categories are missing (truly insufficient data)
         # Missing individual categories is expected and not a warning-worthy event
         if len(missing_categories) == len(category_scores):
@@ -1051,14 +1067,18 @@ class HealthScoreEngine:
             ]
 
             with open(csv_path, "w", newline="", encoding="utf-8") as csvfile:
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames, extrasaction="ignore")
+                writer = csv.DictWriter(
+                    csvfile, fieldnames=fieldnames, extrasaction="ignore"
+                )
                 writer.writeheader()
 
                 for record in records:
                     row = {k: record.get(k, "") for k in fieldnames}
                     writer.writerow(row)
 
-            logger.info(f"CSV exported successfully: {csv_path} ({len(records)} records)")
+            logger.info(
+                f"CSV exported successfully: {csv_path} ({len(records)} records)"
+            )
             return csv_path
 
         except Exception as e:
@@ -1124,9 +1144,7 @@ class HealthScoreEngine:
 
                 except Exception as e:
                     self.pipeline_stats["companies_failed"] += 1
-                    error_msg = (
-                        f"Failed to process row {idx}: {str(e)}"
-                    )
+                    error_msg = f"Failed to process row {idx}: {str(e)}"
                     logger.error(error_msg)
                     self.pipeline_stats["errors"].append(error_msg)
 
@@ -1176,8 +1194,10 @@ class HealthScoreEngine:
         missing_lines = []
         for category, count in missing_summary.items():
             if count > 0:
-                missing_lines.append(f"  {category.capitalize()} Metrics Missing: {count} records")
-        
+                missing_lines.append(
+                    f"  {category.capitalize()} Metrics Missing: {count} records"
+                )
+
         missing_text = "\n".join(missing_lines) if missing_lines else "  None"
 
         summary = f"""
@@ -1213,6 +1233,7 @@ Missing Metrics Summary:
 # =============================================================================
 # CONVENIENCE FUNCTIONS
 # =============================================================================
+
 
 def run_health_score_pipeline() -> Dict[str, Any]:
     """
@@ -1253,9 +1274,7 @@ def get_health_score_statistics() -> Dict[str, Any]:
             GROUP BY rating
             ORDER BY count DESC
         """)
-        stats["rating_distribution"] = {
-            row[0]: row[1] for row in cursor.fetchall()
-        }
+        stats["rating_distribution"] = {row[0]: row[1] for row in cursor.fetchall()}
 
         # Average scores
         cursor = conn.execute(f"""
@@ -1316,4 +1335,3 @@ if __name__ == "__main__":
     print(f"Pipeline status: {stats['status']}")
     print(f"Records processed: {stats['companies_processed']}")
     print(f"Errors: {len(stats['errors'])}")
-

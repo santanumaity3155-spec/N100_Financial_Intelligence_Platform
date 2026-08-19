@@ -11,7 +11,7 @@ def render_dataframe(
     use_container_width: bool = True,
     hide_index: bool = True,
     height: Optional[int] = None,
-    column_config: Optional[Dict[str, Any]] = None
+    column_config: Optional[Dict[str, Any]] = None,
 ) -> None:
     """
     Render a dataframe with sensible defaults.
@@ -32,7 +32,7 @@ def render_dataframe(
         use_container_width=use_container_width,
         hide_index=hide_index,
         height=height,
-        column_config=column_config
+        column_config=column_config,
     )
 
 
@@ -41,7 +41,7 @@ def render_formatted_table(
     format_dict: Optional[Dict[str, str]] = None,
     title: Optional[str] = None,
     use_container_width: bool = True,
-    hide_index: bool = True
+    hide_index: bool = True,
 ) -> None:
     """
     Render a formatted table with specific number formatting.
@@ -69,7 +69,7 @@ def render_formatted_table(
         for col, fmt in format_dict.items():
             if col in display_df.columns:
                 try:
-                    if data[col].dtype in ['int64', 'float64']:
+                    if data[col].dtype in ["int64", "float64"]:
                         display_df[col] = data[col].apply(
                             lambda x: fmt.format(x) if pd.notnull(x) else "N/A"
                         )
@@ -80,9 +80,7 @@ def render_formatted_table(
                     pass
 
     st.dataframe(
-        display_df,
-        use_container_width=use_container_width,
-        hide_index=hide_index
+        display_df, use_container_width=use_container_width, hide_index=hide_index
     )
 
 
@@ -92,7 +90,7 @@ def render_numeric_table(
     precision: int = 2,
     title: Optional[str] = None,
     use_container_width: bool = True,
-    hide_index: bool = True
+    hide_index: bool = True,
 ) -> None:
     """
     Render a table with automatic numeric formatting.
@@ -115,7 +113,9 @@ def render_numeric_table(
 
     # Auto-detect numeric columns if not provided
     if numeric_columns is None:
-        numeric_columns = data.select_dtypes(include=['int64', 'float64']).columns.tolist()
+        numeric_columns = data.select_dtypes(
+            include=["int64", "float64"]
+        ).columns.tolist()
 
     # Create display copy
     display_df = data.copy()
@@ -132,9 +132,7 @@ def render_numeric_table(
                 pass
 
     st.dataframe(
-        display_df,
-        use_container_width=use_container_width,
-        hide_index=hide_index
+        display_df, use_container_width=use_container_width, hide_index=hide_index
     )
 
 
@@ -144,7 +142,7 @@ def render_clickable_table(
     base_url: str = "",
     title: Optional[str] = None,
     use_container_width: bool = True,
-    hide_index: bool = True
+    hide_index: bool = True,
 ) -> None:
     """
     Render a table with clickable links in specified columns.
@@ -170,7 +168,9 @@ def render_clickable_table(
     # Convert specified columns to clickable links
     for col in clickable_columns:
         if col in display_df.columns:
+
             def make_clickable(val):
+                """Make clickable functionality."""
                 if pd.isnull(val) or val == "":
                     return ""
                 str_val = str(val)
@@ -185,16 +185,11 @@ def render_clickable_table(
             display_df[col] = display_df[col].apply(make_clickable)
 
     # Display with HTML rendering
-    st.write(
-        display_df.to_html(escape=False, index=hide_index),
-        unsafe_allow_html=True
-    )
+    st.write(display_df.to_html(escape=False, index=hide_index), unsafe_allow_html=True)
 
 
 def render_export_buttons(
-    data: pd.DataFrame,
-    filename_prefix: str = "data",
-    key_prefix: str = "export"
+    data: pd.DataFrame, filename_prefix: str = "data", key_prefix: str = "export"
 ) -> None:
     """
     Render export buttons for CSV and Excel formats.
@@ -220,14 +215,14 @@ def render_export_buttons(
             file_name=f"{filename_prefix}.csv",
             mime="text/csv",
             use_container_width=True,
-            key=f"{key_prefix}_csv"
+            key=f"{key_prefix}_csv",
         )
 
     with col2:
         # Excel export (requires openpyxl or xlsxwriter)
         try:
             excel_buffer = io.BytesIO()
-            data.to_excel(excel_buffer, index=False, engine='openpyxl')
+            data.to_excel(excel_buffer, index=False, engine="openpyxl")
             excel_data = excel_buffer.getvalue()
             st.download_button(
                 label="📥 Download Excel",
@@ -235,7 +230,7 @@ def render_export_buttons(
                 file_name=f"{filename_prefix}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True,
-                key=f"{key_prefix}_excel"
+                key=f"{key_prefix}_excel",
             )
         except ImportError:
             st.button(
@@ -243,14 +238,12 @@ def render_export_buttons(
                 disabled=True,
                 help="Excel export requires openpyxl package",
                 use_container_width=True,
-                key=f"{key_prefix}_excel_disabled"
+                key=f"{key_prefix}_excel_disabled",
             )
 
 
 def render_paginated_table(
-    data: pd.DataFrame,
-    page_size: int = 20,
-    title: Optional[str] = None
+    data: pd.DataFrame, page_size: int = 20, title: Optional[str] = None
 ) -> None:
     """
     Render a paginated table (simplified version).
@@ -285,18 +278,16 @@ def render_paginated_table(
 
     # Display current page data
     page_data = data.iloc[start_idx:end_idx]
-    st.dataframe(
-        page_data,
-        use_container_width=True,
-        hide_index=True
-    )
+    st.dataframe(page_data, use_container_width=True, hide_index=True)
 
     # Pagination controls
     col1, col2, col3 = st.columns([1, 2, 1])
 
     with col1:
         if current_page > 0:
-            if st.button("◀ Previous", use_container_width=True, key=f"{page_key}_prev"):
+            if st.button(
+                "◀ Previous", use_container_width=True, key=f"{page_key}_prev"
+            ):
                 st.session_state[page_key] -= 1
                 st.rerun()
 
@@ -314,7 +305,7 @@ def render_paginated_table(
             options=page_options,
             index=current_page,
             key=f"{page_key}_selector",
-            label_visibility="collapsed"
+            label_visibility="collapsed",
         )
         if selected_page != current_page:
             st.session_state[page_key] = selected_page
@@ -326,7 +317,7 @@ def render_styled_dataframe(
     style_functions: Optional[List[callable]] = None,
     title: Optional[str] = None,
     use_container_width: bool = True,
-    hide_index: bool = True
+    hide_index: bool = True,
 ) -> None:
     """
     Render a dataframe with custom styling functions.
@@ -354,27 +345,23 @@ def render_styled_dataframe(
             st.dataframe(
                 styled_df,
                 use_container_width=use_container_width,
-                hide_index=hide_index
+                hide_index=hide_index,
             )
         except Exception:
             # Fallback to regular dataframe if styling fails
             st.dataframe(
-                data,
-                use_container_width=use_container_width,
-                hide_index=hide_index
+                data, use_container_width=use_container_width, hide_index=hide_index
             )
     else:
         st.dataframe(
-            data,
-            use_container_width=use_container_width,
-            hide_index=hide_index
+            data, use_container_width=use_container_width, hide_index=hide_index
         )
 
 
 def render_summary_table(
     data: pd.DataFrame,
     summary_fields: List[Tuple[str, str, str]],
-    title: Optional[str] = None
+    title: Optional[str] = None,
 ) -> None:
     """
     Render a summary table with label-value pairs.
@@ -413,8 +400,8 @@ def render_summary_table(
             hide_index=True,
             column_config={
                 "Metric": st.column_config.TextColumn("Metric", width="medium"),
-                "Value": st.column_config.TextColumn("Value", width="medium")
-            }
+                "Value": st.column_config.TextColumn("Value", width="medium"),
+            },
         )
 
 
@@ -423,7 +410,7 @@ def render_grouped_table(
     group_column: str,
     value_columns: List[str],
     agg_funcs: Optional[Dict[str, List[str]]] = None,
-    title: Optional[str] = None
+    title: Optional[str] = None,
 ) -> None:
     """
     Render a grouped and aggregated table.
@@ -454,8 +441,7 @@ def render_grouped_table(
 
     # Filter agg_funcs to available columns
     filtered_agg_funcs = {
-        col: funcs for col, funcs in agg_funcs.items()
-        if col in available_value_cols
+        col: funcs for col, funcs in agg_funcs.items() if col in available_value_cols
     }
 
     if not filtered_agg_funcs:
@@ -464,25 +450,19 @@ def render_grouped_table(
 
     try:
         # Perform groupby and aggregation
-        grouped = data.groupby(group_column)[available_value_cols].agg(filtered_agg_funcs)
+        grouped = data.groupby(group_column)[available_value_cols].agg(
+            filtered_agg_funcs
+        )
 
         # Flatten column multi-index if needed
         if isinstance(grouped.columns, pd.MultiIndex):
-            grouped.columns = ['_'.join(col).strip() for col in grouped.columns.values]
+            grouped.columns = ["_".join(col).strip() for col in grouped.columns.values]
 
         # Reset index to make group column regular column
         grouped = grouped.reset_index()
 
-        st.dataframe(
-            grouped,
-            use_container_width=True,
-            hide_index=True
-        )
+        st.dataframe(grouped, use_container_width=True, hide_index=True)
     except Exception as e:
         st.error(f"Error creating grouped table: {str(e)}")
         # Fallback to original data
-        st.dataframe(
-            data,
-            use_container_width=True,
-            hide_index=True
-        )
+        st.dataframe(data, use_container_width=True, hide_index=True)

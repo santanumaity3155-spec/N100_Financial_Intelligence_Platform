@@ -35,8 +35,8 @@ SQLITE_DATABASE = DATABASE_PATH
 # ETL SETTINGS
 # =============================================================================
 
-READ_HEADER_CORE = 1          # Core datasets
-READ_HEADER_SUPPORT = 0       # Supporting datasets
+READ_HEADER_CORE = 1  # Core datasets
+READ_HEADER_SUPPORT = 0  # Supporting datasets
 
 DATE_FORMAT = "%Y-%m"
 

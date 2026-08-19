@@ -34,15 +34,19 @@ SCORE_MAX: float = 100.0
 
 # Expected ranges for normalization (typical values)
 PROFITABILITY_RANGES: Dict[str, Tuple[float, float]] = {
-    "roe": (-50.0, 50.0),        # Return on Equity (%)
-    "roce": (-30.0, 60.0),       # Return on Capital Employed (%)
-    "roa": (-20.0, 30.0),        # Return on Assets (%)
-    "net_profit_margin": (-30.0, 60.0),   # Net Profit Margin (%)
+    "roe": (-50.0, 50.0),  # Return on Equity (%)
+    "roce": (-30.0, 60.0),  # Return on Capital Employed (%)
+    "roa": (-20.0, 30.0),  # Return on Assets (%)
+    "net_profit_margin": (-30.0, 60.0),  # Net Profit Margin (%)
     "operating_profit_margin": (-20.0, 50.0),  # Operating Profit Margin (%)
 }
 
 PROFITABILITY_METRICS: List[str] = [
-    "roe", "roce", "roa", "net_profit_margin", "operating_profit_margin",
+    "roe",
+    "roce",
+    "roa",
+    "net_profit_margin",
+    "operating_profit_margin",
 ]
 
 # =============================================================================
@@ -185,4 +189,3 @@ HEALTH_SCORE_CSV_NAME: str = "financial_health_scores.csv"
 # =============================================================================
 
 HEALTH_SCORE_TABLE: str = "financial_health_scores"
-

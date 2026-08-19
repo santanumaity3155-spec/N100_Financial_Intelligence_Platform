@@ -92,7 +92,6 @@ from src.nlp.pros_cons_generator import (  # noqa: E402
     validate_output_schema,
 )
 
-
 # =============================================================================
 # HELPERS / FIXTURES
 # =============================================================================
@@ -182,8 +181,14 @@ class TestDataLoading:
 
     def test_load_financial_data_keys(self, financial_data):
         expected = {
-            "companies", "sectors", "profit_loss", "balance_sheet",
-            "cash_flow", "ratios", "market_cap", "analysis",
+            "companies",
+            "sectors",
+            "profit_loss",
+            "balance_sheet",
+            "cash_flow",
+            "ratios",
+            "market_cap",
+            "analysis",
         }
         assert set(financial_data.keys()) == expected
         assert not financial_data["companies"].empty
@@ -247,12 +252,14 @@ class TestLatestYearExtraction:
     """Verify latest-year resolution (synthetic + live)."""
 
     def test_synthetic_latest_year(self):
-        df = pd.DataFrame({
-            "period": ["Mar 2019", "Mar 2020", "Mar 2021"],
-            "company_id": ["X", "X", "X"],
-            "revenue": [100.0, 150.0, np.nan],
-            "year": [2019, 2020, 2021],
-        })
+        df = pd.DataFrame(
+            {
+                "period": ["Mar 2019", "Mar 2020", "Mar 2021"],
+                "company_id": ["X", "X", "X"],
+                "revenue": [100.0, 150.0, np.nan],
+                "year": [2019, 2020, 2021],
+            }
+        )
         _, year, metrics = prepare_latest_year_data("X", history_df=df)
         assert year == 2021
         assert metrics["revenue"] is None  # latest year missing revenue
@@ -262,9 +269,7 @@ class TestLatestYearExtraction:
         assert context.latest_year >= 2023
 
     def test_empty_history_latest(self):
-        _, year, metrics = prepare_latest_year_data(
-            "X", history_df=pd.DataFrame()
-        )
+        _, year, metrics = prepare_latest_year_data("X", history_df=pd.DataFrame())
         assert year is None
         assert metrics == {}
 
@@ -279,20 +284,24 @@ class TestHistoricalExtraction:
 
     def test_synthetic_history_merge(self):
         data = {
-            "profit_loss": pd.DataFrame({
-                "company_id": ["SYN"] * 3,
-                "period": ["Mar 2020", "Mar 2021", "Mar 2022"],
-                "sales": [100.0, 140.0, 200.0],
-                "net_profit": [10.0, 15.0, 25.0],
-                "operating_profit": [15.0, 20.0, 30.0],
-                "depreciation": [5.0, 6.0, 7.0],
-            }),
-            "balance_sheet": pd.DataFrame({
-                "company_id": ["SYN"] * 2,
-                "period": ["Mar 2021", "Mar 2022"],
-                "borrowings": [50.0, 60.0],
-                "investments": [10.0, 12.0],
-            }),
+            "profit_loss": pd.DataFrame(
+                {
+                    "company_id": ["SYN"] * 3,
+                    "period": ["Mar 2020", "Mar 2021", "Mar 2022"],
+                    "sales": [100.0, 140.0, 200.0],
+                    "net_profit": [10.0, 15.0, 25.0],
+                    "operating_profit": [15.0, 20.0, 30.0],
+                    "depreciation": [5.0, 6.0, 7.0],
+                }
+            ),
+            "balance_sheet": pd.DataFrame(
+                {
+                    "company_id": ["SYN"] * 2,
+                    "period": ["Mar 2021", "Mar 2022"],
+                    "borrowings": [50.0, 60.0],
+                    "investments": [10.0, 12.0],
+                }
+            ),
             "cash_flow": pd.DataFrame(),
             "ratios": pd.DataFrame(),
             "market_cap": pd.DataFrame(),
@@ -447,13 +456,9 @@ class TestTrendHelpers:
 
     def test_consecutive_condition_with_predicate(self):
         values = [10.0, 25.0, 35.0, 40.0, 12.0]
-        above_20 = check_consecutive_condition(
-            values, lambda v: v > 20.0, required=3
-        )
+        above_20 = check_consecutive_condition(values, lambda v: v > 20.0, required=3)
         assert above_20 is True
-        not_above = check_consecutive_condition(
-            values, lambda v: v > 20.0, required=4
-        )
+        not_above = check_consecutive_condition(values, lambda v: v > 20.0, required=4)
         assert not_above is False
 
     def test_cagr_calculation(self):
@@ -489,22 +494,31 @@ class TestRuleResult:
 
     def test_invalid_rule_type(self):
         result = RuleResult(
-            company_id="TCS", rule_id="X", rule_type="info",
-            triggered=False, confidence_pct=50.0,
+            company_id="TCS",
+            rule_id="X",
+            rule_type="info",
+            triggered=False,
+            confidence_pct=50.0,
         )
         assert any("rule_type" in m for m in result.validate())
 
     def test_invalid_confidence(self):
         result = RuleResult(
-            company_id="TCS", rule_id="X", rule_type=TYPE_PRO,
-            triggered=False, confidence_pct=150.0,
+            company_id="TCS",
+            rule_id="X",
+            rule_type=TYPE_PRO,
+            triggered=False,
+            confidence_pct=150.0,
         )
         assert any("confidence_pct" in m for m in result.validate())
 
     def test_null_ids(self):
         result = RuleResult(
-            company_id="", rule_id="", rule_type=TYPE_CON,
-            triggered=False, confidence_pct=50.0,
+            company_id="",
+            rule_id="",
+            rule_type=TYPE_CON,
+            triggered=False,
+            confidence_pct=50.0,
         )
         issues = result.validate()
         assert any("company_id" in m for m in issues)
@@ -512,8 +526,12 @@ class TestRuleResult:
 
     def test_to_dict_matches_output_schema(self):
         result = RuleResult(
-            company_id="TCS", rule_id="PRO_00", rule_type=TYPE_PRO,
-            triggered=True, text="x", confidence_pct=80.123,
+            company_id="TCS",
+            rule_id="PRO_00",
+            rule_type=TYPE_PRO,
+            triggered=True,
+            text="x",
+            confidence_pct=80.123,
         )
         d = result.to_dict()
         assert set(d.keys()) == set(OUTPUT_COLUMNS)
@@ -561,13 +579,9 @@ class TestRuleRegistry:
     def test_registries_by_default(self):
         # After Module 2C, both registries must be populated with 12 rules each.
         assert len(PRO_RULES) == 12
-        assert [r.rule_id for r in PRO_RULES] == [
-            f"PRO_{i:02d}" for i in range(1, 13)
-        ]
+        assert [r.rule_id for r in PRO_RULES] == [f"PRO_{i:02d}" for i in range(1, 13)]
         assert len(CON_RULES) == 12
-        assert [r.rule_id for r in CON_RULES] == [
-            f"CON_{i:02d}" for i in range(1, 13)
-        ]
+        assert [r.rule_id for r in CON_RULES] == [f"CON_{i:02d}" for i in range(1, 13)]
 
         reg = get_registered_rules()
         assert len(reg["pro"]) == 12
@@ -668,14 +682,31 @@ class TestConfidence:
 
 
 def _valid_results_df():
-    return pd.DataFrame([
-        {"company_id": "TCS", "type": TYPE_PRO, "rule_id": "PRO_01",
-         "text": "a", "confidence_pct": 80.0},
-        {"company_id": "TCS", "type": TYPE_CON, "rule_id": "CON_01",
-         "text": "b", "confidence_pct": 70.0},
-        {"company_id": "INFY", "type": TYPE_PRO, "rule_id": "PRO_01",
-         "text": "c", "confidence_pct": 90.0},
-    ])
+    return pd.DataFrame(
+        [
+            {
+                "company_id": "TCS",
+                "type": TYPE_PRO,
+                "rule_id": "PRO_01",
+                "text": "a",
+                "confidence_pct": 80.0,
+            },
+            {
+                "company_id": "TCS",
+                "type": TYPE_CON,
+                "rule_id": "CON_01",
+                "text": "b",
+                "confidence_pct": 70.0,
+            },
+            {
+                "company_id": "INFY",
+                "type": TYPE_PRO,
+                "rule_id": "PRO_01",
+                "text": "c",
+                "confidence_pct": 90.0,
+            },
+        ]
+    )
 
 
 class TestOutputSchema:
@@ -759,12 +790,24 @@ class TestCompanyCoverage:
         assert stats["missing_con"] == 2
 
     def test_partial_coverage(self):
-        df = pd.DataFrame([
-            {"company_id": "A", "type": TYPE_PRO, "rule_id": "PRO_01",
-             "text": "x", "confidence_pct": 50.0},
-            {"company_id": "A", "type": TYPE_CON, "rule_id": "CON_01",
-             "text": "y", "confidence_pct": 50.0},
-        ])
+        df = pd.DataFrame(
+            [
+                {
+                    "company_id": "A",
+                    "type": TYPE_PRO,
+                    "rule_id": "PRO_01",
+                    "text": "x",
+                    "confidence_pct": 50.0,
+                },
+                {
+                    "company_id": "A",
+                    "type": TYPE_CON,
+                    "rule_id": "CON_01",
+                    "text": "y",
+                    "confidence_pct": 50.0,
+                },
+            ]
+        )
         stats = validate_company_coverage(["A", "B"], df)
         assert stats["companies_fully_covered"] == 1
         assert stats["missing_pro"] == 1  # B missing
@@ -786,9 +829,15 @@ class TestFinancialSector:
     """Verify is_financial_sector and get_sub_sector."""
 
     def test_financial_sub_sectors(self):
-        for sub in ["Private Banks", "Public Sector Banks", "Consumer Finance",
-                    "Life Insurance", "General Insurance", "Diversified Financials",
-                    "Speciality Finance"]:
+        for sub in [
+            "Private Banks",
+            "Public Sector Banks",
+            "Consumer Finance",
+            "Life Insurance",
+            "General Insurance",
+            "Diversified Financials",
+            "Speciality Finance",
+        ]:
             assert is_financial_sector(sub) is True
 
     def test_non_financial_sub_sector(self):

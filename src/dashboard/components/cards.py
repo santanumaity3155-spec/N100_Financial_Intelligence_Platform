@@ -9,7 +9,7 @@ def kpi_card(
     value: str,
     delta: Optional[str] = None,
     help_text: Optional[str] = None,
-    delta_color: str = "normal"
+    delta_color: str = "normal",
 ) -> None:
     """
     Render a KPI (Key Performance Indicator) card.
@@ -27,22 +27,13 @@ def kpi_card(
             value=value,
             delta=delta,
             help=help_text,
-            delta_color=delta_color
+            delta_color=delta_color,
         )
     else:
-        st.metric(
-            label=title,
-            value=value,
-            delta=delta,
-            delta_color=delta_color
-        )
+        st.metric(label=title, value=value, delta=delta, delta_color=delta_color)
 
 
-def metric_card(
-    title: str,
-    value: str,
-    label_visibility: str = "visible"
-) -> None:
+def metric_card(title: str, value: str, label_visibility: str = "visible") -> None:
     """
     Render a simple metric card.
 
@@ -54,11 +45,7 @@ def metric_card(
     st.metric(label=title, value=value, label_visibility=label_visibility)
 
 
-def info_card(
-    title: str,
-    content: str,
-    icon: str = "ℹ️"
-) -> None:
+def info_card(title: str, content: str, icon: str = "ℹ️") -> None:
     """
     Render an info card with title and content.
 
@@ -73,11 +60,7 @@ def info_card(
         st.markdown("---")
 
 
-def alert_card(
-    title: str,
-    content: str,
-    alert_type: str = "info"
-) -> None:
+def alert_card(title: str, content: str, alert_type: str = "info") -> None:
     """
     Render an alert card.
 

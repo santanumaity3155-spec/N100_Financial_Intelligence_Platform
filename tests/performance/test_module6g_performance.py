@@ -14,6 +14,7 @@ import importlib
 import pytest
 
 from src.config.settings import SQLITE_DATABASE
+
 try:
     from tests.performance.test_screener_load import run_concurrent_screener_load_test
 except ImportError:
@@ -57,7 +58,9 @@ def test_10_concurrent_screener_requests():
     print(f"Successful Requests: {successful}/10")
 
     assert successful == 10, f"Expected 10 successful requests, got {successful}."
-    assert total_time <= 10.0, f"FAILED: Concurrent screener test exceeded 10-second target. Actual: {total_time:.2f} seconds."
+    assert (
+        total_time <= 10.0
+    ), f"FAILED: Concurrent screener test exceeded 10-second target. Actual: {total_time:.2f} seconds."
 
 
 def test_company_profile_performance_5_tickers():
@@ -83,14 +86,16 @@ def test_company_profile_performance_5_tickers():
 
         print(f"{ticker:<12} | {duration:<12.3f} | < 3.0 s    | {status_str:<6}")
 
-        assert data and data.get("profile") is not None, f"Failed to load profile data for ticker {ticker}"
+        assert (
+            data and data.get("profile") is not None
+        ), f"Failed to load profile data for ticker {ticker}"
 
         if not passed:
             failed_tickers.append((ticker, duration))
 
-    assert len(failed_tickers) == 0, (
-        f"FAILED: Company Profile load time exceeded 3-second target for tickers: {failed_tickers}"
-    )
+    assert (
+        len(failed_tickers) == 0
+    ), f"FAILED: Company Profile load time exceeded 3-second target for tickers: {failed_tickers}"
 
 
 if __name__ == "__main__":

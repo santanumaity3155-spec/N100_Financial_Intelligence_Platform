@@ -108,7 +108,7 @@ class TestEmptyDataFrame:
         """Empty DataFrame should return empty figure without crashing."""
         df = pd.DataFrame()
         fig = build_radar_chart(df, "TCS", "Tata Consultancy Services", "IT Services")
-        
+
         assert isinstance(fig, go.Figure)
         assert len(fig.data) == 0
         assert "Radar chart skipped: group_df is None or empty" in caplog.text
@@ -116,7 +116,7 @@ class TestEmptyDataFrame:
     def test_none_dataframe(self, caplog):
         """None DataFrame should return empty figure without crashing."""
         fig = build_radar_chart(None, "TCS", "Tata Consultancy Services", "IT Services")
-        
+
         assert isinstance(fig, go.Figure)
         assert len(fig.data) == 0
         assert "Radar chart skipped: group_df is None or empty" in caplog.text
@@ -134,7 +134,7 @@ class TestMissingCompanyIdColumn:
             }
         )
         fig = build_radar_chart(df, "TCS", "Tata Consultancy Services", "IT Services")
-        
+
         assert isinstance(fig, go.Figure)
         assert len(fig.data) == 0
         assert "'company_id' column missing" in caplog.text
@@ -145,8 +145,10 @@ class TestMissingCompany:
 
     def test_unknown_company(self, caplog, valid_group_df):
         """Unknown company ID should return empty figure with warning."""
-        fig = build_radar_chart(valid_group_df, "UNKNOWN", "Unknown Company", "IT Services")
-        
+        fig = build_radar_chart(
+            valid_group_df, "UNKNOWN", "Unknown Company", "IT Services"
+        )
+
         assert isinstance(fig, go.Figure)
         assert len(fig.data) == 0
         assert "selected company UNKNOWN not found" in caplog.text
@@ -154,7 +156,7 @@ class TestMissingCompany:
     def test_company_not_in_group(self, caplog, valid_group_df):
         """Company not in the group should return empty figure."""
         fig = build_radar_chart(valid_group_df, "RELIANCE", "Reliance", "IT Services")
-        
+
         assert isinstance(fig, go.Figure)
         assert len(fig.data) == 0
 
@@ -173,7 +175,7 @@ class TestMissingMetrics:
             }
         )
         fig = build_radar_chart(df, "TCS", "Tata Consultancy Services", "IT Services")
-        
+
         # Should still generate a chart (with 0.0 for missing metrics)
         assert isinstance(fig, go.Figure)
         assert len(fig.data) == 2
@@ -188,7 +190,7 @@ class TestMissingMetrics:
             }
         )
         fig = build_radar_chart(df, "TCS", "Tata Consultancy Services", "IT Services")
-        
+
         assert isinstance(fig, go.Figure)
         assert len(fig.data) == 2
 
@@ -221,7 +223,7 @@ class TestNaNValues:
             }
         )
         fig = build_radar_chart(df, "TCS", "Tata Consultancy Services", "IT Services")
-        
+
         # Critical: function should not crash and should return valid figure
         assert isinstance(fig, go.Figure)
         assert len(fig.data) == 2
@@ -244,7 +246,7 @@ class TestNaNValues:
             }
         )
         fig = build_radar_chart(df, "TCS", "Tata Consultancy Services", "IT Services")
-        
+
         assert isinstance(fig, go.Figure)
         assert len(fig.data) == 2
 
@@ -269,7 +271,7 @@ class TestInvalidPercentileValues:
             }
         )
         fig = build_radar_chart(df, "TCS", "Tata Consultancy Services", "IT Services")
-        
+
         assert isinstance(fig, go.Figure)
         assert len(fig.data) == 2
         assert "invalid percentile" in caplog.text
@@ -291,7 +293,7 @@ class TestInvalidPercentileValues:
             }
         )
         fig = build_radar_chart(df, "TCS", "Tata Consultancy Services", "IT Services")
-        
+
         assert isinstance(fig, go.Figure)
         assert len(fig.data) == 2
         assert "invalid percentile" in caplog.text
@@ -313,7 +315,7 @@ class TestInvalidPercentileValues:
             }
         )
         fig = build_radar_chart(df, "TCS", "Tata Consultancy Services", "IT Services")
-        
+
         assert isinstance(fig, go.Figure)
         assert len(fig.data) == 2
         assert "cannot convert value to float" in caplog.text
@@ -324,16 +326,18 @@ class TestSingleCompanyPeerGroup:
 
     def test_single_company_peer_group(self, caplog, single_company_df):
         """Single company peer group should generate chart with equal values."""
-        fig = build_radar_chart(single_company_df, "TCS", "Tata Consultancy Services", "IT Services")
-        
+        fig = build_radar_chart(
+            single_company_df, "TCS", "Tata Consultancy Services", "IT Services"
+        )
+
         # Critical: function should not crash and should return valid figure
         assert isinstance(fig, go.Figure)
         assert len(fig.data) == 2
-        
+
         # Company and peer average should be identical
         company_trace = fig.data[0]
         peer_trace = fig.data[1]
-        
+
         assert company_trace.r == peer_trace.r
         # Single company group handled correctly
 
@@ -343,24 +347,31 @@ class TestValidData:
 
     def test_valid_peer_group(self, caplog, valid_group_df):
         """Valid peer group should generate proper radar chart."""
-        fig = build_radar_chart(valid_group_df, "TCS", "Tata Consultancy Services", "IT Services")
-        
+        fig = build_radar_chart(
+            valid_group_df, "TCS", "Tata Consultancy Services", "IT Services"
+        )
+
         # Critical: function should not crash and should return valid figure
         assert isinstance(fig, go.Figure)
         assert len(fig.data) == 2  # Company + Peer Average
-        
+
         # Verify chart properties
-        assert fig.layout.title.text == "Tata Consultancy Services vs IT Services Peer Average"
+        assert (
+            fig.layout.title.text
+            == "Tata Consultancy Services vs IT Services Peer Average"
+        )
         # Chart generated successfully (logging verified separately)
 
     def test_chart_has_correct_structure(self, valid_group_df):
         """Chart should have proper structure with 8 metrics."""
-        fig = build_radar_chart(valid_group_df, "TCS", "Tata Consultancy Services", "IT Services")
-        
+        fig = build_radar_chart(
+            valid_group_df, "TCS", "Tata Consultancy Services", "IT Services"
+        )
+
         # Each trace should have 9 points (8 metrics + 1 closing point)
         assert len(fig.data[0].r) == 9
         assert len(fig.data[1].r) == 9
-        
+
         # Theta should have 9 labels
         assert len(fig.data[0].theta) == 9
 
@@ -371,9 +382,11 @@ class TestPerformance:
     def test_chart_generation_performance(self, valid_group_df):
         """Radar chart should generate in < 1 second."""
         start = time.time()
-        fig = build_radar_chart(valid_group_df, "TCS", "Tata Consultancy Services", "IT Services")
+        fig = build_radar_chart(
+            valid_group_df, "TCS", "Tata Consultancy Services", "IT Services"
+        )
         elapsed = time.time() - start
-        
+
         assert isinstance(fig, go.Figure)
         assert elapsed < 1.0, f"Chart generation took {elapsed:.3f}s (should be < 1s)"
 
@@ -383,8 +396,10 @@ class TestLogging:
 
     def test_successful_generation_logs(self, caplog, valid_group_df):
         """Successful generation should complete without errors."""
-        fig = build_radar_chart(valid_group_df, "TCS", "Tata Consultancy Services", "IT Services")
-        
+        fig = build_radar_chart(
+            valid_group_df, "TCS", "Tata Consultancy Services", "IT Services"
+        )
+
         # Critical: function should not crash
         assert isinstance(fig, go.Figure)
         assert len(fig.data) == 2
@@ -394,7 +409,7 @@ class TestLogging:
         """Error logs should include context for debugging."""
         df = pd.DataFrame()  # Empty
         fig = build_radar_chart(df, "TCS", "Tata Consultancy Services", "IT Services")
-        
+
         assert isinstance(fig, go.Figure)
         assert "group_df is None or empty" in caplog.text
 
@@ -424,15 +439,15 @@ class TestIntegrationWithComputePercentiles:
                 "composite_quality_score": [0.85, 0.75, 0.60],
             }
         )
-        
+
         # Compute percentiles
         df_with_pct = compute_peer_percentiles(df)
-        
+
         # Generate radar chart
         fig = build_radar_chart(
             df_with_pct, "TCS", "Tata Consultancy Services", "IT Services"
         )
-        
+
         assert isinstance(fig, go.Figure)
         assert len(fig.data) == 2
 

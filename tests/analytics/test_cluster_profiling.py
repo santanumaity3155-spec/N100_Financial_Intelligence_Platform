@@ -39,24 +39,26 @@ from src.analytics.cluster_profiling import (
     calculate_portfolio_stats,
     run_cluster_profiling_pipeline,
     DEFAULT_10_KPIS,
-    DEFAULT_CLUSTER_NAMES
+    DEFAULT_CLUSTER_NAMES,
 )
 from src.analytics.clustering import REQUIRED_FEATURES
-
 
 # =============================================================================
 # DETERMINISTIC FIXTURES
 # =============================================================================
 
+
 @pytest.fixture
 def mock_label_data():
     """Mock dataset with 5 companies distributed across 5 clusters."""
-    return pd.DataFrame({
-        "company_id": ["COMP_A", "COMP_B", "COMP_C", "COMP_D", "COMP_E"],
-        "cluster_id": [0, 1, 2, 3, 4],
-        "cluster_name": [f"Cluster {i}" for i in range(5)],
-        "distance_from_centroid": [0.1, 0.2, 0.3, 0.4, 0.5]
-    })
+    return pd.DataFrame(
+        {
+            "company_id": ["COMP_A", "COMP_B", "COMP_C", "COMP_D", "COMP_E"],
+            "cluster_id": [0, 1, 2, 3, 4],
+            "cluster_name": [f"Cluster {i}" for i in range(5)],
+            "distance_from_centroid": [0.1, 0.2, 0.3, 0.4, 0.5],
+        }
+    )
 
 
 @pytest.fixture
@@ -72,20 +74,31 @@ def mock_kpi_dataset():
 @pytest.fixture
 def mock_sector_dataset():
     """Deterministic sector dataset with regular values, an outlier, and a zero-std sector."""
-    return pd.DataFrame({
-        "company_id": ["C1", "C2", "C3", "C4", "C5", "C6", "C7"],
-        "sector": ["SecA", "SecA", "SecA", "SecA", "SecB", "SecB", "SecC"],
-        "return_on_equity_pct": [10.0, 12.0, 11.0, 100.0, 15.0, 15.0, 20.0],  # C4 is outlier in SecA, SecB zero-std
-        "debt_to_equity": [1.0, 1.2, 1.1, 10.0, 0.5, 0.5, 2.0],
-        "revenue_cagr_5yr": [5.0, 6.0, 5.5, 50.0, 8.0, 8.0, 10.0],
-        "fcf_cagr_5yr": [4.0, 5.0, 4.5, 40.0, 7.0, 7.0, 9.0],
-        "operating_profit_margin_pct": [15.0, 16.0, 15.5, 80.0, 20.0, 20.0, 25.0]
-    })
+    return pd.DataFrame(
+        {
+            "company_id": ["C1", "C2", "C3", "C4", "C5", "C6", "C7"],
+            "sector": ["SecA", "SecA", "SecA", "SecA", "SecB", "SecB", "SecC"],
+            "return_on_equity_pct": [
+                10.0,
+                12.0,
+                11.0,
+                100.0,
+                15.0,
+                15.0,
+                20.0,
+            ],  # C4 is outlier in SecA, SecB zero-std
+            "debt_to_equity": [1.0, 1.2, 1.1, 10.0, 0.5, 0.5, 2.0],
+            "revenue_cagr_5yr": [5.0, 6.0, 5.5, 50.0, 8.0, 8.0, 10.0],
+            "fcf_cagr_5yr": [4.0, 5.0, 4.5, 40.0, 7.0, 7.0, 9.0],
+            "operating_profit_margin_pct": [15.0, 16.0, 15.5, 80.0, 20.0, 20.0, 25.0],
+        }
+    )
 
 
 # =============================================================================
 # PART 1: CLUSTER PROFILING & NAMING TESTS
 # =============================================================================
+
 
 def test_01_five_clusters_profiled(tmp_path):
     """Test 1: Exactly 5 clusters are profiled."""
@@ -133,6 +146,7 @@ def test_05_median_calculation_is_correct():
 # PART 2: CORRELATION MATRIX TESTS
 # =============================================================================
 
+
 def test_06_correlation_matrix_has_10_kpis(tmp_path):
     """Test 6: Correlation matrix contains exactly 10 KPIs."""
     out_img = tmp_path / "heatmap.png"
@@ -169,6 +183,7 @@ def test_09_correlation_values_between_minus_one_and_plus_one(tmp_path):
 # PART 3: SECTOR OUTLIER TESTS
 # =============================================================================
 
+
 def test_10_sector_z_score_calculation_is_correct():
     """Test 10: Sector Z-score calculation formula Z = (X - mean) / std is correct."""
     vals = np.array([10.0, 12.0, 11.0, 100.0])
@@ -189,16 +204,18 @@ def test_11_outlier_threshold_is_exactly_abs_z_gt_3(tmp_path):
 
 def test_12_zero_std_sectors_handled_safely(tmp_path):
     """Test 12: Zero standard deviation and single-company sectors do not raise zero-division errors."""
-    df_zero_std = pd.DataFrame({
-        "company_id": ["C1", "C2"],
-        "sector": ["SecConst", "SecConst"],
-        "return_on_equity_pct": [15.0, 15.0],  # zero std
-        "debt_to_equity": [1.0, 1.0],
-        "revenue_cagr_5yr": [5.0, 5.0],
-        "fcf_cagr_5yr": [4.0, 4.0],
-        "operating_profit_margin_pct": [10.0, 10.0]
-    })
-    
+    df_zero_std = pd.DataFrame(
+        {
+            "company_id": ["C1", "C2"],
+            "sector": ["SecConst", "SecConst"],
+            "return_on_equity_pct": [15.0, 15.0],  # zero std
+            "debt_to_equity": [1.0, 1.0],
+            "revenue_cagr_5yr": [5.0, 5.0],
+            "fcf_cagr_5yr": [4.0, 4.0],
+            "operating_profit_margin_pct": [10.0, 10.0],
+        }
+    )
+
     out_file = tmp_path / "outliers_zero.csv"
     # Execute outlier detection without crashing
     outliers = detect_sector_outliers(output_path=out_file)
@@ -208,6 +225,7 @@ def test_12_zero_std_sectors_handled_safely(tmp_path):
 # =============================================================================
 # PART 4: PORTFOLIO STATISTICS TESTS
 # =============================================================================
+
 
 def test_13_portfolio_p10_calculation_is_correct():
     """Test 13: Portfolio P10 percentile calculation is mathematically accurate."""

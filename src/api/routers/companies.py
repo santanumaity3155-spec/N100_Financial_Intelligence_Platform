@@ -27,17 +27,30 @@ router = APIRouter(prefix="/companies", tags=["Companies"])
 # PYDANTIC RESPONSE MODELS
 # =============================================================================
 
+
 class CompanyListItem(BaseModel):
+    """CompanyListItem class representation."""
+
     company_id: str = Field(..., description="Unique company ticker identifier")
     company_name: str = Field(..., description="Official company name")
-    broad_sector: Optional[str] = Field(None, description="Broad industry sector classification")
-    sub_sector: Optional[str] = Field(None, description="Specific sub-sector classification")
-    market_cap_category: Optional[str] = Field(None, description="Market cap category (e.g. Large Cap)")
+    broad_sector: Optional[str] = Field(
+        None, description="Broad industry sector classification"
+    )
+    sub_sector: Optional[str] = Field(
+        None, description="Specific sub-sector classification"
+    )
+    market_cap_category: Optional[str] = Field(
+        None, description="Market cap category (e.g. Large Cap)"
+    )
     roe_pct: Optional[float] = Field(None, description="Return on Equity percentage")
-    roce_pct: Optional[float] = Field(None, description="Return on Capital Employed percentage")
+    roce_pct: Optional[float] = Field(
+        None, description="Return on Capital Employed percentage"
+    )
 
 
 class CompanyProfile(BaseModel):
+    """CompanyProfile class representation."""
+
     company_id: str = Field(..., description="Company ticker symbol")
     company_name: str = Field(..., description="Company name")
     sector: Optional[str] = Field(None, description="Sector description")
@@ -49,7 +62,9 @@ class CompanyProfile(BaseModel):
     isin_code: Optional[str] = Field(None, description="ISIN security identifier")
     company_logo: Optional[str] = Field(None, description="URL to company logo image")
     chart_link: Optional[str] = Field(None, description="Interactive chart URL")
-    about_company: Optional[str] = Field(None, description="Business overview and description")
+    about_company: Optional[str] = Field(
+        None, description="Business overview and description"
+    )
     website: Optional[str] = Field(None, description="Official company website URL")
     nse_profile: Optional[str] = Field(None, description="NSE stock profile page URL")
     bse_profile: Optional[str] = Field(None, description="BSE stock profile page URL")
@@ -57,28 +72,46 @@ class CompanyProfile(BaseModel):
     book_value: Optional[float] = Field(None, description="Book value per share")
     roce_percentage: Optional[float] = Field(None, description="ROCE percentage")
     roe_percentage: Optional[float] = Field(None, description="ROE percentage")
-    latest_kpis: Optional[Dict[str, Any]] = Field(None, description="Latest calculated KPIs and financial metrics")
+    latest_kpis: Optional[Dict[str, Any]] = Field(
+        None, description="Latest calculated KPIs and financial metrics"
+    )
 
 
 class ProfitLossRecord(BaseModel):
+    """ProfitLossRecord class representation."""
+
     id: Optional[int] = Field(None, description="Record primary key ID")
     company_id: str = Field(..., description="Company ticker")
     period: str = Field(..., description="Financial period (e.g. Mar 2024)")
     sales: Optional[float] = Field(None, description="Total sales / revenue")
     expenses: Optional[float] = Field(None, description="Total operating expenses")
-    operating_profit: Optional[float] = Field(None, description="Operating profit (EBITDA)")
-    opm_percentage: Optional[float] = Field(None, description="Operating profit margin %")
-    other_income: Optional[float] = Field(None, description="Other non-operating income")
+    operating_profit: Optional[float] = Field(
+        None, description="Operating profit (EBITDA)"
+    )
+    opm_percentage: Optional[float] = Field(
+        None, description="Operating profit margin %"
+    )
+    other_income: Optional[float] = Field(
+        None, description="Other non-operating income"
+    )
     interest: Optional[float] = Field(None, description="Interest expense")
-    depreciation: Optional[float] = Field(None, description="Depreciation and amortization")
-    profit_before_tax: Optional[float] = Field(None, description="Profit before tax (PBT)")
+    depreciation: Optional[float] = Field(
+        None, description="Depreciation and amortization"
+    )
+    profit_before_tax: Optional[float] = Field(
+        None, description="Profit before tax (PBT)"
+    )
     tax_percentage: Optional[float] = Field(None, description="Effective tax rate %")
     net_profit: Optional[float] = Field(None, description="Net profit after tax (PAT)")
     eps: Optional[float] = Field(None, description="Earnings per share")
-    dividend_payout: Optional[float] = Field(None, description="Dividend payout ratio %")
+    dividend_payout: Optional[float] = Field(
+        None, description="Dividend payout ratio %"
+    )
 
 
 class BalanceSheetRecord(BaseModel):
+    """BalanceSheetRecord class representation."""
+
     id: Optional[int] = Field(None, description="Record primary key ID")
     company_id: str = Field(..., description="Company ticker")
     period: str = Field(..., description="Financial period")
@@ -96,27 +129,45 @@ class BalanceSheetRecord(BaseModel):
 
 
 class CashFlowRecord(BaseModel):
+    """CashFlowRecord class representation."""
+
     id: Optional[int] = Field(None, description="Record primary key ID")
     company_id: str = Field(..., description="Company ticker")
     period: str = Field(..., description="Financial period")
-    cash_from_operating_activity: Optional[float] = Field(None, description="Operating cash flow")
-    cash_from_investing_activity: Optional[float] = Field(None, description="Investing cash flow")
-    cash_from_financing_activity: Optional[float] = Field(None, description="Financing cash flow")
+    cash_from_operating_activity: Optional[float] = Field(
+        None, description="Operating cash flow"
+    )
+    cash_from_investing_activity: Optional[float] = Field(
+        None, description="Investing cash flow"
+    )
+    cash_from_financing_activity: Optional[float] = Field(
+        None, description="Financing cash flow"
+    )
     free_cash_flow: Optional[float] = Field(None, description="Free cash flow")
     net_cash_flow: Optional[float] = Field(None, description="Net change in cash")
-    operating_activity: Optional[float] = Field(None, description="Operating activity cash flow")
-    investing_activity: Optional[float] = Field(None, description="Investing activity cash flow")
-    financing_activity: Optional[float] = Field(None, description="Financing activity cash flow")
+    operating_activity: Optional[float] = Field(
+        None, description="Operating activity cash flow"
+    )
+    investing_activity: Optional[float] = Field(
+        None, description="Investing activity cash flow"
+    )
+    financing_activity: Optional[float] = Field(
+        None, description="Financing activity cash flow"
+    )
 
 
 class RatioRecord(BaseModel):
+    """RatioRecord class representation."""
+
     company_id: str = Field(..., description="Company ticker")
     period: str = Field(..., description="Financial period")
     roe: Optional[float] = Field(None, description="Return on Equity %")
     roce: Optional[float] = Field(None, description="Return on Capital Employed %")
     roa: Optional[float] = Field(None, description="Return on Assets %")
     net_profit_margin: Optional[float] = Field(None, description="Net profit margin %")
-    operating_margin: Optional[float] = Field(None, description="Operating profit margin %")
+    operating_margin: Optional[float] = Field(
+        None, description="Operating profit margin %"
+    )
     ebit_margin: Optional[float] = Field(None, description="EBIT margin %")
     gross_margin: Optional[float] = Field(None, description="Gross profit margin %")
     current_ratio: Optional[float] = Field(None, description="Current ratio")
@@ -124,12 +175,20 @@ class RatioRecord(BaseModel):
     cash_ratio: Optional[float] = Field(None, description="Cash ratio")
     debt_to_equity: Optional[float] = Field(None, description="Debt to Equity ratio")
     debt_ratio: Optional[float] = Field(None, description="Debt ratio")
-    interest_coverage: Optional[float] = Field(None, description="Interest coverage ratio")
+    interest_coverage: Optional[float] = Field(
+        None, description="Interest coverage ratio"
+    )
     financial_leverage: Optional[float] = Field(None, description="Financial leverage")
     asset_turnover: Optional[float] = Field(None, description="Asset turnover ratio")
-    inventory_turnover: Optional[float] = Field(None, description="Inventory turnover ratio")
-    receivable_turnover: Optional[float] = Field(None, description="Receivables turnover ratio")
-    operating_cash_flow: Optional[float] = Field(None, description="Operating cash flow")
+    inventory_turnover: Optional[float] = Field(
+        None, description="Inventory turnover ratio"
+    )
+    receivable_turnover: Optional[float] = Field(
+        None, description="Receivables turnover ratio"
+    )
+    operating_cash_flow: Optional[float] = Field(
+        None, description="Operating cash flow"
+    )
     free_cash_flow: Optional[float] = Field(None, description="Free cash flow")
     eps: Optional[float] = Field(None, description="Earnings per share")
     pe_ratio: Optional[float] = Field(None, description="Price to Earnings ratio")
@@ -141,6 +200,7 @@ class RatioRecord(BaseModel):
 # =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
+
 
 def normalize_ticker(ticker: str) -> str:
     """Normalize ticker string by stripping whitespace and converting to uppercase."""
@@ -154,12 +214,11 @@ def validate_company_exists(ticker: str) -> bool:
     norm_ticker = normalize_ticker(ticker)
     if not norm_ticker:
         return False
-    
+
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT 1 FROM companies WHERE UPPER(TRIM(company_id)) = ?",
-        (norm_ticker,)
+        "SELECT 1 FROM companies WHERE UPPER(TRIM(company_id)) = ?", (norm_ticker,)
     )
     row = cursor.fetchone()
     return row is not None
@@ -173,22 +232,22 @@ def parse_year_string(year_str: Optional[str]) -> Optional[int]:
     """
     if not year_str:
         return None
-    
+
     clean_str = year_str.strip()
-    
+
     # Format YYYY-MM
     match_ym = re.match(r"^(\d{4})-(0[1-9]|1[0-2])$", clean_str)
     if match_ym:
         return int(match_ym.group(1))
-    
+
     # Format YYYY
     match_y = re.match(r"^\d{4}$", clean_str)
     if match_y:
         return int(match_y.group(0))
-    
+
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail=f"Invalid year format '{year_str}'. Expected format YYYY or YYYY-MM (e.g., 2024 or 2024-03)."
+        detail=f"Invalid year format '{year_str}'. Expected format YYYY or YYYY-MM (e.g., 2024 or 2024-03).",
     )
 
 
@@ -199,19 +258,19 @@ def extract_year_from_db_period(period_str: Optional[str]) -> int:
     """
     if not period_str:
         return 0
-    
+
     p_str = str(period_str).strip()
-    
+
     # Check 4-digit year
     m4 = re.search(r"\b(19\d\d|20\d\d)\b", p_str)
     if m4:
         return int(m4.group(1))
-    
+
     # Check 2-digit year (e.g., Mar-24 -> 2024, Mar-13 -> 2013)
     m2 = re.search(r"-(1\d|2\d)\b", p_str)
     if m2:
         return 2000 + int(m2.group(1))
-    
+
     return 0
 
 
@@ -222,19 +281,20 @@ def validate_year_range(from_year: Optional[str], to_year: Optional[str]):
     """
     fy_int = parse_year_string(from_year)
     ty_int = parse_year_string(to_year)
-    
+
     if fy_int is not None and ty_int is not None and fy_int > ty_int:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid year range: from_year ({from_year}) cannot be greater than to_year ({to_year})."
+            detail=f"Invalid year range: from_year ({from_year}) cannot be greater than to_year ({to_year}).",
         )
-    
+
     return fy_int, ty_int
 
 
 # =============================================================================
 # ENDPOINTS
 # =============================================================================
+
 
 @router.get(
     "",
@@ -243,13 +303,19 @@ def validate_year_range(from_year: Optional[str], to_year: Optional[str]):
     description="Retrieve list of all authoritative companies with optional sector, market cap, and search filters.",
     responses={
         200: {"description": "List of companies returned successfully"},
-        500: {"description": "Internal server error"}
-    }
+        500: {"description": "Internal server error"},
+    },
 )
 def get_companies(
-    sector: Optional[str] = Query(None, description="Filter by broad or sub sector (case-insensitive)"),
-    market_cap_category: Optional[str] = Query(None, description="Filter by market cap category (e.g. Large Cap)"),
-    search: Optional[str] = Query(None, description="Partial search by company name or ticker")
+    sector: Optional[str] = Query(
+        None, description="Filter by broad or sub sector (case-insensitive)"
+    ),
+    market_cap_category: Optional[str] = Query(
+        None, description="Filter by market cap category (e.g. Large Cap)"
+    ),
+    search: Optional[str] = Query(
+        None, description="Partial search by company name or ticker"
+    ),
 ) -> List[CompanyListItem]:
     """
     Returns list of all companies from the database.
@@ -258,7 +324,7 @@ def get_companies(
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        
+
         query = """
             SELECT 
                 c.company_id,
@@ -273,7 +339,7 @@ def get_companies(
             WHERE 1=1
         """
         params: List[Any] = []
-        
+
         if sector and sector.strip():
             sec_clean = sector.strip()
             sec_lower = sec_clean.lower()
@@ -296,34 +362,36 @@ def get_companies(
                 )"""
                 sec_pattern = f"%{sec_clean}%"
                 params.extend([sec_clean, sec_clean, sec_clean, sec_clean, sec_pattern])
-            
+
         if market_cap_category and market_cap_category.strip():
             mcap_clean = market_cap_category.strip()
             query += " AND LOWER(s.market_cap_category) = LOWER(?)"
             params.append(mcap_clean)
-            
+
         if search and search.strip():
             search_clean = f"%{search.strip()}%"
             query += " AND (LOWER(c.company_name) LIKE LOWER(?) OR LOWER(c.company_id) LIKE LOWER(?))"
             params.extend([search_clean, search_clean])
-            
+
         query += " ORDER BY c.company_id ASC"
-        
+
         cursor.execute(query, params)
         rows = cursor.fetchall()
-        
+
         result: List[CompanyListItem] = []
         for r in rows:
-            result.append(CompanyListItem(
-                company_id=r["company_id"],
-                company_name=r["company_name"],
-                broad_sector=r["broad_sector"],
-                sub_sector=r["sub_sector"],
-                market_cap_category=r["market_cap_category"],
-                roe_pct=r["roe_pct"],
-                roce_pct=r["roce_pct"]
-            ))
-            
+            result.append(
+                CompanyListItem(
+                    company_id=r["company_id"],
+                    company_name=r["company_name"],
+                    broad_sector=r["broad_sector"],
+                    sub_sector=r["sub_sector"],
+                    market_cap_category=r["market_cap_category"],
+                    roe_pct=r["roe_pct"],
+                    roce_pct=r["roce_pct"],
+                )
+            )
+
         return result
 
     except HTTPException:
@@ -332,7 +400,7 @@ def get_companies(
         logger.exception("Error in GET /companies")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve company list"
+            detail="Failed to retrieve company list",
         ) from exc
 
 
@@ -344,20 +412,21 @@ def get_companies(
     responses={
         200: {"description": "Company profile returned successfully"},
         404: {"description": "Company ticker not found"},
-        500: {"description": "Internal server error"}
-    }
+        500: {"description": "Internal server error"},
+    },
 )
 def get_company_profile(ticker: str) -> CompanyProfile:
     """
     Returns complete company profile for given ticker symbol.
     """
     norm_ticker = normalize_ticker(ticker)
-    
+
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        
-        cursor.execute("""
+
+        cursor.execute(
+            """
             SELECT 
                 c.company_id,
                 c.company_name,
@@ -381,34 +450,47 @@ def get_company_profile(ticker: str) -> CompanyProfile:
             FROM companies c
             LEFT JOIN sectors s ON c.company_id = s.company_id
             WHERE UPPER(TRIM(c.company_id)) = ?
-        """, (norm_ticker,))
-        
+        """,
+            (norm_ticker,),
+        )
+
         row = cursor.fetchone()
         if not row:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Company with ticker '{ticker}' not found"
+                detail=f"Company with ticker '{ticker}' not found",
             )
-            
+
         # Fetch latest calculated KPIs for company
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT *
             FROM financial_kpis
             WHERE UPPER(TRIM(company_id)) = ?
             ORDER BY id DESC
             LIMIT 10
-        """, (norm_ticker,))
+        """,
+            (norm_ticker,),
+        )
         kpi_rows = cursor.fetchall()
-        
+
         latest_kpis: Dict[str, Any] = {}
         for kr in kpi_rows:
             kd = dict(kr)
             non_null_count = sum(1 for v in kd.values() if v is not None)
             if non_null_count > 3:
-                latest_kpis = {k: v for k, v in kd.items() if k not in ("id", "company_id", "calculated_at")}
+                latest_kpis = {
+                    k: v
+                    for k, v in kd.items()
+                    if k not in ("id", "company_id", "calculated_at")
+                }
                 break
         if not latest_kpis and kpi_rows:
-            latest_kpis = {k: v for k, v in dict(kpi_rows[0]).items() if k not in ("id", "company_id", "calculated_at")}
+            latest_kpis = {
+                k: v
+                for k, v in dict(kpi_rows[0]).items()
+                if k not in ("id", "company_id", "calculated_at")
+            }
 
         return CompanyProfile(
             company_id=row["company_id"],
@@ -430,7 +512,7 @@ def get_company_profile(ticker: str) -> CompanyProfile:
             book_value=row["book_value"],
             roce_percentage=row["roce_percentage"],
             roe_percentage=row["roe_percentage"],
-            latest_kpis=latest_kpis
+            latest_kpis=latest_kpis,
         )
 
     except HTTPException:
@@ -439,7 +521,7 @@ def get_company_profile(ticker: str) -> CompanyProfile:
         logger.exception(f"Error in GET /companies/{ticker}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve company profile"
+            detail="Failed to retrieve company profile",
         ) from exc
 
 
@@ -452,13 +534,17 @@ def get_company_profile(ticker: str) -> CompanyProfile:
         200: {"description": "P&L history array returned successfully"},
         400: {"description": "Invalid year format or range"},
         404: {"description": "Company ticker not found"},
-        500: {"description": "Internal server error"}
-    }
+        500: {"description": "Internal server error"},
+    },
 )
 def get_profit_loss_history(
     ticker: str,
-    from_year: Optional[str] = Query(None, description="Start year filter (YYYY or YYYY-MM)"),
-    to_year: Optional[str] = Query(None, description="End year filter (YYYY or YYYY-MM)")
+    from_year: Optional[str] = Query(
+        None, description="Start year filter (YYYY or YYYY-MM)"
+    ),
+    to_year: Optional[str] = Query(
+        None, description="End year filter (YYYY or YYYY-MM)"
+    ),
 ) -> List[ProfitLossRecord]:
     """
     Returns historical P&L statements for company.
@@ -467,24 +553,27 @@ def get_profit_loss_history(
     if not validate_company_exists(norm_ticker):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Company with ticker '{ticker}' not found"
+            detail=f"Company with ticker '{ticker}' not found",
         )
-        
+
     fy_int, ty_int = validate_year_range(from_year, to_year)
-    
+
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        
-        cursor.execute("""
+
+        cursor.execute(
+            """
             SELECT *
             FROM profit_loss
             WHERE UPPER(TRIM(company_id)) = ?
             ORDER BY id ASC
-        """, (norm_ticker,))
-        
+        """,
+            (norm_ticker,),
+        )
+
         rows = cursor.fetchall()
-        
+
         records: List[ProfitLossRecord] = []
         for r in rows:
             r_year = extract_year_from_db_period(r["period"])
@@ -492,25 +581,27 @@ def get_profit_loss_history(
                 continue
             if ty_int is not None and r_year > ty_int and r_year != 0:
                 continue
-            
-            records.append(ProfitLossRecord(
-                id=r["id"],
-                company_id=r["company_id"],
-                period=r["period"],
-                sales=r["sales"],
-                expenses=r["expenses"],
-                operating_profit=r["operating_profit"],
-                opm_percentage=r["opm_percentage"],
-                other_income=r["other_income"],
-                interest=r["interest"],
-                depreciation=r["depreciation"],
-                profit_before_tax=r["profit_before_tax"],
-                tax_percentage=r["tax_percentage"],
-                net_profit=r["net_profit"],
-                eps=r["eps"],
-                dividend_payout=r["dividend_payout"]
-            ))
-            
+
+            records.append(
+                ProfitLossRecord(
+                    id=r["id"],
+                    company_id=r["company_id"],
+                    period=r["period"],
+                    sales=r["sales"],
+                    expenses=r["expenses"],
+                    operating_profit=r["operating_profit"],
+                    opm_percentage=r["opm_percentage"],
+                    other_income=r["other_income"],
+                    interest=r["interest"],
+                    depreciation=r["depreciation"],
+                    profit_before_tax=r["profit_before_tax"],
+                    tax_percentage=r["tax_percentage"],
+                    net_profit=r["net_profit"],
+                    eps=r["eps"],
+                    dividend_payout=r["dividend_payout"],
+                )
+            )
+
         records.sort(key=lambda item: extract_year_from_db_period(item.period))
         return records
 
@@ -520,7 +611,7 @@ def get_profit_loss_history(
         logger.exception(f"Error in GET /companies/{ticker}/pl")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve P&L history"
+            detail="Failed to retrieve P&L history",
         ) from exc
 
 
@@ -533,13 +624,17 @@ def get_profit_loss_history(
         200: {"description": "Balance Sheet history array returned successfully"},
         400: {"description": "Invalid year format or range"},
         404: {"description": "Company ticker not found"},
-        500: {"description": "Internal server error"}
-    }
+        500: {"description": "Internal server error"},
+    },
 )
 def get_balance_sheet_history(
     ticker: str,
-    from_year: Optional[str] = Query(None, description="Start year filter (YYYY or YYYY-MM)"),
-    to_year: Optional[str] = Query(None, description="End year filter (YYYY or YYYY-MM)")
+    from_year: Optional[str] = Query(
+        None, description="Start year filter (YYYY or YYYY-MM)"
+    ),
+    to_year: Optional[str] = Query(
+        None, description="End year filter (YYYY or YYYY-MM)"
+    ),
 ) -> List[BalanceSheetRecord]:
     """
     Returns historical Balance Sheet statements for company.
@@ -548,24 +643,27 @@ def get_balance_sheet_history(
     if not validate_company_exists(norm_ticker):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Company with ticker '{ticker}' not found"
+            detail=f"Company with ticker '{ticker}' not found",
         )
-        
+
     fy_int, ty_int = validate_year_range(from_year, to_year)
-    
+
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        
-        cursor.execute("""
+
+        cursor.execute(
+            """
             SELECT *
             FROM balance_sheet
             WHERE UPPER(TRIM(company_id)) = ?
             ORDER BY id ASC
-        """, (norm_ticker,))
-        
+        """,
+            (norm_ticker,),
+        )
+
         rows = cursor.fetchall()
-        
+
         records: List[BalanceSheetRecord] = []
         for r in rows:
             r_year = extract_year_from_db_period(r["period"])
@@ -573,24 +671,26 @@ def get_balance_sheet_history(
                 continue
             if ty_int is not None and r_year > ty_int and r_year != 0:
                 continue
-                
-            records.append(BalanceSheetRecord(
-                id=r["id"],
-                company_id=r["company_id"],
-                period=r["period"],
-                share_capital=r["share_capital"],
-                reserves=r["reserves"],
-                borrowings=r["borrowings"],
-                other_liabilities=r["other_liabilities"],
-                total_liabilities=r["total_liabilities"],
-                fixed_assets=r["fixed_assets"],
-                cwip=r["cwip"],
-                investments=r["investments"],
-                other_assets=r["other_assets"],
-                total_assets=r["total_assets"],
-                equity_capital=r["equity_capital"]
-            ))
-            
+
+            records.append(
+                BalanceSheetRecord(
+                    id=r["id"],
+                    company_id=r["company_id"],
+                    period=r["period"],
+                    share_capital=r["share_capital"],
+                    reserves=r["reserves"],
+                    borrowings=r["borrowings"],
+                    other_liabilities=r["other_liabilities"],
+                    total_liabilities=r["total_liabilities"],
+                    fixed_assets=r["fixed_assets"],
+                    cwip=r["cwip"],
+                    investments=r["investments"],
+                    other_assets=r["other_assets"],
+                    total_assets=r["total_assets"],
+                    equity_capital=r["equity_capital"],
+                )
+            )
+
         records.sort(key=lambda item: extract_year_from_db_period(item.period))
         return records
 
@@ -600,7 +700,7 @@ def get_balance_sheet_history(
         logger.exception(f"Error in GET /companies/{ticker}/bs")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve Balance Sheet history"
+            detail="Failed to retrieve Balance Sheet history",
         ) from exc
 
 
@@ -613,13 +713,17 @@ def get_balance_sheet_history(
         200: {"description": "Cash Flow history array returned successfully"},
         400: {"description": "Invalid year format or range"},
         404: {"description": "Company ticker not found"},
-        500: {"description": "Internal server error"}
-    }
+        500: {"description": "Internal server error"},
+    },
 )
 def get_cash_flow_history(
     ticker: str,
-    from_year: Optional[str] = Query(None, description="Start year filter (YYYY or YYYY-MM)"),
-    to_year: Optional[str] = Query(None, description="End year filter (YYYY or YYYY-MM)")
+    from_year: Optional[str] = Query(
+        None, description="Start year filter (YYYY or YYYY-MM)"
+    ),
+    to_year: Optional[str] = Query(
+        None, description="End year filter (YYYY or YYYY-MM)"
+    ),
 ) -> List[CashFlowRecord]:
     """
     Returns historical Cash Flow statements for company.
@@ -628,24 +732,27 @@ def get_cash_flow_history(
     if not validate_company_exists(norm_ticker):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Company with ticker '{ticker}' not found"
+            detail=f"Company with ticker '{ticker}' not found",
         )
-        
+
     fy_int, ty_int = validate_year_range(from_year, to_year)
-    
+
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        
-        cursor.execute("""
+
+        cursor.execute(
+            """
             SELECT *
             FROM cash_flow
             WHERE UPPER(TRIM(company_id)) = ?
             ORDER BY id ASC
-        """, (norm_ticker,))
-        
+        """,
+            (norm_ticker,),
+        )
+
         rows = cursor.fetchall()
-        
+
         records: List[CashFlowRecord] = []
         for r in rows:
             r_year = extract_year_from_db_period(r["period"])
@@ -653,21 +760,23 @@ def get_cash_flow_history(
                 continue
             if ty_int is not None and r_year > ty_int and r_year != 0:
                 continue
-                
-            records.append(CashFlowRecord(
-                id=r["id"],
-                company_id=r["company_id"],
-                period=r["period"],
-                cash_from_operating_activity=r["cash_from_operating_activity"],
-                cash_from_investing_activity=r["cash_from_investing_activity"],
-                cash_from_financing_activity=r["cash_from_financing_activity"],
-                free_cash_flow=r["free_cash_flow"],
-                net_cash_flow=r["net_cash_flow"],
-                operating_activity=r["operating_activity"],
-                investing_activity=r["investing_activity"],
-                financing_activity=r["financing_activity"]
-            ))
-            
+
+            records.append(
+                CashFlowRecord(
+                    id=r["id"],
+                    company_id=r["company_id"],
+                    period=r["period"],
+                    cash_from_operating_activity=r["cash_from_operating_activity"],
+                    cash_from_investing_activity=r["cash_from_investing_activity"],
+                    cash_from_financing_activity=r["cash_from_financing_activity"],
+                    free_cash_flow=r["free_cash_flow"],
+                    net_cash_flow=r["net_cash_flow"],
+                    operating_activity=r["operating_activity"],
+                    investing_activity=r["investing_activity"],
+                    financing_activity=r["financing_activity"],
+                )
+            )
+
         records.sort(key=lambda item: extract_year_from_db_period(item.period))
         return records
 
@@ -677,7 +786,7 @@ def get_cash_flow_history(
         logger.exception(f"Error in GET /companies/{ticker}/cashflow")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve Cash Flow history"
+            detail="Failed to retrieve Cash Flow history",
         ) from exc
 
 
@@ -690,12 +799,14 @@ def get_cash_flow_history(
         200: {"description": "Ratios and KPIs array returned successfully"},
         400: {"description": "Invalid year format"},
         404: {"description": "Company ticker not found"},
-        500: {"description": "Internal server error"}
-    }
+        500: {"description": "Internal server error"},
+    },
 )
 def get_company_ratios(
     ticker: str,
-    year: Optional[str] = Query(None, description="Optional year filter (YYYY or YYYY-MM)")
+    year: Optional[str] = Query(
+        None, description="Optional year filter (YYYY or YYYY-MM)"
+    ),
 ) -> List[RatioRecord]:
     """
     Returns historical financial ratios and KPIs for company.
@@ -705,16 +816,17 @@ def get_company_ratios(
     if not validate_company_exists(norm_ticker):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Company with ticker '{ticker}' not found"
+            detail=f"Company with ticker '{ticker}' not found",
         )
-        
+
     filter_year_int = parse_year_string(year)
-    
+
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        
-        cursor.execute("""
+
+        cursor.execute(
+            """
             SELECT 
                 k.company_id,
                 k.period,
@@ -745,45 +857,49 @@ def get_company_ratios(
             FROM financial_kpis k
             WHERE UPPER(TRIM(k.company_id)) = ?
             ORDER BY k.id ASC
-        """, (norm_ticker,))
-        
+        """,
+            (norm_ticker,),
+        )
+
         rows = cursor.fetchall()
-        
+
         records: List[RatioRecord] = []
         for r in rows:
             r_year = extract_year_from_db_period(r["period"])
             if filter_year_int is not None and r_year != filter_year_int:
                 continue
-                
-            records.append(RatioRecord(
-                company_id=r["company_id"],
-                period=r["period"],
-                roe=r["roe"],
-                roce=r["roce"],
-                roa=r["roa"],
-                net_profit_margin=r["net_profit_margin"],
-                operating_margin=r["operating_margin"],
-                ebit_margin=r["ebit_margin"],
-                gross_margin=r["gross_margin"],
-                current_ratio=r["current_ratio"],
-                quick_ratio=r["quick_ratio"],
-                cash_ratio=r["cash_ratio"],
-                debt_to_equity=r["debt_to_equity"],
-                debt_ratio=r["debt_ratio"],
-                interest_coverage=r["interest_coverage"],
-                financial_leverage=r["financial_leverage"],
-                asset_turnover=r["asset_turnover"],
-                inventory_turnover=r["inventory_turnover"],
-                receivable_turnover=r["receivable_turnover"],
-                operating_cash_flow=r["operating_cash_flow"],
-                free_cash_flow=r["free_cash_flow"],
-                eps=r["eps"],
-                pe_ratio=r["pe_ratio"],
-                pb_ratio=r["pb_ratio"],
-                ev_ebitda=r["ev_ebitda"],
-                dividend_yield=r["dividend_yield"]
-            ))
-            
+
+            records.append(
+                RatioRecord(
+                    company_id=r["company_id"],
+                    period=r["period"],
+                    roe=r["roe"],
+                    roce=r["roce"],
+                    roa=r["roa"],
+                    net_profit_margin=r["net_profit_margin"],
+                    operating_margin=r["operating_margin"],
+                    ebit_margin=r["ebit_margin"],
+                    gross_margin=r["gross_margin"],
+                    current_ratio=r["current_ratio"],
+                    quick_ratio=r["quick_ratio"],
+                    cash_ratio=r["cash_ratio"],
+                    debt_to_equity=r["debt_to_equity"],
+                    debt_ratio=r["debt_ratio"],
+                    interest_coverage=r["interest_coverage"],
+                    financial_leverage=r["financial_leverage"],
+                    asset_turnover=r["asset_turnover"],
+                    inventory_turnover=r["inventory_turnover"],
+                    receivable_turnover=r["receivable_turnover"],
+                    operating_cash_flow=r["operating_cash_flow"],
+                    free_cash_flow=r["free_cash_flow"],
+                    eps=r["eps"],
+                    pe_ratio=r["pe_ratio"],
+                    pb_ratio=r["pb_ratio"],
+                    ev_ebitda=r["ev_ebitda"],
+                    dividend_yield=r["dividend_yield"],
+                )
+            )
+
         records.sort(key=lambda item: extract_year_from_db_period(item.period))
         return records
 
@@ -793,7 +909,7 @@ def get_company_ratios(
         logger.exception(f"Error in GET /companies/{ticker}/ratios")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve financial ratios"
+            detail="Failed to retrieve financial ratios",
         ) from exc
 
 
@@ -802,11 +918,14 @@ def get_company_ratios(
     summary="Get Company Tearsheet PDF",
     description="Download pre-generated PDF tearsheet report for a company.",
     responses={
-        200: {"content": {"application/pdf": {}}, "description": "PDF tearsheet file returned successfully"},
+        200: {
+            "content": {"application/pdf": {}},
+            "description": "PDF tearsheet file returned successfully",
+        },
         400: {"description": "Invalid ticker parameter"},
         404: {"description": "Company ticker or tearsheet PDF not found"},
-        500: {"description": "Internal server error"}
-    }
+        500: {"description": "Internal server error"},
+    },
 )
 def get_company_tearsheet(ticker: str):
     """
@@ -814,40 +933,39 @@ def get_company_tearsheet(ticker: str):
     Enforces path traversal safety and validates ticker against DB.
     """
     norm_ticker = normalize_ticker(ticker)
-    
+
     # Path traversal validation
     if not norm_ticker or re.search(r"[/\\]|\.\.", ticker):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid company ticker format"
+            detail="Invalid company ticker format",
         )
-        
+
     if not validate_company_exists(norm_ticker):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Company with ticker '{ticker}' not found"
+            detail=f"Company with ticker '{ticker}' not found",
         )
-        
+
     tearsheet_dir = (REPORTS_DIR / "tearsheets").resolve()
     pdf_path = (tearsheet_dir / f"{norm_ticker}_tearsheet.pdf").resolve()
-    
+
     # Strictly enforce path containment
     if not pdf_path.is_relative_to(tearsheet_dir):
         logger.warning(f"Path traversal attempt blocked for ticker: {ticker}")
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid file path"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid file path"
         )
-        
+
     if not pdf_path.exists() or not pdf_path.is_file():
         logger.warning(f"Tearsheet PDF missing for ticker: {norm_ticker} at {pdf_path}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Tearsheet PDF for ticker '{ticker}' not found on server"
+            detail=f"Tearsheet PDF for ticker '{ticker}' not found on server",
         )
-        
+
     return FileResponse(
         path=str(pdf_path),
         media_type="application/pdf",
-        filename=f"{norm_ticker}_tearsheet.pdf"
+        filename=f"{norm_ticker}_tearsheet.pdf",
     )

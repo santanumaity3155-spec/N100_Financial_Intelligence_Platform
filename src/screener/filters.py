@@ -8,10 +8,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-
 # =============================================================================
 # FILTER OPERATORS
 # =============================================================================
+
 
 class FilterOperator(str, Enum):
     """
@@ -34,6 +34,7 @@ class FilterOperator(str, Enum):
 # =============================================================================
 # FILTER CONDITION
 # =============================================================================
+
 
 @dataclass
 class FilterCondition:
@@ -85,7 +86,9 @@ class FilterCondition:
                 )
         elif self.operator in (FilterOperator.IN, FilterOperator.NOT_IN):
             if self.value is None:
-                raise ValueError(f"{self.operator.value} operator requires a list of values")
+                raise ValueError(
+                    f"{self.operator.value} operator requires a list of values"
+                )
             if not isinstance(self.value, (list, tuple)):
                 raise ValueError(
                     f"{self.operator.value} operator requires a list or tuple, got {type(self.value)}"
@@ -139,6 +142,7 @@ class FilterCondition:
 # FILTER GROUP (for AND/OR logic)
 # =============================================================================
 
+
 @dataclass
 class FilterGroup:
     """
@@ -158,7 +162,9 @@ class FilterGroup:
     def __post_init__(self):
         """Validate the filter group."""
         if self.logic not in ("AND", "OR"):
-            raise ValueError(f"Filter group logic must be 'AND' or 'OR', got '{self.logic}'")
+            raise ValueError(
+                f"Filter group logic must be 'AND' or 'OR', got '{self.logic}'"
+            )
 
         if not self.conditions:
             raise ValueError("Filter group must have at least one condition")
@@ -207,6 +213,7 @@ class FilterGroup:
 # =============================================================================
 # FILTER VALIDATOR
 # =============================================================================
+
 
 class FilterValidator:
     """
@@ -298,7 +305,9 @@ class FilterValidator:
             FilterOperator.IS_NOT_NULL,
         ):
             if filter_condition.value is None:
-                errors.append(f"Operator {filter_condition.operator.value} requires a value")
+                errors.append(
+                    f"Operator {filter_condition.operator.value} requires a value"
+                )
 
         return errors
 

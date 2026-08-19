@@ -76,13 +76,13 @@ logger = get_logger(__name__)
 # =============================================================================
 
 # CFO Quality classification thresholds (Sprint 5 specification)
-CFO_QUALITY_HIGH_THRESHOLD = 1.0        # ratio > 1.0            -> High Quality
-CFO_QUALITY_MODERATE_LOWER = 0.5        # 0.5 <= ratio <= 1.0    -> Moderate
+CFO_QUALITY_HIGH_THRESHOLD = 1.0  # ratio > 1.0            -> High Quality
+CFO_QUALITY_MODERATE_LOWER = 0.5  # 0.5 <= ratio <= 1.0    -> Moderate
 # ratio < 0.5                            -> Accrual Risk
 
 # CapEx Intensity classification thresholds (Sprint 5 specification)
-CAPEX_INTENSITY_ASSET_LIGHT = 3.0       # < 3%   -> Asset Light
-CAPEX_INTENSITY_MODERATE_UPPER = 8.0    # 3-8%   -> Moderate (3.0 and 8.0 inclusive)
+CAPEX_INTENSITY_ASSET_LIGHT = 3.0  # < 3%   -> Asset Light
+CAPEX_INTENSITY_MODERATE_UPPER = 8.0  # 3-8%   -> Moderate (3.0 and 8.0 inclusive)
 # > 8%   -> Capital Intensive
 
 # Number of latest years used for CFO quality
@@ -151,8 +151,18 @@ DISTRESS_CSV_FILENAME = "distress_alerts.csv"
 
 # Period parsing helpers
 _MONTHS = {
-    "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
-    "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+    "jan": 1,
+    "feb": 2,
+    "mar": 3,
+    "apr": 4,
+    "may": 5,
+    "jun": 6,
+    "jul": 7,
+    "aug": 8,
+    "sep": 9,
+    "oct": 10,
+    "nov": 11,
+    "dec": 12,
 }
 _ANNUAL_PERIOD_RE = re.compile(r"^([A-Za-z]{3})\s+(\d{4})$")
 _LEGACY_PERIOD_RE = re.compile(r"^([A-Za-z]{3})-(\d{2})$")
@@ -215,9 +225,6 @@ def is_valid_annual_period(period: Any) -> bool:
     return parse_period(period) is not None
 
 
-
-
-
 # =============================================================================
 # DATA EXTRACTION HELPERS
 # =============================================================================
@@ -269,7 +276,13 @@ def _normalize_cashflow(cf_df: pd.DataFrame) -> List[Dict[str, Any]]:
         ocf = _col_value(row, "cash_from_operating_activity", "operating_activity")
         cfi = _col_value(row, "cash_from_investing_activity", "investing_activity")
         cff = _col_value(row, "cash_from_financing_activity", "financing_activity")
-        rec = {"key": key, "period": str(row["period"]), "ocf": ocf, "cfi": cfi, "cff": cff}
+        rec = {
+            "key": key,
+            "period": str(row["period"]),
+            "ocf": ocf,
+            "cfi": cfi,
+            "cff": cff,
+        }
 
         existing = records.get(key)
         if existing is None:
@@ -316,7 +329,6 @@ def _normalize_profit_loss(pl_df: pd.DataFrame) -> List[Dict[str, Any]]:
     return sorted(records.values(), key=lambda r: r["key"])
 
 
-
 def _normalize_balance_sheet(bs_df: pd.DataFrame) -> List[Dict[str, Any]]:
     """
     Normalise raw balance-sheet rows into sorted, de-duplicated records.
@@ -350,10 +362,14 @@ def _normalize_balance_sheet(bs_df: pd.DataFrame) -> List[Dict[str, Any]]:
 
 def _single_cf_df(ocf: float, cfi: float) -> pd.DataFrame:
     """Build a single-row cash-flow DataFrame using canonical column names."""
-    return pd.DataFrame([{
-        "cash_from_operating_activity": ocf,
-        "cash_from_investing_activity": cfi,
-    }])
+    return pd.DataFrame(
+        [
+            {
+                "cash_from_operating_activity": ocf,
+                "cash_from_investing_activity": cfi,
+            }
+        ]
+    )
 
 
 def _latest_net_profit(pl_df: pd.DataFrame) -> Optional[float]:
@@ -470,7 +486,6 @@ def compute_capex_intensity(cf_df: pd.DataFrame, pl_df: pd.DataFrame) -> Dict[st
     return {"value": value, "label": label}
 
 
-
 def compute_fcf_cagr_5yr(cf_df: pd.DataFrame) -> Dict[str, Any]:
     """
     Compute the 5-year Free Cash Flow CAGR.
@@ -510,7 +525,8 @@ def compute_fcf_cagr_5yr(cf_df: pd.DataFrame) -> Dict[str, Any]:
 
     end_key, end_fcf = fcf_series[-1]
     start_key, start_fcf = (
-        fcf_series[- (FCF_CAGR_WINDOW_YEARS + 1)] if len(fcf_series) >= FCF_CAGR_WINDOW_YEARS + 1
+        fcf_series[-(FCF_CAGR_WINDOW_YEARS + 1)]
+        if len(fcf_series) >= FCF_CAGR_WINDOW_YEARS + 1
         else fcf_series[0]
     )
 
@@ -519,7 +535,11 @@ def compute_fcf_cagr_5yr(cf_df: pd.DataFrame) -> Dict[str, Any]:
         return {"value": None, "flag": FLAG_INSUFFICIENT, "years_used": len(fcf_series)}
 
     result = calculate_cagr(start_fcf, end_fcf, years, "fcf")
-    return {"value": result["value"], "flag": result["flag"], "years_used": len(fcf_series)}
+    return {
+        "value": result["value"],
+        "flag": result["flag"],
+        "years_used": len(fcf_series),
+    }
 
 
 def compute_fcf_conversion(cf_df: pd.DataFrame, pl_df: pd.DataFrame) -> Dict[str, Any]:
@@ -588,7 +608,6 @@ def compute_distress_flag(cf_df: pd.DataFrame) -> Dict[str, Any]:
     }
 
 
-
 def _fiscal_month(bs_rows: List[Dict[str, Any]]) -> Optional[int]:
     """
     Determine the dominant fiscal year-end month from balance-sheet periods.
@@ -604,7 +623,9 @@ def _fiscal_month(bs_rows: List[Dict[str, Any]]) -> Optional[int]:
     return max(set(months), key=months.count)
 
 
-def compute_deleveraging_flag(cf_df: pd.DataFrame, bs_df: pd.DataFrame) -> Dict[str, Any]:
+def compute_deleveraging_flag(
+    cf_df: pd.DataFrame, bs_df: pd.DataFrame
+) -> Dict[str, Any]:
     """
     Compute the Deleveraging Flag for the latest year.
 
@@ -637,7 +658,8 @@ def compute_deleveraging_flag(cf_df: pd.DataFrame, bs_df: pd.DataFrame) -> Dict[
         return {"flag": False, "cff": latest_cff, "borrowings_change": None}
 
     annual_borrowings = [
-        r for r in bs_rows
+        r
+        for r in bs_rows
         if r["key"][1] == fiscal_month and r["borrowings"] is not None
     ]
     if len(annual_borrowings) < 2:
@@ -683,10 +705,14 @@ def compute_capital_allocation_label(cf_df: pd.DataFrame, pl_df: pd.DataFrame) -
         return LABEL_INSUFFICIENT_DATA
 
     cf_single = _single_cf_df(cf_row["ocf"], cf_row["cfi"])
-    pl_single = pd.DataFrame([{
-        "sales": pl_row["sales"],
-        "net_profit": pl_row["net_profit"],
-    }])
+    pl_single = pd.DataFrame(
+        [
+            {
+                "sales": pl_row["sales"],
+                "net_profit": pl_row["net_profit"],
+            }
+        ]
+    )
 
     fcf = calculate_free_cash_flow(cf_single)
     ocf = _get_operating_cash_flow(cf_single)
@@ -697,4 +723,3 @@ def compute_capital_allocation_label(cf_df: pd.DataFrame, pl_df: pd.DataFrame) -
     capex_intensity = calculate_capex_intensity_ocf(cf_single)
 
     return classify_capital_allocation(fcf, cash_conversion, capex_intensity, ocf)
-

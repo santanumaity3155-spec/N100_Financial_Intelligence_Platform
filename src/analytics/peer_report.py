@@ -97,36 +97,43 @@ TOP_WEAKNESSES_COUNT = 3
 
 class PeerReportError(Exception):
     """Base exception for peer report errors."""
+
     pass
 
 
 class CompanyNotFoundError(PeerReportError):
     """Raised when company is not found."""
+
     pass
 
 
 class PeerGroupNotFoundError(PeerReportError):
     """Raised when peer group is not found."""
+
     pass
 
 
 class HealthScoreNotFoundError(PeerReportError):
     """Raised when health score is not found."""
+
     pass
 
 
 class RadarChartNotFoundError(PeerReportError):
     """Raised when radar chart is not found."""
+
     pass
 
 
 class KPIDataError(PeerReportError):
     """Raised when KPI data is missing or invalid."""
+
     pass
 
 
 class ReportGenerationError(PeerReportError):
     """Raised when report generation fails."""
+
     pass
 
 
@@ -135,24 +142,26 @@ class ReportGenerationError(PeerReportError):
 # =============================================================================
 
 
-def load_company_report_data(company_id: str, period: Optional[str] = None) -> Dict[str, Any]:
+def load_company_report_data(
+    company_id: str, period: Optional[str] = None
+) -> Dict[str, Any]:
     """
     Load all necessary data for generating a company's peer comparison report.
-    
+
     This function loads data from multiple sources:
     - companies table: Basic company information
     - financial_ratios table: Financial KPIs
     - financial_health_scores table: Health scores
     - peer_percentiles table: Percentile rankings
     - peer_groups table: Peer group assignments
-    
+
     Parameters
     ----------
     company_id : str
         Company identifier (e.g., "RELIANCE", "TCS")
     period : Optional[str], optional
         Financial period (e.g., "FY2024"), by default None (latest period)
-    
+
     Returns
     -------
     Dict[str, Any]
@@ -164,7 +173,7 @@ def load_company_report_data(company_id: str, period: Optional[str] = None) -> D
         - peer_percentiles: Percentile rankings
         - peer_benchmark: Peer group averages
         - period: Reporting period
-    
+
     Raises
     ------
     CompanyNotFoundError
@@ -180,11 +189,11 @@ def load_company_report_data(company_id: str, period: Optional[str] = None) -> D
     """
     logger.info(f"Loading report data for company: {company_id}, period: {period}")
     start_time = time.time()
-    
+
     try:
         conn = get_connection()
         report_data = {}
-        
+
         # Step 1: Load company information
         logger.info(f"Step 1: Loading company information for {company_id}")
         company_query = """
@@ -200,13 +209,13 @@ def load_company_report_data(company_id: str, period: Optional[str] = None) -> D
             WHERE c.company_id = ?
         """
         company_df = pd.read_sql_query(company_query, conn, params=(company_id,))
-        
+
         if company_df.empty:
             raise CompanyNotFoundError(f"Company not found: {company_id}")
-        
+
         report_data["company_info"] = company_df.iloc[0].to_dict()
         logger.info(f"Company found: {report_data['company_info'].get('company_name')}")
-        
+
         # Step 2: Load peer group
         logger.info("Step 2: Loading peer group")
         peer_group_query = """
@@ -215,15 +224,17 @@ def load_company_report_data(company_id: str, period: Optional[str] = None) -> D
             WHERE company_id = ?
         """
         peer_group_df = pd.read_sql_query(peer_group_query, conn, params=(company_id,))
-        
+
         if peer_group_df.empty or pd.isna(peer_group_df.iloc[0].get("peer_group_name")):
-            raise PeerGroupNotFoundError(f"No peer group assigned for company: {company_id}")
-        
+            raise PeerGroupNotFoundError(
+                f"No peer group assigned for company: {company_id}"
+            )
+
         peer_group_name = peer_group_df.iloc[0]["peer_group_name"]
         report_data["peer_group"] = peer_group_name
         report_data["is_benchmark"] = peer_group_df.iloc[0].get("is_benchmark", 0)
         logger.info(f"Peer group: {peer_group_name}")
-        
+
         # Step 3: Load financial ratios
         logger.info("Step 3: Loading financial ratios")
         if period:
@@ -231,7 +242,9 @@ def load_company_report_data(company_id: str, period: Optional[str] = None) -> D
                 SELECT * FROM financial_ratios
                 WHERE company_id = ? AND period = ?
             """
-            ratios_df = pd.read_sql_query(ratios_query, conn, params=(company_id, period))
+            ratios_df = pd.read_sql_query(
+                ratios_query, conn, params=(company_id, period)
+            )
         else:
             # Get latest period
             ratios_query = """
@@ -241,15 +254,15 @@ def load_company_report_data(company_id: str, period: Optional[str] = None) -> D
                 LIMIT 1
             """
             ratios_df = pd.read_sql_query(ratios_query, conn, params=(company_id,))
-        
+
         if ratios_df.empty:
             raise KPIDataError(f"No financial ratios found for company: {company_id}")
-        
+
         report_data["financial_ratios"] = ratios_df.iloc[0].to_dict()
         actual_period = ratios_df.iloc[0].get("period")
         report_data["period"] = actual_period
         logger.info(f"Financial ratios loaded for period: {actual_period}")
-        
+
         # Step 4: Load health score
         logger.info("Step 4: Loading health score")
         if period:
@@ -257,7 +270,9 @@ def load_company_report_data(company_id: str, period: Optional[str] = None) -> D
                 SELECT * FROM financial_health_scores
                 WHERE company_id = ? AND period = ?
             """
-            health_df = pd.read_sql_query(health_query, conn, params=(company_id, period))
+            health_df = pd.read_sql_query(
+                health_query, conn, params=(company_id, period)
+            )
         else:
             health_query = """
                 SELECT * FROM financial_health_scores
@@ -266,15 +281,17 @@ def load_company_report_data(company_id: str, period: Optional[str] = None) -> D
                 LIMIT 1
             """
             health_df = pd.read_sql_query(health_query, conn, params=(company_id,))
-        
+
         if health_df.empty:
             raise HealthScoreNotFoundError(
                 f"No health score found for company: {company_id}, period: {actual_period}"
             )
-        
+
         report_data["health_score"] = health_df.iloc[0].to_dict()
-        logger.info(f"Health score loaded: {report_data['health_score'].get('overall_score')}")
-        
+        logger.info(
+            f"Health score loaded: {report_data['health_score'].get('overall_score')}"
+        )
+
         # Step 5: Load peer percentiles
         logger.info("Step 5: Loading peer percentiles")
         percentiles_query = """
@@ -283,13 +300,13 @@ def load_company_report_data(company_id: str, period: Optional[str] = None) -> D
             WHERE company_id = ? AND peer_group_name = ? AND period = ?
         """
         percentiles_df = pd.read_sql_query(
-            percentiles_query, 
-            conn, 
-            params=(company_id, peer_group_name, actual_period)
+            percentiles_query, conn, params=(company_id, peer_group_name, actual_period)
         )
-        
+
         if percentiles_df.empty:
-            logger.warning(f"No peer percentiles found for {company_id}, calculating on the fly")
+            logger.warning(
+                f"No peer percentiles found for {company_id}, calculating on the fly"
+            )
             # This is a warning, not an error - we can still generate a partial report
             report_data["peer_percentiles"] = {}
         else:
@@ -297,11 +314,11 @@ def load_company_report_data(company_id: str, period: Optional[str] = None) -> D
             report_data["peer_percentiles"] = {
                 row["metric"]: {
                     "value": row["metric_value"],
-                    "percentile": row["percentile_rank"]
+                    "percentile": row["percentile_rank"],
                 }
                 for _, row in percentiles_df.iterrows()
             }
-        
+
         # Step 6: Load peer group benchmarks
         logger.info("Step 6: Loading peer group benchmarks")
         benchmark_query = """
@@ -313,38 +330,51 @@ def load_company_report_data(company_id: str, period: Optional[str] = None) -> D
             WHERE peer_group_name = ? AND period = ?
             GROUP BY metric
         """
-        benchmark_df = pd.read_sql_query(benchmark_query, conn, params=(peer_group_name, actual_period))
-        
+        benchmark_df = pd.read_sql_query(
+            benchmark_query, conn, params=(peer_group_name, actual_period)
+        )
+
         if benchmark_df.empty:
-            logger.warning(f"No peer benchmark data found for peer group: {peer_group_name}")
+            logger.warning(
+                f"No peer benchmark data found for peer group: {peer_group_name}"
+            )
             report_data["peer_benchmark"] = {}
         else:
             report_data["peer_benchmark"] = {
                 row["metric"]: {
                     "peer_avg": row["peer_avg"],
-                    "peer_count": row["peer_count"]
+                    "peer_count": row["peer_count"],
                 }
                 for _, row in benchmark_df.iterrows()
             }
-        
+
         # Step 7: Check for radar chart
         logger.info("Step 7: Checking for radar chart")
-        radar_chart_path = PEER_REPORTS_DIR.parent / "radar_charts" / f"{company_id}_radar.png"
-        report_data["radar_chart_path"] = str(radar_chart_path) if radar_chart_path.exists() else None
-        
+        radar_chart_path = (
+            PEER_REPORTS_DIR.parent / "radar_charts" / f"{company_id}_radar.png"
+        )
+        report_data["radar_chart_path"] = (
+            str(radar_chart_path) if radar_chart_path.exists() else None
+        )
+
         if report_data["radar_chart_path"]:
             logger.info(f"Radar chart found: {report_data['radar_chart_path']}")
         else:
             logger.warning(f"Radar chart not found for {company_id}")
-        
+
         elapsed_time = time.time() - start_time
         logger.info(
             f"Report data loaded successfully for {company_id} in {elapsed_time:.2f}s"
         )
-        
+
         return report_data
-        
-    except (CompanyNotFoundError, PeerGroupNotFoundError, HealthScoreNotFoundError, KPIDataError):
+
+    except (
+        CompanyNotFoundError,
+        PeerGroupNotFoundError,
+        HealthScoreNotFoundError,
+        KPIDataError,
+    ):
         raise
     except sqlite3.Error as e:
         logger.error(f"Database error loading report data for {company_id}: {str(e)}")
@@ -362,72 +392,80 @@ def load_company_report_data(company_id: str, period: Optional[str] = None) -> D
 def generate_kpi_table(report_data: Dict[str, Any]) -> str:
     """
     Generate KPI comparison table for the report.
-    
+
     Parameters
     ----------
     report_data : Dict[str, Any]
         Report data dictionary from load_company_report_data()
-    
+
     Returns
     -------
     str
         Markdown formatted KPI comparison table
     """
     logger.info("Generating KPI comparison table")
-    
+
     try:
         financial_ratios = report_data.get("financial_ratios", {})
         peer_benchmark = report_data.get("peer_benchmark", {})
         peer_percentiles = report_data.get("peer_percentiles", {})
-        
+
         if not financial_ratios:
             logger.warning("No financial ratios available for KPI table")
             return "*No KPI data available*\n"
-        
+
         # Build table header
         table = "| Metric | Company Value | Peer Average | Difference | Status |\n"
         table += "|--------|--------------|--------------|------------|--------|\n"
-        
+
         # Add rows for each KPI
         for metric in TOP_KPI_METRICS:
             # Get company value
             company_value = financial_ratios.get(metric)
-            
+
             # Get peer average
             benchmark_data = peer_benchmark.get(metric, {})
             peer_avg = benchmark_data.get("peer_avg")
-            
+
             # Skip if no data
             if company_value is None and peer_avg is None:
                 continue
-            
+
             # Format values
             company_str = f"{company_value:.2f}" if company_value is not None else "N/A"
             peer_str = f"{peer_avg:.2f}" if peer_avg is not None else "N/A"
-            
+
             # Calculate difference
             if company_value is not None and peer_avg is not None:
                 diff = company_value - peer_avg
                 diff_str = f"{diff:+.2f}"
-                
+
                 # Determine status (better/worse)
                 # For debt_to_equity, lower is better
                 if metric in INVERTED_METRICS:
-                    status = "✅ Better" if diff < 0 else "⚠️ Worse" if diff > 0 else "➡️ Neutral"
+                    status = (
+                        "✅ Better"
+                        if diff < 0
+                        else "⚠️ Worse" if diff > 0 else "➡️ Neutral"
+                    )
                 else:
-                    status = "✅ Better" if diff > 0 else "⚠️ Worse" if diff < 0 else "➡️ Neutral"
+                    status = (
+                        "✅ Better"
+                        if diff > 0
+                        else "⚠️ Worse" if diff < 0 else "➡️ Neutral"
+                    )
             else:
                 diff_str = "N/A"
                 status = "➡️ N/A"
-            
+
             # Get display name
             display_name = METRIC_DISPLAY_NAMES.get(metric, metric)
-            
+
             table += f"| {display_name} | {company_str} | {peer_str} | {diff_str} | {status} |\n"
-        
+
         logger.info("KPI comparison table generated successfully")
         return table
-        
+
     except Exception as e:
         logger.error(f"Failed to generate KPI table: {str(e)}")
         return "*Error generating KPI table*\n"
@@ -441,15 +479,15 @@ def generate_kpi_table(report_data: Dict[str, Any]) -> str:
 def calculate_strengths(report_data: Dict[str, Any]) -> List[Dict[str, Any]]:
     """
     Calculate top strengths from percentile rankings.
-    
+
     A strength is defined as a metric where the company is at or above the
     75th percentile within its peer group.
-    
+
     Parameters
     ----------
     report_data : Dict[str, Any]
         Report data dictionary from load_company_report_data()
-    
+
     Returns
     -------
     List[Dict[str, Any]]
@@ -461,49 +499,51 @@ def calculate_strengths(report_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         - percentile_pct: Percentile as percentage (0-100)
     """
     logger.info("Calculating top strengths")
-    
+
     try:
         peer_percentiles = report_data.get("peer_percentiles", {})
         financial_ratios = report_data.get("financial_ratios", {})
-        
+
         if not peer_percentiles:
             logger.warning("No peer percentiles available for strength calculation")
             return []
-        
+
         strengths = []
-        
+
         for metric, data in peer_percentiles.items():
             percentile = data.get("percentile")
             value = data.get("value")
-            
+
             if percentile is None:
                 continue
-            
+
             # Check if metric is in top KPIs
             if metric not in TOP_KPI_METRICS:
                 continue
-            
+
             # Check if percentile meets strength threshold
             percentile_pct = percentile * 100
             if percentile_pct >= STRENGTH_PERCENTILE_THRESHOLD:
                 display_name = METRIC_DISPLAY_NAMES.get(metric, metric)
-                strengths.append({
-                    "metric": metric,
-                    "display_name": display_name,
-                    "value": value,
-                    "percentile": percentile,
-                    "percentile_pct": percentile_pct
-                })
-        
+                strengths.append(
+                    {
+                        "metric": metric,
+                        "display_name": display_name,
+                        "value": value,
+                        "percentile": percentile,
+                        "percentile_pct": percentile_pct,
+                    }
+                )
+
         # Sort by percentile (highest first)
         strengths.sort(key=lambda x: x["percentile"], reverse=True)
-        
+
         # Return top N strengths
         top_strengths = strengths[:TOP_STRENGTHS_COUNT]
-        
+
         logger.info(f"Identified {len(top_strengths)} top strengths")
         return top_strengths
-        
+
     except Exception as e:
         logger.error(f"Failed to calculate strengths: {str(e)}")
         return []
@@ -512,15 +552,15 @@ def calculate_strengths(report_data: Dict[str, Any]) -> List[Dict[str, Any]]:
 def calculate_weaknesses(report_data: Dict[str, Any]) -> List[Dict[str, Any]]:
     """
     Calculate top weaknesses from percentile rankings.
-    
+
     A weakness is defined as a metric where the company is at or below the
     25th percentile within its peer group.
-    
+
     Parameters
     ----------
     report_data : Dict[str, Any]
         Report data dictionary from load_company_report_data()
-    
+
     Returns
     -------
     List[Dict[str, Any]]
@@ -532,48 +572,50 @@ def calculate_weaknesses(report_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         - percentile_pct: Percentile as percentage (0-100)
     """
     logger.info("Calculating top weaknesses")
-    
+
     try:
         peer_percentiles = report_data.get("peer_percentiles", {})
-        
+
         if not peer_percentiles:
             logger.warning("No peer percentiles available for weakness calculation")
             return []
-        
+
         weaknesses = []
-        
+
         for metric, data in peer_percentiles.items():
             percentile = data.get("percentile")
             value = data.get("value")
-            
+
             if percentile is None:
                 continue
-            
+
             # Check if metric is in top KPIs
             if metric not in TOP_KPI_METRICS:
                 continue
-            
+
             # Check if percentile meets weakness threshold
             percentile_pct = percentile * 100
             if percentile_pct <= WEAKNESS_PERCENTILE_THRESHOLD:
                 display_name = METRIC_DISPLAY_NAMES.get(metric, metric)
-                weaknesses.append({
-                    "metric": metric,
-                    "display_name": display_name,
-                    "value": value,
-                    "percentile": percentile,
-                    "percentile_pct": percentile_pct
-                })
-        
+                weaknesses.append(
+                    {
+                        "metric": metric,
+                        "display_name": display_name,
+                        "value": value,
+                        "percentile": percentile,
+                        "percentile_pct": percentile_pct,
+                    }
+                )
+
         # Sort by percentile (lowest first)
         weaknesses.sort(key=lambda x: x["percentile"])
-        
+
         # Return top N weaknesses
         top_weaknesses = weaknesses[:TOP_WEAKNESSES_COUNT]
-        
+
         logger.info(f"Identified {len(top_weaknesses)} top weaknesses")
         return top_weaknesses
-        
+
     except Exception as e:
         logger.error(f"Failed to calculate weaknesses: {str(e)}")
         return []
@@ -588,53 +630,57 @@ def generate_summary(report_data: Dict[str, Any]) -> str:
     """
     Generate a concise business summary highlighting the company's position
     within its peer group.
-    
+
     Parameters
     ----------
     report_data : Dict[str, Any]
         Report data dictionary from load_company_report_data()
-    
+
     Returns
     -------
     str
         Concise business summary paragraph
     """
     logger.info("Generating business summary")
-    
+
     try:
         company_info = report_data.get("company_info", {})
         health_score = report_data.get("health_score", {})
         peer_percentiles = report_data.get("peer_percentiles", {})
         peer_group = report_data.get("peer_group", "N/A")
-        
+
         company_name = company_info.get("company_name", "Unknown Company")
         sector = company_info.get("sector", "N/A")
         overall_score = health_score.get("overall_score")
         rating = health_score.get("rating", "N/A")
-        
+
         # Calculate average percentile
         if peer_percentiles:
-            percentiles = [data["percentile"] for data in peer_percentiles.values() if data.get("percentile") is not None]
+            percentiles = [
+                data["percentile"]
+                for data in peer_percentiles.values()
+                if data.get("percentile") is not None
+            ]
             avg_percentile = np.mean(percentiles) * 100 if percentiles else None
         else:
             avg_percentile = None
-        
+
         # Build summary
         summary_parts = []
-        
+
         # Introduction
         summary_parts.append(
             f"{company_name} operates in the {sector} sector and is part of the "
             f"'{peer_group}' peer group."
         )
-        
+
         # Health score
         if overall_score is not None:
             summary_parts.append(
                 f"The company has a Financial Health Score of {overall_score:.1f}/100 "
                 f"with a '{rating}' rating."
             )
-        
+
         # Peer comparison
         if avg_percentile is not None:
             if avg_percentile >= 75:
@@ -645,30 +691,30 @@ def generate_summary(report_data: Dict[str, Any]) -> str:
                 comparison = "below-average performer"
             else:
                 comparison = "bottom-tier performer"
-            
+
             summary_parts.append(
                 f"Within its peer group, the company ranks at the {avg_percentile:.0f}th percentile "
                 f"on average, positioning it as a {comparison}."
             )
-        
+
         # Strengths and weaknesses context
         strengths = calculate_strengths(report_data)
         weaknesses = calculate_weaknesses(report_data)
-        
+
         if strengths:
             top_strength = strengths[0]["display_name"]
             summary_parts.append(
                 f"Key strengths include {top_strength.lower()}, "
                 f"where it outperforms most peers."
             )
-        
+
         if weaknesses:
             top_weakness = weaknesses[0]["display_name"]
             summary_parts.append(
                 f"Areas of concern include {top_weakness.lower()}, "
                 f"which lags behind peer averages."
             )
-        
+
         # Final assessment
         if overall_score is not None and avg_percentile is not None:
             if overall_score >= 70 and avg_percentile >= 75:
@@ -686,12 +732,12 @@ def generate_summary(report_data: Dict[str, Any]) -> str:
                     "The company faces challenges in financial health and competitive positioning, "
                     "requiring strategic improvements."
                 )
-        
+
         summary = " ".join(summary_parts)
         logger.info("Business summary generated successfully")
-        
+
         return summary
-        
+
     except Exception as e:
         logger.error(f"Failed to generate summary: {str(e)}")
         return "Summary generation failed due to an error."
@@ -705,19 +751,19 @@ def generate_summary(report_data: Dict[str, Any]) -> str:
 def build_report(report_data: Dict[str, Any]) -> str:
     """
     Build complete Markdown report from report data.
-    
+
     Parameters
     ----------
     report_data : Dict[str, Any]
         Report data dictionary from load_company_report_data()
-    
+
     Returns
     -------
     str
         Complete Markdown formatted report
     """
     logger.info("Building complete report")
-    
+
     try:
         # Extract data
         company_info = report_data.get("company_info", {})
@@ -725,27 +771,31 @@ def build_report(report_data: Dict[str, Any]) -> str:
         peer_group = report_data.get("peer_group", "N/A")
         period = report_data.get("period", "N/A")
         radar_chart_path = report_data.get("radar_chart_path")
-        
+
         # Build report sections
         report_sections = []
-        
+
         # =====================================================================
         # Section 1: Company Information
         # =====================================================================
         report_sections.append("# Company Information\n")
-        report_sections.append(f"**Company Name:** {company_info.get('company_name', 'N/A')}\n")
-        report_sections.append(f"**Company ID:** {company_info.get('company_id', 'N/A')}\n")
+        report_sections.append(
+            f"**Company Name:** {company_info.get('company_name', 'N/A')}\n"
+        )
+        report_sections.append(
+            f"**Company ID:** {company_info.get('company_id', 'N/A')}\n"
+        )
         report_sections.append(f"**Sector:** {company_info.get('sector', 'N/A')}\n")
         report_sections.append(f"**Industry:** {company_info.get('industry', 'N/A')}\n")
         report_sections.append(f"**Peer Group:** {peer_group}\n")
         report_sections.append(f"**Reporting Period:** {period}\n")
         report_sections.append("")
-        
+
         # =====================================================================
         # Section 2: Financial Health Score
         # =====================================================================
         report_sections.append("# Financial Health Score\n")
-        
+
         if health_score:
             overall_score = health_score.get("overall_score")
             rating = health_score.get("rating", "N/A")
@@ -755,18 +805,20 @@ def build_report(report_data: Dict[str, Any]) -> str:
             leverage_score = health_score.get("leverage_score")
             efficiency_score = health_score.get("efficiency_score")
             remarks = health_score.get("remarks", "")
-            
+
             report_sections.append(f"## Overall Score: {overall_score:.1f}/100\n")
             report_sections.append(f"**Rating:** {rating}\n")
             report_sections.append("")
-            
+
             # Category scores
             report_sections.append("### Category Scores\n")
             report_sections.append("| Category | Score |\n")
             report_sections.append("|----------|-------|\n")
-            
+
             if profitability_score is not None:
-                report_sections.append(f"| Profitability | {profitability_score:.1f} |\n")
+                report_sections.append(
+                    f"| Profitability | {profitability_score:.1f} |\n"
+                )
             if growth_score is not None:
                 report_sections.append(f"| Growth | {growth_score:.1f} |\n")
             if cashflow_score is not None:
@@ -775,43 +827,47 @@ def build_report(report_data: Dict[str, Any]) -> str:
                 report_sections.append(f"| Leverage | {leverage_score:.1f} |\n")
             if efficiency_score is not None:
                 report_sections.append(f"| Efficiency | {efficiency_score:.1f} |\n")
-            
+
             report_sections.append("")
-            
+
             # Remarks
             if remarks:
                 report_sections.append(f"**Remarks:** {remarks}\n")
         else:
             report_sections.append("*No health score data available*\n")
-        
+
         report_sections.append("")
-        
+
         # =====================================================================
         # Section 3: KPI Comparison Table
         # =====================================================================
         report_sections.append("# KPI Comparison Table\n")
-        report_sections.append("Comparison of key financial metrics between the company and its peer group average.\n")
+        report_sections.append(
+            "Comparison of key financial metrics between the company and its peer group average.\n"
+        )
         report_sections.append("")
         report_sections.append(generate_kpi_table(report_data))
         report_sections.append("")
-        
+
         # =====================================================================
         # Section 4: Percentile Rankings
         # =====================================================================
         report_sections.append("# Percentile Rankings\n")
-        report_sections.append("Percentile rankings show how the company compares to its peer group (0-100 scale).\n")
+        report_sections.append(
+            "Percentile rankings show how the company compares to its peer group (0-100 scale).\n"
+        )
         report_sections.append("")
-        
+
         peer_percentiles = report_data.get("peer_percentiles", {})
         if peer_percentiles:
             report_sections.append("| Metric | Company Value | Percentile Rank |\n")
             report_sections.append("|--------|--------------|----------------|\n")
-            
+
             for metric in TOP_KPI_METRICS:
                 data = peer_percentiles.get(metric, {})
                 value = data.get("value")
                 percentile = data.get("percentile")
-                
+
                 if value is not None and percentile is not None:
                     display_name = METRIC_DISPLAY_NAMES.get(metric, metric)
                     percentile_pct = percentile * 100
@@ -820,44 +876,50 @@ def build_report(report_data: Dict[str, Any]) -> str:
                     )
         else:
             report_sections.append("*No percentile data available*\n")
-        
+
         report_sections.append("")
-        
+
         # =====================================================================
         # Section 5: Peer Benchmark Summary
         # =====================================================================
         report_sections.append("# Peer Benchmark Summary\n")
-        
+
         peer_benchmark = report_data.get("peer_benchmark", {})
         if peer_benchmark:
-            report_sections.append("| Metric | Company Value | Peer Average | Peer Count |\n")
-            report_sections.append("|--------|--------------|--------------|------------|\n")
-            
+            report_sections.append(
+                "| Metric | Company Value | Peer Average | Peer Count |\n"
+            )
+            report_sections.append(
+                "|--------|--------------|--------------|------------|\n"
+            )
+
             for metric in TOP_KPI_METRICS:
                 financial_ratios = report_data.get("financial_ratios", {})
                 company_value = financial_ratios.get(metric)
                 benchmark_data = peer_benchmark.get(metric, {})
                 peer_avg = benchmark_data.get("peer_avg")
                 peer_count = benchmark_data.get("peer_count", 0)
-                
+
                 if company_value is not None or peer_avg is not None:
-                    company_str = f"{company_value:.2f}" if company_value is not None else "N/A"
+                    company_str = (
+                        f"{company_value:.2f}" if company_value is not None else "N/A"
+                    )
                     peer_str = f"{peer_avg:.2f}" if peer_avg is not None else "N/A"
                     display_name = METRIC_DISPLAY_NAMES.get(metric, metric)
-                    
+
                     report_sections.append(
                         f"| {display_name} | {company_str} | {peer_str} | {peer_count} |\n"
                     )
         else:
             report_sections.append("*No peer benchmark data available*\n")
-        
+
         report_sections.append("")
-        
+
         # =====================================================================
         # Section 6: Strengths
         # =====================================================================
         report_sections.append("# Strengths\n")
-        
+
         strengths = calculate_strengths(report_data)
         if strengths:
             report_sections.append(
@@ -865,7 +927,7 @@ def build_report(report_data: Dict[str, Any]) -> str:
                 "(75th percentile or above within peer group):\n"
             )
             report_sections.append("")
-            
+
             for i, strength in enumerate(strengths, 1):
                 report_sections.append(
                     f"{i}. **{strength['display_name']}**: "
@@ -876,14 +938,14 @@ def build_report(report_data: Dict[str, Any]) -> str:
             report_sections.append(
                 "*No significant strengths identified (metrics below 75th percentile)*\n"
             )
-        
+
         report_sections.append("")
-        
+
         # =====================================================================
         # Section 7: Weaknesses
         # =====================================================================
         report_sections.append("# Weaknesses\n")
-        
+
         weaknesses = calculate_weaknesses(report_data)
         if weaknesses:
             report_sections.append(
@@ -891,7 +953,7 @@ def build_report(report_data: Dict[str, Any]) -> str:
                 "(25th percentile or below within peer group):\n"
             )
             report_sections.append("")
-            
+
             for i, weakness in enumerate(weaknesses, 1):
                 report_sections.append(
                     f"{i}. **{weakness['display_name']}**: "
@@ -902,14 +964,14 @@ def build_report(report_data: Dict[str, Any]) -> str:
             report_sections.append(
                 "*No significant weaknesses identified (all metrics above 25th percentile)*\n"
             )
-        
+
         report_sections.append("")
-        
+
         # =====================================================================
         # Section 8: Radar Chart Location
         # =====================================================================
         report_sections.append("# Radar Chart\n")
-        
+
         if radar_chart_path:
             report_sections.append(f"**Radar Chart Location:** `{radar_chart_path}`\n")
             report_sections.append("")
@@ -924,22 +986,22 @@ def build_report(report_data: Dict[str, Any]) -> str:
                 "Note: Radar charts are generated by Module 8 (Radar Chart Engine). "
                 "Run the radar chart generation pipeline to create visualizations.\n"
             )
-        
+
         report_sections.append("")
-        
+
         # =====================================================================
         # Section 9: Final Recommendation
         # =====================================================================
         report_sections.append("# Final Recommendation\n")
         report_sections.append(generate_summary(report_data))
         report_sections.append("")
-        
+
         # Combine all sections
         full_report = "\n".join(report_sections)
-        
+
         logger.info("Report built successfully")
         return full_report
-        
+
     except Exception as e:
         logger.error(f"Failed to build report: {str(e)}")
         raise ReportGenerationError(f"Failed to build report: {str(e)}")
@@ -950,10 +1012,12 @@ def build_report(report_data: Dict[str, Any]) -> str:
 # =============================================================================
 
 
-def save_report(report: str, company_id: str, output_dir: Optional[Path] = None) -> Path:
+def save_report(
+    report: str, company_id: str, output_dir: Optional[Path] = None
+) -> Path:
     """
     Save Markdown report to file.
-    
+
     Parameters
     ----------
     report : str
@@ -962,12 +1026,12 @@ def save_report(report: str, company_id: str, output_dir: Optional[Path] = None)
         Company identifier (used for filename)
     output_dir : Optional[Path], optional
         Output directory, by default None (uses PEER_REPORTS_DIR)
-    
+
     Returns
     -------
     Path
         Path to saved report file
-    
+
     Raises
     ------
     ReportGenerationError
@@ -976,25 +1040,25 @@ def save_report(report: str, company_id: str, output_dir: Optional[Path] = None)
         If file cannot be written due to permissions
     """
     logger.info(f"Saving report for company: {company_id}")
-    
+
     try:
         # Use default output directory if not specified
         if output_dir is None:
             output_dir = PEER_REPORTS_DIR
-        
+
         # Ensure output directory exists
         output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Create file path
         report_path = output_dir / f"{company_id}.md"
-        
+
         # Write report to file
-        with open(report_path, 'w', encoding='utf-8') as f:
+        with open(report_path, "w", encoding="utf-8") as f:
             f.write(report)
-        
+
         logger.info(f"Report saved successfully: {report_path}")
         return report_path
-        
+
     except PermissionError as e:
         logger.error(f"Permission error saving report for {company_id}: {str(e)}")
         raise ReportGenerationError(f"Permission denied: {str(e)}")
@@ -1014,26 +1078,21 @@ def save_report(report: str, company_id: str, output_dir: Optional[Path] = None)
 def validate_report(report_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Validate report data before generation.
-    
+
     Parameters
     ----------
     report_data : Dict[str, Any]
         Report data dictionary from load_company_report_data()
-    
+
     Returns
     -------
     Dict[str, Any]
         Validation results with 'valid' flag and list of issues
     """
     logger.info("Validating report data")
-    
-    results = {
-        "valid": True,
-        "checks": [],
-        "warnings": [],
-        "errors": []
-    }
-    
+
+    results = {"valid": True, "checks": [], "warnings": [], "errors": []}
+
     try:
         # Check 1: Company info exists
         if "company_info" not in report_data or not report_data["company_info"]:
@@ -1041,98 +1100,111 @@ def validate_report(report_data: Dict[str, Any]) -> Dict[str, Any]:
             results["valid"] = False
         else:
             results["checks"].append({"check": "company_info", "status": "passed"})
-        
+
         # Check 2: Peer group exists
         if "peer_group" not in report_data or not report_data["peer_group"]:
             results["errors"].append("Peer group is missing")
             results["valid"] = False
         else:
             results["checks"].append({"check": "peer_group", "status": "passed"})
-        
+
         # Check 3: Health score exists
         if "health_score" not in report_data or not report_data["health_score"]:
             results["errors"].append("Health score is missing")
             results["valid"] = False
         else:
             results["checks"].append({"check": "health_score", "status": "passed"})
-        
+
         # Check 4: Financial ratios exist
         if "financial_ratios" not in report_data or not report_data["financial_ratios"]:
             results["errors"].append("Financial ratios are missing")
             results["valid"] = False
         else:
             results["checks"].append({"check": "financial_ratios", "status": "passed"})
-        
+
         # Check 5: Ten supported KPIs available
         financial_ratios = report_data.get("financial_ratios", {})
         available_kpis = [kpi for kpi in TOP_KPI_METRICS if kpi in financial_ratios]
-        
+
         if len(available_kpis) < len(TOP_KPI_METRICS):
-            missing_kpis = [kpi for kpi in TOP_KPI_METRICS if kpi not in financial_ratios]
-            results["warnings"].append({
-                "warning": "missing_kpis",
-                "message": f"Some KPIs are missing: {missing_kpis}",
-                "available_count": len(available_kpis),
-                "required_count": len(TOP_KPI_METRICS)
-            })
-        
-        results["checks"].append({
-            "check": "kpi_availability",
-            "status": "passed" if len(available_kpis) == len(TOP_KPI_METRICS) else "warning",
-            "available": len(available_kpis),
-            "required": len(TOP_KPI_METRICS)
-        })
-        
+            missing_kpis = [
+                kpi for kpi in TOP_KPI_METRICS if kpi not in financial_ratios
+            ]
+            results["warnings"].append(
+                {
+                    "warning": "missing_kpis",
+                    "message": f"Some KPIs are missing: {missing_kpis}",
+                    "available_count": len(available_kpis),
+                    "required_count": len(TOP_KPI_METRICS),
+                }
+            )
+
+        results["checks"].append(
+            {
+                "check": "kpi_availability",
+                "status": (
+                    "passed"
+                    if len(available_kpis) == len(TOP_KPI_METRICS)
+                    else "warning"
+                ),
+                "available": len(available_kpis),
+                "required": len(TOP_KPI_METRICS),
+            }
+        )
+
         # Check 6: No duplicate KPIs
         if len(available_kpis) != len(set(available_kpis)):
             results["errors"].append("Duplicate KPIs found")
             results["valid"] = False
         else:
             results["checks"].append({"check": "no_duplicate_kpis", "status": "passed"})
-        
+
         # Check 7: Peer percentiles exist (warning only)
         if "peer_percentiles" not in report_data or not report_data["peer_percentiles"]:
-            results["warnings"].append({
-                "warning": "missing_peer_percentiles",
-                "message": "Peer percentiles are missing, some sections will be limited"
-            })
+            results["warnings"].append(
+                {
+                    "warning": "missing_peer_percentiles",
+                    "message": "Peer percentiles are missing, some sections will be limited",
+                }
+            )
         else:
             results["checks"].append({"check": "peer_percentiles", "status": "passed"})
-        
+
         # Check 8: Benchmark exists (warning only)
         if "peer_benchmark" not in report_data or not report_data["peer_benchmark"]:
-            results["warnings"].append({
-                "warning": "missing_peer_benchmark",
-                "message": "Peer benchmark data is missing"
-            })
+            results["warnings"].append(
+                {
+                    "warning": "missing_peer_benchmark",
+                    "message": "Peer benchmark data is missing",
+                }
+            )
         else:
             results["checks"].append({"check": "peer_benchmark", "status": "passed"})
-        
+
         # Check 9: Period exists
         if "period" not in report_data or not report_data["period"]:
-            results["warnings"].append({
-                "warning": "missing_period",
-                "message": "Reporting period is missing"
-            })
+            results["warnings"].append(
+                {"warning": "missing_period", "message": "Reporting period is missing"}
+            )
         else:
             results["checks"].append({"check": "period", "status": "passed"})
-        
+
         logger.info(
             f"Validation complete: valid={results['valid']}, "
             f"checks={len(results['checks'])}, "
             f"warnings={len(results['warnings'])}, "
             f"errors={len(results['errors'])}"
         )
-        
+
         return results
-        
+
     except Exception as e:
         logger.error(f"Validation failed: {str(e)}")
         return {
             "valid": False,
             "checks": [],
             "warnings": [],
-            "errors": [f"Validation exception: {str(e)}"]
+            "errors": [f"Validation exception: {str(e)}"],
         }
 
 
@@ -1145,14 +1217,14 @@ def generate_company_report(
     company_id: str,
     period: Optional[str] = None,
     output_dir: Optional[Path] = None,
-    validate: bool = True
+    validate: bool = True,
 ) -> Dict[str, Any]:
     """
     Generate a complete peer comparison report for a single company.
-    
+
     This is the main function for generating a single company report.
     It loads all necessary data, validates it, builds the report, and saves it.
-    
+
     Parameters
     ----------
     company_id : str
@@ -1163,7 +1235,7 @@ def generate_company_report(
         Output directory for reports, by default None (uses PEER_REPORTS_DIR)
     validate : bool, optional
         Whether to validate data before generation, by default True
-    
+
     Returns
     -------
     Dict[str, Any]
@@ -1174,7 +1246,7 @@ def generate_company_report(
         - validation: Validation results (if validate=True)
         - error: Error message (if failed)
         - execution_time: Time taken in seconds
-    
+
     Raises
     ------
     PeerReportError
@@ -1183,7 +1255,7 @@ def generate_company_report(
     logger.info(f"=" * 80)
     logger.info(f"GENERATING PEER COMPARISON REPORT: {company_id}")
     logger.info(f"=" * 80)
-    
+
     start_time = time.time()
     result = {
         "success": False,
@@ -1191,87 +1263,87 @@ def generate_company_report(
         "report_path": None,
         "validation": None,
         "error": None,
-        "execution_time": 0
+        "execution_time": 0,
     }
-    
+
     try:
         # Step 1: Load report data
         logger.info(f"Step 1: Loading report data for {company_id}")
         report_data = load_company_report_data(company_id, period=period)
         result["period"] = report_data.get("period")
-        
+
         # Step 2: Validate data
         if validate:
             logger.info("Step 2: Validating report data")
             validation_results = validate_report(report_data)
             result["validation"] = validation_results
-            
+
             if not validation_results["valid"]:
                 error_msg = f"Validation failed: {validation_results['errors']}"
                 logger.error(error_msg)
                 result["error"] = error_msg
                 return result
-            
+
             if validation_results["warnings"]:
                 for warning in validation_results["warnings"]:
                     logger.warning(f"Validation warning: {warning}")
-        
+
         # Step 3: Build report
         logger.info("Step 3: Building report")
         report = build_report(report_data)
-        
+
         # Step 4: Save report
         logger.info("Step 4: Saving report")
         report_path = save_report(report, company_id, output_dir=output_dir)
         result["report_path"] = str(report_path)
         result["success"] = True
-        
+
         # Calculate execution time
         execution_time = time.time() - start_time
         result["execution_time"] = execution_time
-        
+
         logger.info(
             f"Report generated successfully for {company_id} "
             f"in {execution_time:.2f}s: {report_path}"
         )
-        
+
         return result
-        
+
     except CompanyNotFoundError as e:
         error_msg = f"Company not found: {str(e)}"
         logger.error(error_msg)
         result["error"] = error_msg
         result["execution_time"] = time.time() - start_time
         return result
-        
+
     except PeerGroupNotFoundError as e:
         error_msg = f"Peer group not found: {str(e)}"
         logger.error(error_msg)
         result["error"] = error_msg
         result["execution_time"] = time.time() - start_time
         return result
-        
+
     except HealthScoreNotFoundError as e:
         error_msg = f"Health score not found: {str(e)}"
         logger.error(error_msg)
         result["error"] = error_msg
         result["execution_time"] = time.time() - start_time
         return result
-        
+
     except KPIDataError as e:
         error_msg = f"KPI data error: {str(e)}"
         logger.error(error_msg)
         result["error"] = error_msg
         result["execution_time"] = time.time() - start_time
         return result
-        
+
     except ReportGenerationError as e:
         error_msg = f"Report generation error: {str(e)}"
         logger.error(error_msg)
         result["error"] = error_msg
         result["execution_time"] = time.time() - start_time
         return result
-        
+
     except Exception as e:
         error_msg = f"Unexpected error: {str(e)}"
         logger.error(error_msg, exc_info=True)
@@ -1289,11 +1361,11 @@ def generate_all_reports(
     period: Optional[str] = None,
     output_dir: Optional[Path] = None,
     validate: bool = True,
-    company_ids: Optional[List[str]] = None
+    company_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """
     Generate peer comparison reports for all companies or a specified list.
-    
+
     Parameters
     ----------
     period : Optional[str], optional
@@ -1304,7 +1376,7 @@ def generate_all_reports(
         Whether to validate data before generation, by default True
     company_ids : Optional[List[str]], optional
         List of specific company IDs to process, by default None (all companies)
-    
+
     Returns
     -------
     Dict[str, Any]
@@ -1319,7 +1391,7 @@ def generate_all_reports(
     logger.info("=" * 80)
     logger.info("STARTING BATCH PEER REPORT GENERATION")
     logger.info("=" * 80)
-    
+
     start_time = time.time()
     batch_results = {
         "total_companies": 0,
@@ -1327,14 +1399,14 @@ def generate_all_reports(
         "failed": 0,
         "results": [],
         "execution_time": 0,
-        "errors": []
+        "errors": [],
     }
-    
+
     try:
         # Step 1: Get list of companies
         logger.info("Step 1: Loading company list")
         conn = get_connection()
-        
+
         if company_ids:
             # Use provided company list
             companies_query = """
@@ -1352,48 +1424,45 @@ def generate_all_reports(
                 ORDER BY company_id
             """
             companies_df = pd.read_sql_query(companies_query, conn)
-        
+
         if companies_df.empty:
             logger.warning("No companies found in database")
             batch_results["execution_time"] = time.time() - start_time
             return batch_results
-        
+
         total_companies = len(companies_df)
         batch_results["total_companies"] = total_companies
         logger.info(f"Found {total_companies} companies to process")
-        
+
         # Step 2: Generate reports for each company
         logger.info("Step 2: Generating reports")
         for idx, row in companies_df.iterrows():
             company_id = row["company_id"]
             company_name = row.get("company_name", company_id)
-            
+
             logger.info(
                 f"Processing company {idx + 1}/{total_companies}: "
                 f"{company_id} ({company_name})"
             )
-            
+
             # Generate report
             report_result = generate_company_report(
-                company_id,
-                period=period,
-                output_dir=output_dir,
-                validate=validate
+                company_id, period=period, output_dir=output_dir, validate=validate
             )
-            
+
             batch_results["results"].append(report_result)
-            
+
             if report_result["success"]:
                 batch_results["successful"] += 1
             else:
                 batch_results["failed"] += 1
                 if report_result["error"]:
                     batch_results["errors"].append(report_result["error"])
-        
+
         # Step 3: Calculate execution time
         execution_time = time.time() - start_time
         batch_results["execution_time"] = execution_time
-        
+
         # Log summary
         logger.info("=" * 80)
         logger.info("BATCH REPORT GENERATION SUMMARY")
@@ -1402,16 +1471,18 @@ def generate_all_reports(
         logger.info(f"Successful: {batch_results['successful']}")
         logger.info(f"Failed: {batch_results['failed']}")
         logger.info(f"Execution Time: {execution_time:.2f}s")
-        
+
         if batch_results["errors"]:
             logger.info(f"Unique Errors: {len(set(batch_results['errors']))}")
-            for error in list(set(batch_results["errors"]))[:10]:  # Show first 10 unique errors
+            for error in list(set(batch_results["errors"]))[
+                :10
+            ]:  # Show first 10 unique errors
                 logger.warning(f"  - {error}")
-        
+
         logger.info("=" * 80)
-        
+
         return batch_results
-        
+
     except Exception as e:
         logger.error(f"Batch report generation failed: {str(e)}", exc_info=True)
         batch_results["execution_time"] = time.time() - start_time
@@ -1427,57 +1498,57 @@ def generate_all_reports(
 def get_report_statistics(output_dir: Optional[Path] = None) -> Dict[str, Any]:
     """
     Get statistics about generated reports.
-    
+
     Parameters
     ----------
     output_dir : Optional[Path], optional
         Reports directory, by default None (uses PEER_REPORTS_DIR)
-    
+
     Returns
     -------
     Dict[str, Any]
         Report statistics
     """
     logger.info("Getting report statistics")
-    
+
     try:
         if output_dir is None:
             output_dir = PEER_REPORTS_DIR
-        
+
         if not output_dir.exists():
             logger.warning(f"Reports directory does not exist: {output_dir}")
             return {
                 "total_reports": 0,
                 "reports_directory": str(output_dir),
-                "exists": False
+                "exists": False,
             }
-        
+
         # Count report files
         report_files = list(output_dir.glob("*.md"))
         total_reports = len(report_files)
-        
+
         # Get file sizes
         total_size = sum(f.stat().st_size for f in report_files)
-        
+
         # Get recent reports
         recent_reports = sorted(
-            report_files,
-            key=lambda x: x.stat().st_mtime,
-            reverse=True
+            report_files, key=lambda x: x.stat().st_mtime, reverse=True
         )[:10]
-        
+
         stats = {
             "total_reports": total_reports,
             "reports_directory": str(output_dir),
             "exists": True,
             "total_size_bytes": total_size,
             "total_size_mb": round(total_size / (1024 * 1024), 2),
-            "recent_reports": [f.name for f in recent_reports]
+            "recent_reports": [f.name for f in recent_reports],
         }
-        
-        logger.info(f"Report statistics: {total_reports} reports, {stats['total_size_mb']} MB")
+
+        logger.info(
+            f"Report statistics: {total_reports} reports, {stats['total_size_mb']} MB"
+        )
         return stats
-        
+
     except Exception as e:
         logger.error(f"Failed to get report statistics: {str(e)}")
         return {"error": str(e)}
@@ -1486,14 +1557,14 @@ def get_report_statistics(output_dir: Optional[Path] = None) -> Dict[str, Any]:
 def list_available_companies() -> List[Dict[str, str]]:
     """
     List all companies available in the database.
-    
+
     Returns
     -------
     List[Dict[str, str]]
         List of companies with company_id and company_name
     """
     logger.info("Listing available companies")
-    
+
     try:
         conn = get_connection()
         query = """
@@ -1502,11 +1573,11 @@ def list_available_companies() -> List[Dict[str, str]]:
             ORDER BY company_id
         """
         df = pd.read_sql_query(query, conn)
-        
-        companies = df.to_dict('records')
+
+        companies = df.to_dict("records")
         logger.info(f"Found {len(companies)} companies")
         return companies
-        
+
     except Exception as e:
         logger.error(f"Failed to list companies: {str(e)}")
         return []
@@ -1521,14 +1592,14 @@ def run_peer_report_engine(
     period: Optional[str] = None,
     output_dir: Optional[Path] = None,
     validate: bool = True,
-    company_ids: Optional[List[str]] = None
+    company_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """
     Main entry point for the Peer Comparison Report Engine.
-    
+
     This function generates peer comparison reports for all companies or a
     specified subset. It coordinates the entire report generation pipeline.
-    
+
     Parameters
     ----------
     period : Optional[str], optional
@@ -1539,26 +1610,23 @@ def run_peer_report_engine(
         Whether to validate data before generation, by default True
     company_ids : Optional[List[str]], optional
         List of specific company IDs to process, by default None (all companies)
-    
+
     Returns
     -------
     Dict[str, Any]
         Batch generation results
-    
+
     Example
     -------
     >>> # Generate reports for all companies
     >>> results = run_peer_report_engine()
-    
+
     >>> # Generate reports for specific companies
     >>> results = run_peer_report_engine(company_ids=["RELIANCE", "TCS", "INFY"])
-    
+
     >>> # Generate reports for a specific period
     >>> results = run_peer_report_engine(period="FY2024")
     """
     return generate_all_reports(
-        period=period,
-        output_dir=output_dir,
-        validate=validate,
-        company_ids=company_ids
+        period=period, output_dir=output_dir, validate=validate, company_ids=company_ids
     )

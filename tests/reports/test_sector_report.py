@@ -10,7 +10,11 @@ import pytest
 from pathlib import Path
 import pandas as pd
 
-from src.reports.sector_report import SectorReportGenerator, generate_sector_report, generate_all_sector_reports
+from src.reports.sector_report import (
+    SectorReportGenerator,
+    generate_sector_report,
+    generate_all_sector_reports,
+)
 from src.config.constants import REPORTS_DIR
 
 

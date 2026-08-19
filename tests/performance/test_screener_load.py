@@ -57,8 +57,7 @@ def run_concurrent_screener_load_test(concurrency: int = 10):
 
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
         futures = [
-            executor.submit(execute_screener_request, i + 1)
-            for i in range(concurrency)
+            executor.submit(execute_screener_request, i + 1) for i in range(concurrency)
         ]
         for future in as_completed(futures):
             results.append(future.result())
@@ -99,10 +98,16 @@ def test_10_concurrent_screener_requests():
     print(f"Failed Requests: {failed}/10")
 
     for res in load_metrics["results"]:
-        print(f"Req #{res['request_id']}: Status={res['status_code']}, Time={res['duration']:.3f}s, Items={res['item_count']}")
+        print(
+            f"Req #{res['request_id']}: Status={res['status_code']}, Time={res['duration']:.3f}s, Items={res['item_count']}"
+        )
 
-    assert successful == 10, f"Expected 10 successful requests, but got {successful} success, {failed} failed."
-    assert total_time <= 10.0, f"Concurrent screener test exceeded 10-second target. Actual: {total_time:.2f} seconds."
+    assert (
+        successful == 10
+    ), f"Expected 10 successful requests, but got {successful} success, {failed} failed."
+    assert (
+        total_time <= 10.0
+    ), f"Concurrent screener test exceeded 10-second target. Actual: {total_time:.2f} seconds."
 
 
 if __name__ == "__main__":

@@ -23,16 +23,23 @@ router = APIRouter(tags=["Screener"])
 # PYDANTIC RESPONSE MODELS
 # =============================================================================
 
+
 class ScreenerCompanyItem(BaseModel):
+    """ScreenerCompanyItem class representation."""
+
     company_id: str = Field(..., description="Unique company ticker symbol")
     company_name: str = Field(..., description="Official company name")
     sector: Optional[str] = Field(None, description="Industry sector classification")
     rank: int = Field(..., description="Screener ranking position")
-    ranking: Optional[int] = Field(None, description="Alias for screener ranking position")
+    ranking: Optional[int] = Field(
+        None, description="Alias for screener ranking position"
+    )
     roe: Optional[float] = Field(None, description="Return on Equity %")
     debt_to_equity: Optional[float] = Field(None, description="Debt to Equity ratio")
     de: Optional[float] = Field(None, description="Alias for Debt to Equity ratio")
-    free_cash_flow: Optional[float] = Field(None, description="Free Cash Flow in Crores/Millions")
+    free_cash_flow: Optional[float] = Field(
+        None, description="Free Cash Flow in Crores/Millions"
+    )
     fcf: Optional[float] = Field(None, description="Alias for Free Cash Flow")
     revenue_cagr_5yr: Optional[float] = Field(None, description="5-Year Revenue CAGR %")
     pat_cagr_5yr: Optional[float] = Field(None, description="5-Year Net Profit CAGR %")
@@ -43,6 +50,7 @@ class ScreenerCompanyItem(BaseModel):
 # =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
+
 
 def validate_float_param(val: Any, param_name: str) -> Optional[float]:
     """
@@ -59,7 +67,7 @@ def validate_float_param(val: Any, param_name: str) -> Optional[float]:
         if math.isnan(val) or math.isinf(val):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid parameter '{param_name}': must be a finite number."
+                detail=f"Invalid parameter '{param_name}': must be a finite number.",
             )
         return float(val)
     try:
@@ -67,19 +75,20 @@ def validate_float_param(val: Any, param_name: str) -> Optional[float]:
         if math.isnan(f_val) or math.isinf(f_val):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid parameter '{param_name}': must be a finite number."
+                detail=f"Invalid parameter '{param_name}': must be a finite number.",
             )
         return f_val
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid parameter '{param_name}': expected numeric value."
+            detail=f"Invalid parameter '{param_name}': expected numeric value.",
         ) from exc
 
 
 # =============================================================================
 # ENDPOINT
 # =============================================================================
+
 
 @router.get(
     "/screener",
@@ -89,17 +98,29 @@ def validate_float_param(val: Any, param_name: str) -> Optional[float]:
     responses={
         200: {"description": "Filtered and ranked company list returned successfully"},
         400: {"description": "Invalid query parameters"},
-        500: {"description": "Internal server error"}
-    }
+        500: {"description": "Internal server error"},
+    },
 )
 def get_screener_results(
-    min_roe: Optional[float] = Query(None, description="Minimum Return on Equity % (ROE >= threshold)"),
-    max_de: Optional[float] = Query(None, description="Maximum Debt to Equity ratio (D/E <= threshold)"),
-    min_fcf: Optional[float] = Query(None, description="Minimum Free Cash Flow (FCF >= threshold)"),
+    min_roe: Optional[float] = Query(
+        None, description="Minimum Return on Equity % (ROE >= threshold)"
+    ),
+    max_de: Optional[float] = Query(
+        None, description="Maximum Debt to Equity ratio (D/E <= threshold)"
+    ),
+    min_fcf: Optional[float] = Query(
+        None, description="Minimum Free Cash Flow (FCF >= threshold)"
+    ),
     sector: Optional[str] = Query(None, description="Exact or partial sector filter"),
-    min_rev_cagr_5yr: Optional[float] = Query(None, description="Minimum 5-Year Revenue CAGR %"),
-    min_pat_cagr_5yr: Optional[float] = Query(None, description="Minimum 5-Year PAT CAGR %"),
-    max_pe: Optional[float] = Query(None, description="Maximum Price to Earnings ratio (P/E <= threshold)")
+    min_rev_cagr_5yr: Optional[float] = Query(
+        None, description="Minimum 5-Year Revenue CAGR %"
+    ),
+    min_pat_cagr_5yr: Optional[float] = Query(
+        None, description="Minimum 5-Year PAT CAGR %"
+    ),
+    max_pe: Optional[float] = Query(
+        None, description="Maximum Price to Earnings ratio (P/E <= threshold)"
+    ),
 ) -> List[ScreenerCompanyItem]:
     """
     Returns ranked stock screening results based on specified KPI filters.
@@ -177,12 +198,20 @@ def get_screener_results(
             pe_val = r["pe_ratio"]
 
             # Fallbacks from peer_percentiles if primary metrics are missing
-            if fcf_val is None or roe_val is None or de_val is None or rev_cagr_val is None or pat_cagr_val is None:
+            if (
+                fcf_val is None
+                or roe_val is None
+                or de_val is None
+                or rev_cagr_val is None
+                or pat_cagr_val is None
+            ):
                 pp_cur = conn.execute(
                     "SELECT metric, metric_value FROM peer_percentiles WHERE company_id = ?",
-                    (c_id,)
+                    (c_id,),
                 )
-                pp_dict = {row["metric"]: row["metric_value"] for row in pp_cur.fetchall()}
+                pp_dict = {
+                    row["metric"]: row["metric_value"] for row in pp_cur.fetchall()
+                }
                 if fcf_val is None:
                     fcf_val = pp_dict.get("free_cash_flow")
                 if roe_val is None:
@@ -224,42 +253,49 @@ def get_screener_results(
                 if pe_val is None or pe_val > v_max_pe:
                     continue
 
-            filtered_results.append({
-                "company_id": c_id,
-                "company_name": c_name,
-                "sector": c_sec,
-                "roe": roe_val,
-                "debt_to_equity": de_val,
-                "free_cash_flow": fcf_val,
-                "revenue_cagr_5yr": rev_cagr_val,
-                "pat_cagr_5yr": pat_cagr_val,
-                "pe_ratio": pe_val,
-            })
+            filtered_results.append(
+                {
+                    "company_id": c_id,
+                    "company_name": c_name,
+                    "sector": c_sec,
+                    "roe": roe_val,
+                    "debt_to_equity": de_val,
+                    "free_cash_flow": fcf_val,
+                    "revenue_cagr_5yr": rev_cagr_val,
+                    "pat_cagr_5yr": pat_cagr_val,
+                    "pe_ratio": pe_val,
+                }
+            )
 
         # Sort by ROE descending (handling None values)
         filtered_results.sort(
-            key=lambda item: (item["roe"] is not None, item["roe"] if item["roe"] is not None else -999999),
-            reverse=True
+            key=lambda item: (
+                item["roe"] is not None,
+                item["roe"] if item["roe"] is not None else -999999,
+            ),
+            reverse=True,
         )
 
         results: List[ScreenerCompanyItem] = []
         for index, item in enumerate(filtered_results, start=1):
-            results.append(ScreenerCompanyItem(
-                company_id=item["company_id"],
-                company_name=item["company_name"],
-                sector=item["sector"],
-                rank=index,
-                ranking=index,
-                roe=item["roe"],
-                debt_to_equity=item["debt_to_equity"],
-                de=item["debt_to_equity"],
-                free_cash_flow=item["free_cash_flow"],
-                fcf=item["free_cash_flow"],
-                revenue_cagr_5yr=item["revenue_cagr_5yr"],
-                pat_cagr_5yr=item["pat_cagr_5yr"],
-                pe_ratio=item["pe_ratio"],
-                pe=item["pe_ratio"],
-            ))
+            results.append(
+                ScreenerCompanyItem(
+                    company_id=item["company_id"],
+                    company_name=item["company_name"],
+                    sector=item["sector"],
+                    rank=index,
+                    ranking=index,
+                    roe=item["roe"],
+                    debt_to_equity=item["debt_to_equity"],
+                    de=item["debt_to_equity"],
+                    free_cash_flow=item["free_cash_flow"],
+                    fcf=item["free_cash_flow"],
+                    revenue_cagr_5yr=item["revenue_cagr_5yr"],
+                    pat_cagr_5yr=item["pat_cagr_5yr"],
+                    pe_ratio=item["pe_ratio"],
+                    pe=item["pe_ratio"],
+                )
+            )
 
         return results
 
@@ -269,5 +305,5 @@ def get_screener_results(
         logger.exception("Error executing screener query")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to execute screener query"
+            detail="Failed to execute screener query",
         ) from exc

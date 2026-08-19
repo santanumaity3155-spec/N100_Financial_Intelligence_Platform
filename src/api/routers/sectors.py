@@ -24,29 +24,51 @@ router = APIRouter(tags=["Sectors"])
 # PYDANTIC RESPONSE MODELS
 # =============================================================================
 
+
 class SectorSummaryItem(BaseModel):
+    """SectorSummaryItem class representation."""
+
     sector: str = Field(..., description="Name of the industry sector")
     company_count: int = Field(..., description="Number of companies in this sector")
-    median_roe: Optional[float] = Field(None, description="Median Return on Equity % across sector")
-    median_pe: Optional[float] = Field(None, description="Median Price to Earnings ratio across sector")
-    median_de: Optional[float] = Field(None, description="Median Debt to Equity ratio across sector")
+    median_roe: Optional[float] = Field(
+        None, description="Median Return on Equity % across sector"
+    )
+    median_pe: Optional[float] = Field(
+        None, description="Median Price to Earnings ratio across sector"
+    )
+    median_de: Optional[float] = Field(
+        None, description="Median Debt to Equity ratio across sector"
+    )
 
 
 class SectorCompanyItem(BaseModel):
+    """SectorCompanyItem class representation."""
+
     company_id: str = Field(..., description="Unique company ticker symbol")
     company_name: str = Field(..., description="Official company name")
     sector: str = Field(..., description="Sector classification")
     roe: Optional[float] = Field(None, description="Latest Return on Equity %")
-    roce: Optional[float] = Field(None, description="Latest Return on Capital Employed %")
-    debt_to_equity: Optional[float] = Field(None, description="Latest Debt to Equity ratio")
-    pe_ratio: Optional[float] = Field(None, description="Latest Price to Earnings ratio")
-    net_profit_margin: Optional[float] = Field(None, description="Latest Net Profit Margin %")
-    latest_kpis: Optional[Dict[str, Any]] = Field(None, description="Consolidated latest financial KPIs")
+    roce: Optional[float] = Field(
+        None, description="Latest Return on Capital Employed %"
+    )
+    debt_to_equity: Optional[float] = Field(
+        None, description="Latest Debt to Equity ratio"
+    )
+    pe_ratio: Optional[float] = Field(
+        None, description="Latest Price to Earnings ratio"
+    )
+    net_profit_margin: Optional[float] = Field(
+        None, description="Latest Net Profit Margin %"
+    )
+    latest_kpis: Optional[Dict[str, Any]] = Field(
+        None, description="Consolidated latest financial KPIs"
+    )
 
 
 # =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
+
 
 def get_sector_data_df() -> pd.DataFrame:
     """
@@ -64,7 +86,7 @@ def get_sector_data_df() -> pd.DataFrame:
             GROUP BY company_id
         ) s ON c.company_id = s.company_id
         """,
-        conn
+        conn,
     )
     fr = pd.read_sql_query(
         """
@@ -72,7 +94,7 @@ def get_sector_data_df() -> pd.DataFrame:
         FROM financial_ratios
         ORDER BY period DESC
         """,
-        conn
+        conn,
     ).drop_duplicates(subset=["company_id"], keep="first")
 
     kpi = pd.read_sql_query(
@@ -81,7 +103,7 @@ def get_sector_data_df() -> pd.DataFrame:
         FROM financial_kpis
         ORDER BY period DESC
         """,
-        conn
+        conn,
     ).drop_duplicates(subset=["company_id"], keep="first")
 
     mc = pd.read_sql_query(
@@ -91,16 +113,21 @@ def get_sector_data_df() -> pd.DataFrame:
         WHERE pe_ratio IS NOT NULL
         ORDER BY period DESC
         """,
-        conn
+        conn,
     ).drop_duplicates(subset=["company_id"], keep="first")
 
-    df = comp.merge(fr, on="company_id", how="left").merge(kpi, on="company_id", how="left").merge(mc, on="company_id", how="left")
+    df = (
+        comp.merge(fr, on="company_id", how="left")
+        .merge(kpi, on="company_id", how="left")
+        .merge(mc, on="company_id", how="left")
+    )
     return df
 
 
 # =============================================================================
 # ENDPOINTS
 # =============================================================================
+
 
 @router.get(
     "/sectors",
@@ -109,8 +136,8 @@ def get_sector_data_df() -> pd.DataFrame:
     description="Retrieve sector aggregated statistics including company count, median ROE, median P/E, and median D/E.",
     responses={
         200: {"description": "Sector summary list returned successfully"},
-        500: {"description": "Internal server error"}
-    }
+        500: {"description": "Internal server error"},
+    },
 )
 def get_sectors() -> List[SectorSummaryItem]:
     """
@@ -139,13 +166,15 @@ def get_sectors() -> List[SectorSummaryItem]:
             if med_de is not None and (np.isnan(med_de) or np.isinf(med_de)):
                 med_de = None
 
-            sectors_list.append(SectorSummaryItem(
-                sector=str(sec_name),
-                company_count=int(len(group)),
-                median_roe=med_roe,
-                median_pe=med_pe,
-                median_de=med_de
-            ))
+            sectors_list.append(
+                SectorSummaryItem(
+                    sector=str(sec_name),
+                    company_count=int(len(group)),
+                    median_roe=med_roe,
+                    median_pe=med_pe,
+                    median_de=med_de,
+                )
+            )
 
         # Sort by sector name ascending
         sectors_list.sort(key=lambda s: s.sector.lower())
@@ -155,7 +184,7 @@ def get_sectors() -> List[SectorSummaryItem]:
         logger.exception("Error in GET /sectors")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve sector summary"
+            detail="Failed to retrieve sector summary",
         ) from exc
 
 
@@ -167,8 +196,8 @@ def get_sectors() -> List[SectorSummaryItem]:
     responses={
         200: {"description": "List of companies in sector returned successfully"},
         404: {"description": "Sector not found"},
-        500: {"description": "Internal server error"}
-    }
+        500: {"description": "Internal server error"},
+    },
 )
 def get_sector_companies(sector: str) -> List[SectorCompanyItem]:
     """
@@ -178,7 +207,7 @@ def get_sector_companies(sector: str) -> List[SectorCompanyItem]:
         if not sector or not sector.strip():
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Sector name cannot be empty"
+                detail="Sector name cannot be empty",
             )
 
         df = get_sector_data_df()
@@ -188,22 +217,32 @@ def get_sector_companies(sector: str) -> List[SectorCompanyItem]:
         matching_mask = df["sector"].str.lower() == sec_clean
         if not matching_mask.any():
             # Try partial/contains match if exact match yields 0
-            matching_mask = df["sector"].str.lower().str.contains(sec_clean, regex=False)
+            matching_mask = (
+                df["sector"].str.lower().str.contains(sec_clean, regex=False)
+            )
 
         matched_df = df[matching_mask]
         if matched_df.empty:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Sector '{sector}' not found in database."
+                detail=f"Sector '{sector}' not found in database.",
             )
 
         results: List[SectorCompanyItem] = []
         for _, row in matched_df.iterrows():
             roe_val = float(row["roe"]) if pd.notna(row["roe"]) else None
             roce_val = float(row["roce"]) if pd.notna(row["roce"]) else None
-            de_val = float(row["debt_to_equity"]) if pd.notna(row["debt_to_equity"]) else None
+            de_val = (
+                float(row["debt_to_equity"])
+                if pd.notna(row["debt_to_equity"])
+                else None
+            )
             pe_val = float(row["pe_ratio"]) if pd.notna(row["pe_ratio"]) else None
-            npm_val = float(row["net_profit_margin"]) if pd.notna(row["net_profit_margin"]) else None
+            npm_val = (
+                float(row["net_profit_margin"])
+                if pd.notna(row["net_profit_margin"])
+                else None
+            )
 
             latest_kpis_dict = {
                 "roe": roe_val,
@@ -213,17 +252,19 @@ def get_sector_companies(sector: str) -> List[SectorCompanyItem]:
                 "net_profit_margin": npm_val,
             }
 
-            results.append(SectorCompanyItem(
-                company_id=row["company_id"],
-                company_name=row["company_name"],
-                sector=row["sector"],
-                roe=roe_val,
-                roce=roce_val,
-                debt_to_equity=de_val,
-                pe_ratio=pe_val,
-                net_profit_margin=npm_val,
-                latest_kpis=latest_kpis_dict
-            ))
+            results.append(
+                SectorCompanyItem(
+                    company_id=row["company_id"],
+                    company_name=row["company_name"],
+                    sector=row["sector"],
+                    roe=roe_val,
+                    roce=roce_val,
+                    debt_to_equity=de_val,
+                    pe_ratio=pe_val,
+                    net_profit_margin=npm_val,
+                    latest_kpis=latest_kpis_dict,
+                )
+            )
 
         return results
 
@@ -233,5 +274,5 @@ def get_sector_companies(sector: str) -> List[SectorCompanyItem]:
         logger.exception(f"Error in GET /sectors/{sector}/companies")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve sector companies"
+            detail="Failed to retrieve sector companies",
         ) from exc

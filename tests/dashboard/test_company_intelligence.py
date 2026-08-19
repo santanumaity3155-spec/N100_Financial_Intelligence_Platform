@@ -74,7 +74,9 @@ def test_04_kpi_retrieval():
     """Test 4: Verify financial KPI retrieval for a company."""
     ratios_df = get_ratios("INFY")
     pl_df = get_pl("INFY")
-    assert not ratios_df.empty or not pl_df.empty, "KPI statements should return data for INFY"
+    assert (
+        not ratios_df.empty or not pl_df.empty
+    ), "KPI statements should return data for INFY"
     if not ratios_df.empty:
         assert "roe" in ratios_df.columns
         assert "debt_equity" in ratios_df.columns
@@ -172,13 +174,17 @@ def test_13_missing_data_handling():
     profile_module.render_section_1_header(None, "UNKNOWN")
     profile_module.render_section_2_health(None)
     profile_module.render_section_3_kpis(pd.DataFrame(), pd.DataFrame(), pd.DataFrame())
-    profile_module.render_section_4_profitability(pd.DataFrame(), pd.DataFrame(), "UNKNOWN")
+    profile_module.render_section_4_profitability(
+        pd.DataFrame(), pd.DataFrame(), "UNKNOWN"
+    )
     profile_module.render_section_5_cashflow_intelligence({})
     profile_module.render_section_6_pros_cons({"pros": [], "cons": []})
     profile_module.render_section_7_capital_allocation({})
     profile_module.render_section_8_valuation({})
     profile_module.render_section_9_peer_position(pd.DataFrame(), "UNKNOWN")
-    profile_module.render_section_10_historical_trend(pd.DataFrame(), pd.DataFrame(), pd.DataFrame())
+    profile_module.render_section_10_historical_trend(
+        pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    )
 
 
 def test_14_database_failure_handling():

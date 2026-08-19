@@ -1,0 +1,97 @@
+company_id,company_name,sector,latest_year,capital_allocation_rating,capital_allocation_pattern
+ABB,Abbott India Ltd,,2024,MODERATE,Mixed
+ADANIENSOL,Adani Energy Solutions Ltd,,2024,GOOD,Shareholder Returns
+ADANIENT,Adani Enterprises Ltd,,2024,DISTRESSED,Distress Signal
+ADANIGREEN,Adani Green Energy Ltd,,2024,DISTRESSED,Distress Signal
+ADANIPORTS,Adani Ports & Special Economic Zone Ltd,,2024,EXCELLENT,Reinvestor
+ADANIPOWER,Adani Power Ltd,,2024,MODERATE,Mixed
+AMBUJACEM,Ambuja Cements Ltd,,2024,DISTRESSED,Distress Signal
+APOLLOHOSP,"Apollo Hospitals
+Chain of Indian private hospitals",,2024,WEAK,Cash Accumulator
+ASIANPAINT,"Asian Paints
+Indian Multi-National Paint and Coating Manufacturing Company",,2024,MODERATE,Mixed
+ATGL,Adani Total Gas Ltd,,2024,DISTRESSED,Distress Signal
+AXISBANK,Axis Bank Ltd,,2024,DISTRESSED,Distress Signal
+BAJAJAUTO,Bajaj Auto Ltd,,2024,GOOD,Shareholder Returns
+BAJAJFINSV,Bajaj Finserv Ltd,,2024,DISTRESSED,Distress Signal
+BAJAJHLDNG,Bajaj Holdings & Investment Ltd,,2024,WEAK,Cash Accumulator
+BAJFINANCE,Bajaj Finance Ltd,,2024,DISTRESSED,Distress Signal
+BANKBARODA,Bank of Baroda,,2024,DISTRESSED,Distress Signal
+BEL,Bharat Electronics Ltd,,2024,DISTRESSED,Distress Signal
+BHARTIARTL,Bharti Airtel Ltd,,2024,GOOD,Shareholder Returns
+BHEL,Bharat Heavy Electricals Limited,,2024,DISTRESSED,Distress Signal
+BOSCHLTD,Bosch Ltd,,2024,WEAK,Cash Accumulator
+BPCL,Bharat Petroleum Corporation Ltd,,2024,GOOD,Shareholder Returns
+BRITANNIA,Britannia Industries Ltd,,2024,GOOD,Shareholder Returns
+CANBK,Canara Bank,,2024,GOOD,Shareholder Returns
+CHOLAFIN,Cholamandalam Investment & Finance Company Ltd,,2024,DISTRESSED,Distress Signal
+CIPLA,Cipla Ltd,,2024,WEAK,Cash Accumulator
+COALINDIA,Coal India Ltd,,2024,WEAK,Cash Accumulator
+DABUR,Dabur India Ltd,,2024,MODERATE,Mixed
+DIVISLAB,Divis Laboratories Ltd,,2024,MODERATE,Mixed
+DLF,DLF Ltd,,2024,WEAK,Cash Accumulator
+DMART,Avenue Supermarts Ltd,,2024,WEAK,Cash Accumulator
+DRREDDY,Dr Reddys Laboratories Ltd,,2024,WEAK,Cash Accumulator
+EICHERMOT,Eicher Motors Ltd,,2024,WEAK,Cash Accumulator
+GAIL,GAIL (India) Ltd,,2024,WEAK,Cash Accumulator
+GODREJCP,Godrej Consumer Products Ltd,,2024,DISTRESSED,Distress Signal
+GRASIM,Grasim Industries Ltd,,2024,DISTRESSED,Distress Signal
+HAL,Hindustan Aeronautics Ltd,,2024,WEAK,Cash Accumulator
+HAVELLS,Havells India Ltd,,2024,WEAK,Cash Accumulator
+HCLTECH,HCL Technologies Ltd,,2024,EXCELLENT,Reinvestor
+HDFCBANK,HDFC Bank Ltd,,2024,WEAK,Cash Accumulator
+HDFCLIFE,HDFC Life Insurance Company Ltd,,2024,DISTRESSED,Distress Signal
+HEROMOTOCO,Hero MotoCorp Ltd,,2024,GOOD,Shareholder Returns
+HINDALCO,Hindalco Industries Ltd,,2024,GOOD,Shareholder Returns
+HINDUNILVR,Hindustan Unilever Ltd,,2024,GOOD,Shareholder Returns
+ICICIBANK,ICICI Bank Ltd,,2024,WEAK,Cash Accumulator
+ICICIGI,ICICI Lombard General Insurance Company Ltd,,2024,WEAK,Cash Accumulator
+ICICIPRULI,ICICI Prudential Life Insurance Company Ltd,,2024,DISTRESSED,Distress Signal
+INDIGO,Interglobe Aviation Ltd,,2024,GOOD,Shareholder Returns
+INDUSINDBK,IndusInd Bank Ltd,,2024,DISTRESSED,Distress Signal
+INFY,Infosys Ltd,,2024,MODERATE,Mixed
+IOC,Indian Oil Corporation,,2024,GOOD,Shareholder Returns
+IRCTC,Indian Railway Catering & Tourism Corporation Ltd,,2024,MODERATE,Mixed
+IRFC,Indian Railway Finance Corporation Ltd,,2024,EXCELLENT,Reinvestor
+ITC,ITC Ltd,,2024,MODERATE,Mixed
+JINDALSTEL,Jindal Steel & Power Ltd,,2024,DISTRESSED,Distress Signal
+JIOFIN,Jio Financial Services Ltd,,2024,DISTRESSED,Distress Signal
+JSWENERGY,JSW Energy Ltd,,2024,DISTRESSED,Distress Signal
+JSWSTEEL,JSW Steel Ltd,,2024,DISTRESSED,Distress Signal
+KOTAKBANK,Kotak Mahindra Bank Ltd,,2024,WEAK,Cash Accumulator
+LICI,Life Insurance Corporation of India,,2024,WEAK,Cash Accumulator
+LODHA,Macrotech Developers Ltd,,2024,DISTRESSED,Distress Signal
+LT,Larsen & Toubro Ltd,,2024,EXCELLENT,Reinvestor
+LTIM,LTIMindtree Ltd,,2024,WEAK,Cash Accumulator
+MARUTI,Maruti Suzuki India Ltd,,2024,WEAK,Cash Accumulator
+MM,Mahindra & Mahindra Ltd,,2024,DISTRESSED,Distress Signal
+MOTHERSON,Samvardhana Motherson International Ltd,,2024,WEAK,Cash Accumulator
+NAUKRI,Info Edge (India) Ltd,,2024,DISTRESSED,Distress Signal
+NESTLEIND,Nestle India Ltd,,2024,MODERATE,Mixed
+NHPC,NHPC Ltd,,2024,WEAK,Cash Accumulator
+NTPC,NTPC Ltd,,2024,WEAK,Cash Accumulator
+ONGC,Oil & Natural Gas Corpn Ltd,,2024,MODERATE,Mixed
+PFC,Power Finance Corporation Ltd,,2024,DISTRESSED,Distress Signal
+PIDILITIND,Pidilite Industries Ltd,,2024,MODERATE,Mixed
+PNB,Punjab National Bank,,2024,DISTRESSED,Distress Signal
+POWERGRID,Power Grid Corporation of India Ltd,,2024,EXCELLENT,Reinvestor
+RECLTD,REC Ltd,,2024,DISTRESSED,Distress Signal
+RELIANCE,Reliance Industries Ltd,,2024,MODERATE,Mixed
+SBILIFE,SBI Life Insurance Company Ltd,,2024,DISTRESSED,Distress Signal
+SBIN,State Bank of India,,2024,WEAK,Cash Accumulator
+SHREECEM,Shree Cement Ltd,,2024,EXCELLENT,Reinvestor
+SHRIRAMFIN,Shriram Finance Ltd,,2024,DISTRESSED,Distress Signal
+SIEMENS,Siemens Ltd,,2024,WEAK,Cash Accumulator
+SUNPHARMA,Sun Pharmaceuticals Industries Ltd,,2024,EXCELLENT,Reinvestor
+TATACONSUM,Tata Consumer Products Ltd,,2024,WEAK,Cash Accumulator
+TATAMOTORS,Tata Motors Ltd,,2024,EXCELLENT,Reinvestor
+TATAPOWER,Tata Power Company Ltd,,2024,GOOD,Shareholder Returns
+TATASTEEL,Tata Steel Ltd,,2024,WEAK,Cash Accumulator
+TCS,Tata Consultancy Services Ltd,,2024,GOOD,Shareholder Returns
+TECHM,Tech Mahindra Ltd,,2024,EXCELLENT,Reinvestor
+TITAN,Titan Company Ltd,,2024,WEAK,Cash Accumulator
+TORNTPHARM,Torrent Pharmaceuticals Ltd,,2024,EXCELLENT,Reinvestor
+TRENT,Trent Ltd,,2024,MODERATE,Mixed
+TVSMOTOR,TVS Motor Company Ltd,,2024,DISTRESSED,Distress Signal
+ULTRACEMCO,UltraTech Cement,,2024,WEAK,Cash Accumulator
+UNIONBANK,Union Bank of India,,2024,EXCELLENT,Reinvestor

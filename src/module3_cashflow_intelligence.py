@@ -105,6 +105,7 @@ DISTRESS_CSV_COLUMNS = ["company_id", "sector", "CFO", "CFF", "latest_net_profit
 # DATA LOADING
 # =============================================================================
 
+
 def fetch_companies(conn) -> pd.DataFrame:
     """
     Fetch the authoritative company list.
@@ -124,7 +125,9 @@ def fetch_companies(conn) -> pd.DataFrame:
     return pd.read_sql_query(query, conn)
 
 
-def fetch_company_data(conn, company_id: str) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def fetch_company_data(
+    conn, company_id: str
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Fetch cash flow, profit & loss and balance sheet rows for one company.
 
@@ -157,6 +160,7 @@ def fetch_company_data(conn, company_id: str) -> Tuple[pd.DataFrame, pd.DataFram
 # METRIC COMPUTATION (delegated to the analytics engine)
 # =============================================================================
 
+
 def _py(value: Any) -> Any:
     """Convert numpy scalars to plain Python values for clean Excel output."""
     import numpy as np
@@ -168,7 +172,9 @@ def _py(value: Any) -> Any:
     return value
 
 
-def process_company(conn, company_id: str, company_name: str, sector: Optional[str]) -> Dict[str, Any]:
+def process_company(
+    conn, company_id: str, company_name: str, sector: Optional[str]
+) -> Dict[str, Any]:
     """
     Compute all Sprint 5 cash-flow intelligence metrics for a company.
 
@@ -235,23 +241,25 @@ def process_all_companies(conn=None) -> pd.DataFrame:
             results.append(result)
         except Exception as exc:  # noqa: BLE001 - log exact failure, keep going
             logger.error(f"Failed to process company {company_id}: {exc!r}")
-            results.append({
-                "company_id": company_id,
-                "company_name": company_name,
-                "sector": sector,
-                "cfo_quality_score": None,
-                "cfo_quality_label": "Insufficient Data",
-                "capex_intensity_pct": None,
-                "capex_label": "Insufficient Data",
-                "fcf_cagr_5yr": None,
-                "fcf_conversion_pct": None,
-                "distress_flag": False,
-                "deleveraging_flag": False,
-                "capital_allocation_label": "Insufficient Data",
-                "_cfo_value": None,
-                "_cff_value": None,
-                "_net_profit_latest": None,
-            })
+            results.append(
+                {
+                    "company_id": company_id,
+                    "company_name": company_name,
+                    "sector": sector,
+                    "cfo_quality_score": None,
+                    "cfo_quality_label": "Insufficient Data",
+                    "capex_intensity_pct": None,
+                    "capex_label": "Insufficient Data",
+                    "fcf_cagr_5yr": None,
+                    "fcf_conversion_pct": None,
+                    "distress_flag": False,
+                    "deleveraging_flag": False,
+                    "capital_allocation_label": "Insufficient Data",
+                    "_cfo_value": None,
+                    "_cff_value": None,
+                    "_net_profit_latest": None,
+                }
+            )
 
     results_df = pd.DataFrame(results)
     results_df["sector"] = results_df["sector"].where(
@@ -263,6 +271,7 @@ def process_all_companies(conn=None) -> pd.DataFrame:
 # =============================================================================
 # OUTPUT BUILDING
 # =============================================================================
+
 
 def build_output_dataframe(results_df: pd.DataFrame) -> pd.DataFrame:
     """Select the required Excel columns from the results DataFrame."""
@@ -280,15 +289,19 @@ def build_distress_dataframe(results_df: pd.DataFrame) -> pd.DataFrame:
     distress_df = results_df.loc[
         mask, ["company_id", "sector", "_cfo_value", "_cff_value", "_net_profit_latest"]
     ].copy()
-    distress_df = distress_df.rename(columns={
-        "_cfo_value": "CFO",
-        "_cff_value": "CFF",
-        "_net_profit_latest": "latest_net_profit",
-    })
+    distress_df = distress_df.rename(
+        columns={
+            "_cfo_value": "CFO",
+            "_cff_value": "CFF",
+            "_net_profit_latest": "latest_net_profit",
+        }
+    )
     return distress_df[DISTRESS_CSV_COLUMNS].reset_index(drop=True)
 
 
-def write_outputs(results_df: pd.DataFrame, output_dir: Optional[Path] = None) -> Dict[str, Path]:
+def write_outputs(
+    results_df: pd.DataFrame, output_dir: Optional[Path] = None
+) -> Dict[str, Path]:
     """
     Write the Excel and distress-CSV outputs into ``output_dir``.
 
@@ -317,6 +330,7 @@ def write_outputs(results_df: pd.DataFrame, output_dir: Optional[Path] = None) -
 # SELF-VALIDATION
 # =============================================================================
 
+
 def validate_output_files(excel_path: Path, csv_path: Path) -> Dict[str, Any]:
     """
     Reopen both generated files and verify they are readable and well-formed.
@@ -343,7 +357,9 @@ def validate_output_files(excel_path: Path, csv_path: Path) -> Dict[str, Any]:
             report["excel_readable"] = True
             report["excel_rows"] = len(df)
             report["excel_columns"] = df.columns.tolist()
-            report["missing_columns"] = [c for c in OUTPUT_COLUMNS if c not in df.columns]
+            report["missing_columns"] = [
+                c for c in OUTPUT_COLUMNS if c not in df.columns
+            ]
             report["duplicate_rows"] = int(df["company_id"].duplicated().sum())
         except Exception as exc:  # noqa: BLE001
             report["excel_error"] = str(exc)
@@ -371,6 +387,7 @@ def validate_output_files(excel_path: Path, csv_path: Path) -> Dict[str, Any]:
 # =============================================================================
 # MAIN ENTRY POINT
 # =============================================================================
+
 
 def main() -> int:
     """Run the full Module 3 pipeline and write both output files."""
@@ -401,8 +418,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
-
-
-
-

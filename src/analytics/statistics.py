@@ -13,7 +13,11 @@ _current_file = os.path.abspath(__file__)
 _current_dir = os.path.dirname(_current_file)
 
 # Proxy standard library statistics to prevent shadowing when third-party packages import `statistics`
-_filtered_path = [p for p in sys.path if os.path.abspath(p) not in (_current_dir, os.path.dirname(_current_dir))]
+_filtered_path = [
+    p
+    for p in sys.path
+    if os.path.abspath(p) not in (_current_dir, os.path.dirname(_current_dir))
+]
 
 for _p in _filtered_path:
     try:

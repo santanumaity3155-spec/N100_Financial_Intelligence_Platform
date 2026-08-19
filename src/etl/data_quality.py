@@ -20,7 +20,7 @@ logger = get_logger(__name__)
 class DataQualityReporter:
     """
     Generates data quality reports.
-    
+
     Responsibilities:
     1. Compile validation results
     2. Generate JSON reports
@@ -31,7 +31,7 @@ class DataQualityReporter:
     def __init__(self, reports_dir: Optional[Path] = None):
         """
         Initialize the DataQualityReporter.
-        
+
         Parameters
         ----------
         reports_dir : Path, optional
@@ -39,7 +39,7 @@ class DataQualityReporter:
         """
         self.reports_dir = reports_dir or REPORTS_DIR
         self.reports_dir.mkdir(parents=True, exist_ok=True)
-        
+
         self.validation_results = {}
         self.normalization_log = []
         self.transformation_log = []
@@ -48,7 +48,7 @@ class DataQualityReporter:
     def set_validation_results(self, results: Dict[str, Any]):
         """
         Set validation results.
-        
+
         Parameters
         ----------
         results : Dict[str, Any]
@@ -60,7 +60,7 @@ class DataQualityReporter:
     def set_normalization_log(self, log: List[Dict[str, Any]]):
         """
         Set normalization log.
-        
+
         Parameters
         ----------
         log : List[Dict[str, Any]]
@@ -72,7 +72,7 @@ class DataQualityReporter:
     def set_transformation_log(self, log: List[Dict[str, Any]]):
         """
         Set transformation log.
-        
+
         Parameters
         ----------
         log : List[Dict[str, Any]]
@@ -84,7 +84,7 @@ class DataQualityReporter:
     def set_load_stats(self, stats: Dict[str, Any]):
         """
         Set load statistics.
-        
+
         Parameters
         ----------
         stats : Dict[str, Any]
@@ -96,7 +96,7 @@ class DataQualityReporter:
     def generate_summary_report(self) -> Dict[str, Any]:
         """
         Generate summary data quality report.
-        
+
         Returns
         -------
         Dict[str, Any]
@@ -111,19 +111,21 @@ class DataQualityReporter:
                 "validation_failed": 0,
                 "total_rows_loaded": 0,
                 "total_errors": 0,
-                "total_warnings": 0
+                "total_warnings": 0,
             },
             "validation_summary": {},
             "normalization_summary": {},
             "transformation_summary": {},
             "load_summary": {},
-            "recommendations": []
+            "recommendations": [],
         }
 
         # Validation summary
         if self.validation_results:
             # pipeline may pass either the summary directly or a nested structure
-            val_summary = self.validation_results.get("summary", self.validation_results)
+            val_summary = self.validation_results.get(
+                "summary", self.validation_results
+            )
             report["summary"]["total_datasets"] = val_summary.get("total_datasets", 0)
             report["summary"]["validation_passed"] = val_summary.get("passed", 0)
             report["summary"]["validation_failed"] = val_summary.get("failed", 0)
@@ -141,20 +143,22 @@ class DataQualityReporter:
         if self.normalization_log:
             report["normalization_summary"] = {
                 "total_operations": len(self.normalization_log),
-                "operations": self.normalization_log
+                "operations": self.normalization_log,
             }
 
         # Transformation summary
         if self.transformation_log:
             report["transformation_summary"] = {
                 "total_operations": len(self.transformation_log),
-                "operations": self.transformation_log
+                "operations": self.transformation_log,
             }
 
         # Load summary
         if self.load_stats:
             report["load_summary"] = self.load_stats
-            report["summary"]["total_rows_loaded"] = self.load_stats.get("total_rows_loaded", 0)
+            report["summary"]["total_rows_loaded"] = self.load_stats.get(
+                "total_rows_loaded", 0
+            )
 
         # Generate recommendations
         report["recommendations"] = self._generate_recommendations(report)
@@ -164,12 +168,12 @@ class DataQualityReporter:
     def _generate_recommendations(self, report: Dict[str, Any]) -> List[str]:
         """
         Generate recommendations based on data quality issues.
-        
+
         Parameters
         ----------
         report : Dict[str, Any]
             Summary report
-            
+
         Returns
         -------
         List[str]
@@ -186,38 +190,38 @@ class DataQualityReporter:
 
         # Check for missing values
         if self.validation_results:
-            datasets = self.validation_results.get("datasets", self.validation_results.get("datasets", {}))
+            datasets = self.validation_results.get(
+                "datasets", self.validation_results.get("datasets", {})
+            )
             if not datasets:
                 datasets = self.validation_results.get("datasets", {})
             for dataset_name, dataset_info in datasets.items():
                 failed_checks = dataset_info.get("failed_checks", [])
                 if "missing_values" in failed_checks:
-                    recommendations.append(
-                        f"Address missing values in {dataset_name}"
-                    )
+                    recommendations.append(f"Address missing values in {dataset_name}")
 
         # Check load errors
         if self.load_stats:
             failed_loads = self.load_stats.get("failed_loads", [])
             if failed_loads:
-                recommendations.append(
-                    f"Retry failed loads: {failed_loads}"
-                )
+                recommendations.append(f"Retry failed loads: {failed_loads}")
 
         if not recommendations:
-            recommendations.append("Data quality looks good. No immediate actions required.")
+            recommendations.append(
+                "Data quality looks good. No immediate actions required."
+            )
 
         return recommendations
 
     def save_json_report(self, filename: Optional[str] = None) -> Path:
         """
         Save data quality report as JSON.
-        
+
         Parameters
         ----------
         filename : str, optional
             Report filename. Defaults to timestamped name.
-            
+
         Returns
         -------
         Path
@@ -228,16 +232,16 @@ class DataQualityReporter:
             filename = f"data_quality_report_{timestamp}.json"
 
         report_path = self.reports_dir / filename
-        
+
         report = self.generate_summary_report()
-        
+
         try:
-            with open(report_path, 'w', encoding='utf-8') as f:
+            with open(report_path, "w", encoding="utf-8") as f:
                 json.dump(report, f, indent=2, ensure_ascii=False)
-            
+
             logger.info(f"JSON report saved: {report_path}")
             return report_path
-            
+
         except Exception as e:
             logger.error(f"Failed to save JSON report: {str(e)}")
             raise
@@ -245,12 +249,12 @@ class DataQualityReporter:
     def save_html_report(self, filename: Optional[str] = None) -> Path:
         """
         Save data quality report as HTML.
-        
+
         Parameters
         ----------
         filename : str, optional
             Report filename. Defaults to timestamped name.
-            
+
         Returns
         -------
         Path
@@ -261,18 +265,18 @@ class DataQualityReporter:
             filename = f"data_quality_report_{timestamp}.html"
 
         report_path = self.reports_dir / filename
-        
+
         report = self.generate_summary_report()
-        
+
         try:
             html_content = self._generate_html_report(report)
-            
-            with open(report_path, 'w', encoding='utf-8') as f:
+
+            with open(report_path, "w", encoding="utf-8") as f:
                 f.write(html_content)
-            
+
             logger.info(f"HTML report saved: {report_path}")
             return report_path
-            
+
         except Exception as e:
             logger.error(f"Failed to save HTML report: {str(e)}")
             raise
@@ -280,12 +284,12 @@ class DataQualityReporter:
     def _generate_html_report(self, report: Dict[str, Any]) -> str:
         """
         Generate HTML content for the report.
-        
+
         Parameters
         ----------
         report : Dict[str, Any]
             Summary report
-            
+
         Returns
         -------
         str
@@ -425,7 +429,7 @@ class DataQualityReporter:
                 <th>Status</th>
             </tr>
 """
-        
+
         # Add load summary rows
         if report.get("load_summary"):
             for table, stats in report["load_summary"].get("tables", {}).items():
@@ -438,16 +442,16 @@ class DataQualityReporter:
 </body>
 </html>
 """
-        
+
         return html
 
     def print_summary(self):
         """Print data quality summary to console."""
         report = self.generate_summary_report()
-        
-        print("\n" + "="*80)
+
+        print("\n" + "=" * 80)
         print("DATA QUALITY REPORT SUMMARY")
-        print("="*80)
+        print("=" * 80)
         print(f"Generated: {report['generated_at']}")
         print(f"Total Datasets: {report['summary']['total_datasets']}")
         print(f"Validations Passed: {report['summary']['validation_passed']}")

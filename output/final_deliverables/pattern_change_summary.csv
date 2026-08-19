@@ -1,0 +1,19 @@
+previous_pattern,latest_pattern,company_count
+Cash Accumulator,Distress Signal,2
+Cash Accumulator,Mixed,3
+Cash Accumulator,Reinvestor,3
+Cash Accumulator,Shareholder Returns,3
+Distress Signal,Cash Accumulator,5
+Distress Signal,Mixed,1
+Distress Signal,Reinvestor,3
+Distress Signal,Shareholder Returns,3
+Mixed,Cash Accumulator,4
+Mixed,Shareholder Returns,2
+Reinvestor,Cash Accumulator,1
+Reinvestor,Distress Signal,2
+Reinvestor,Mixed,1
+Reinvestor,Shareholder Returns,1
+Shareholder Returns,Cash Accumulator,2
+Shareholder Returns,Distress Signal,5
+Shareholder Returns,Mixed,2
+Shareholder Returns,Reinvestor,1

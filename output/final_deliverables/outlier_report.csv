@@ -1,0 +1,6 @@
+company_id,broad_sector,metric,value,sector_mean,sector_std,z_score,outlier_flag
+TATAPOWER,Energy & Power,debt_to_equity,167.78,29.8585,42.942,3.2118,True
+HDFCBANK,Financial Services,debt_to_equity,4088.82,763.2688,1041.1669,3.1941,True
+HDFCBANK,Financial Services,operating_profit_margin_pct,-57587.0,-3046.0,15405.1401,-3.5404,True
+JIOFIN,Financial Services,revenue_cagr_5yr,561.31,39.8713,113.8454,4.5802,True
+LICI,Financial Services,return_on_equity_pct,63.61,17.3283,11.1521,4.15,True

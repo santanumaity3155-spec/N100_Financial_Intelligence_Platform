@@ -53,6 +53,7 @@ REPORT_CACHE_TTL = 600
 # DATA LOADING (cached)
 # =============================================================================
 
+
 @st.cache_data(ttl=REPORT_CACHE_TTL, show_spinner=False)
 def load_companies() -> pd.DataFrame:
     """
@@ -70,10 +71,12 @@ def load_companies() -> pd.DataFrame:
             return pd.DataFrame()
 
         # Standardize column names
-        df = df.rename(columns={
-            "ticker": "company_id",
-            "name": "company_name",
-        })
+        df = df.rename(
+            columns={
+                "ticker": "company_id",
+                "name": "company_name",
+            }
+        )
 
         logger.info(f"Loaded {len(df)} companies for annual reports")
         return df[["company_id", "company_name", "sector", "industry"]]
@@ -125,8 +128,10 @@ def load_annual_reports(company_id: str) -> pd.DataFrame:
 
         # Use annual_report field if document_url is empty
         df["report_url"] = df.apply(
-            lambda row: row["document_url"] if row["document_url"] else row["annual_report"],
-            axis=1
+            lambda row: (
+                row["document_url"] if row["document_url"] else row["annual_report"]
+            ),
+            axis=1,
         )
 
         # Filter to only rows with URLs
@@ -135,13 +140,16 @@ def load_annual_reports(company_id: str) -> pd.DataFrame:
         logger.info(f"Loaded {len(df)} annual reports for company {company_id}")
         return df[["year", "report_url", "document_type", "upload_date"]]
     except Exception as e:
-        logger.error(f"Failed to load annual reports for {company_id}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Failed to load annual reports for {company_id}: {str(e)}", exc_info=True
+        )
         return pd.DataFrame()
 
 
 # =============================================================================
 # URL VALIDATION
 # =============================================================================
+
 
 @st.cache_data(ttl=REPORT_CACHE_TTL, show_spinner=False)
 def validate_url(url: str) -> Tuple[bool, Optional[str]]:
@@ -231,7 +239,9 @@ def validate_report_urls(reports_df: pd.DataFrame) -> pd.DataFrame:
             if url:
                 is_valid, error_msg = validate_url(url)
                 reports_df.at[idx, "is_valid"] = is_valid
-                reports_df.at[idx, "status_message"] = "Available" if is_valid else error_msg
+                reports_df.at[idx, "status_message"] = (
+                    "Available" if is_valid else error_msg
+                )
 
         logger.info(f"Validated {len(reports_df)} report URLs")
         return reports_df
@@ -243,6 +253,7 @@ def validate_report_urls(reports_df: pd.DataFrame) -> pd.DataFrame:
 # =============================================================================
 # SIDEBAR SELECTION
 # =============================================================================
+
 
 def render_sidebar(companies_df: pd.DataFrame) -> Tuple[Optional[str], Optional[str]]:
     """
@@ -268,15 +279,21 @@ def render_sidebar(companies_df: pd.DataFrame) -> Tuple[Optional[str], Optional[
     company_names = sorted(set(company_names))
 
     # Search/autocomplete
-    search_query = st.sidebar.text_input(
-        "Search Company",
-        placeholder="Type to search...",
-        help="Search for a company by name (case-insensitive)",
-    ).strip().lower()
+    search_query = (
+        st.sidebar.text_input(
+            "Search Company",
+            placeholder="Type to search...",
+            help="Search for a company by name (case-insensitive)",
+        )
+        .strip()
+        .lower()
+    )
 
     # Filter companies
     if search_query:
-        filtered_names = [name for name in company_names if search_query in name.lower()]
+        filtered_names = [
+            name for name in company_names if search_query in name.lower()
+        ]
     else:
         filtered_names = company_names
 
@@ -306,6 +323,7 @@ def render_sidebar(companies_df: pd.DataFrame) -> Tuple[Optional[str], Optional[
 # =============================================================================
 # MAIN
 # =============================================================================
+
 
 def main() -> None:
     """
@@ -350,7 +368,9 @@ def main() -> None:
 
     # Summary statistics
     total_reports = len(reports_df)
-    valid_reports = reports_df["is_valid"].sum() if "is_valid" in reports_df.columns else 0
+    valid_reports = (
+        reports_df["is_valid"].sum() if "is_valid" in reports_df.columns else 0
+    )
     invalid_reports = total_reports - valid_reports
 
     col1, col2, col3 = st.columns(3)
@@ -426,12 +446,18 @@ def main() -> None:
             # Prepare display dataframe
             display_df = reports_df.copy()
             display_df["Status"] = display_df.apply(
-                lambda row: "✅ Available" if row.get("is_valid", False) else "❌ Unavailable",
-                axis=1
+                lambda row: (
+                    "✅ Available" if row.get("is_valid", False) else "❌ Unavailable"
+                ),
+                axis=1,
             )
             display_df["Action"] = display_df.apply(
-                lambda row: "Open" if row.get("is_valid", False) and row.get("report_url") else "N/A",
-                axis=1
+                lambda row: (
+                    "Open"
+                    if row.get("is_valid", False) and row.get("report_url")
+                    else "N/A"
+                ),
+                axis=1,
             )
 
             # Select columns for display
@@ -446,7 +472,9 @@ def main() -> None:
 
     # Bulk validation section
     with st.expander("🔍 Re-validate All URLs"):
-        st.markdown("Click the button below to re-validate all report URLs. This may take a few moments.")
+        st.markdown(
+            "Click the button below to re-validate all report URLs. This may take a few moments."
+        )
 
         if st.button("Re-validate URLs", type="primary"):
             with st.spinner("Validating URLs..."):
@@ -456,10 +484,16 @@ def main() -> None:
                 reports_df = validate_report_urls(reports_df)
 
                 # Show results
-                valid_count = reports_df["is_valid"].sum() if "is_valid" in reports_df.columns else 0
+                valid_count = (
+                    reports_df["is_valid"].sum()
+                    if "is_valid" in reports_df.columns
+                    else 0
+                )
                 total_count = len(reports_df)
 
-                st.success(f"Validation complete: {int(valid_count)}/{total_count} reports available")
+                st.success(
+                    f"Validation complete: {int(valid_count)}/{total_count} reports available"
+                )
 
                 # Display updated status
                 for idx, row in reports_df.iterrows():

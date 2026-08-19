@@ -47,7 +47,7 @@ Navigate through the pages using the sidebar to explore different analytics modu
 def configure_page() -> None:
     """
     Configure Streamlit page settings.
-    
+
     Sets page title, layout, icon, and initial sidebar state.
     Should be called before any other Streamlit operations.
     """
@@ -56,7 +56,7 @@ def configure_page() -> None:
             page_title=APP_TITLE,
             page_icon="📈",
             layout="wide",
-            initial_sidebar_state="expanded"
+            initial_sidebar_state="expanded",
         )
         logger.info("Streamlit page configured successfully")
     except Exception as e:
@@ -67,7 +67,7 @@ def configure_page() -> None:
 def render_sidebar() -> None:
     """
     Render the application sidebar with navigation and metadata.
-    
+
     Displays:
     - Application title and logo
     - Current module information
@@ -79,12 +79,12 @@ def render_sidebar() -> None:
         # Application header
         st.title("📈 N100 Analytics")
         st.markdown("---")
-        
+
         # Module information
         st.subheader("📦 Current Module")
         st.info(f"**{APP_MODULE}**")
         st.markdown("---")
-        
+
         # Navigation guidance
         st.subheader("🧭 Navigation")
         st.markdown("""
@@ -102,15 +102,16 @@ def render_sidebar() -> None:
         Use the page selector above to navigate.
         """)
         st.markdown("---")
-        
+
         # Application status
         st.subheader("⚙️ Application Status")
-        
+
         # Check database status
         try:
             from src.dashboard.utils.db import get_database_info
+
             db_info = get_database_info()
-            
+
             if db_info["exists"]:
                 st.success("✅ Database Connected")
                 st.caption(f"Size: {db_info['size_mb']} MB")
@@ -121,15 +122,15 @@ def render_sidebar() -> None:
         except Exception as e:
             st.error("❌ Database Error")
             logger.error(f"Error checking database status: {str(e)}")
-        
+
         st.markdown("---")
-        
+
         # App version and info
         st.subheader("ℹ️ Information")
         st.caption(f"**Version:** {APP_VERSION}")
         st.caption(f"**Module:** Module 1")
         st.caption("**Status:** Development")
-        
+
         # Footer
         st.markdown("---")
         st.markdown(
@@ -137,36 +138,36 @@ def render_sidebar() -> None:
             "N100 Financial Intelligence Platform<br>"
             "© 2025 Bluestock"
             "</div>",
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
 
 
 def render_main_content() -> None:
     """
     Render the main content area of the dashboard.
-    
+
     Displays welcome message, instructions, and application status.
     This is the default view when no specific page is selected.
     """
     # Application header
     st.title(f"📈 {APP_TITLE}")
     st.markdown("---")
-    
+
     # Welcome section
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.success("## 👋 Welcome to N100 Analytics!")
         st.markdown("---")
-    
+
     # Description
     st.markdown(APP_DESCRIPTION)
     st.markdown("---")
-    
+
     # Instructions
     st.subheader("📋 How to Use This Dashboard")
-    
+
     col1, col2 = st.columns(2)
-    
+
     with col1:
         st.markdown("""
         ### Getting Started
@@ -177,7 +178,7 @@ def render_main_content() -> None:
         4. **Compare** with peers and sectors
         5. **Export** reports for further analysis
         """)
-    
+
     with col2:
         st.markdown("""
         ### Features
@@ -188,40 +189,28 @@ def render_main_content() -> None:
         - **Multi-year Analysis**: Historical trends
         - **Peer Comparison**: Benchmark performance
         """)
-    
+
     st.markdown("---")
-    
+
     # Application status
     st.subheader("🔍 Application Status")
-    
+
     col1, col2, col3 = st.columns(3)
-    
+
     with col1:
-        st.metric(
-            label="Module",
-            value="Module 1",
-            delta="Dashboard Scaffold"
-        )
-    
+        st.metric(label="Module", value="Module 1", delta="Dashboard Scaffold")
+
     with col2:
-        st.metric(
-            label="Status",
-            value="Active",
-            delta="Development"
-        )
-    
+        st.metric(label="Status", value="Active", delta="Development")
+
     with col3:
-        st.metric(
-            label="Version",
-            value=APP_VERSION,
-            delta="Stable"
-        )
-    
+        st.metric(label="Version", value=APP_VERSION, delta="Stable")
+
     st.markdown("---")
-    
+
     # Navigation guidance
     st.subheader("🧭 Navigation Guidance")
-    
+
     st.info("""
     **👈 Use the sidebar to navigate between pages**
     
@@ -235,9 +224,9 @@ def render_main_content() -> None:
     - **Capital**: Capital structure analysis
     - **Reports**: Generate and export reports
     """)
-    
+
     st.markdown("---")
-    
+
     # Technical information
     with st.expander("🔧 Technical Information"):
         st.markdown("""
@@ -262,9 +251,9 @@ def render_main_content() -> None:
         - **Logging**: Full audit trail
         - **Type Safety**: Type hints throughout
         """)
-    
+
     st.markdown("---")
-    
+
     # Footer message
     st.caption(
         "💡 **Tip**: Bookmark this dashboard for quick access to Nifty 100 analytics. "
@@ -275,7 +264,7 @@ def render_main_content() -> None:
 def initialize_logging() -> None:
     """
     Initialize application logging.
-    
+
     Configures logging to capture application events, errors,
     and performance metrics.
     """
@@ -283,23 +272,23 @@ def initialize_logging() -> None:
         # Create logs directory if it doesn't exist
         log_dir = Path("logs")
         log_dir.mkdir(exist_ok=True)
-        
+
         # Configure logging
         logging.basicConfig(
             level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             handlers=[
                 logging.FileHandler(log_dir / "dashboard.log"),
-                logging.StreamHandler()
-            ]
+                logging.StreamHandler(),
+            ],
         )
-        
+
         logger.info("=" * 80)
         logger.info(f"{APP_TITLE} - Application Starting")
         logger.info(f"Version: {APP_VERSION}")
         logger.info(f"Module: {APP_MODULE}")
         logger.info("=" * 80)
-        
+
     except Exception as e:
         print(f"Warning: Could not initialize logging: {str(e)}")
 
@@ -307,7 +296,7 @@ def initialize_logging() -> None:
 def main() -> None:
     """
     Main application entry point.
-    
+
     Orchestrates the application bootstrap and rendering:
     1. Initialize logging
     2. Configure page settings
@@ -317,18 +306,18 @@ def main() -> None:
     try:
         # Initialize logging first
         initialize_logging()
-        
+
         # Configure Streamlit page
         configure_page()
-        
+
         # Render sidebar
         render_sidebar()
-        
+
         # Render main content
         render_main_content()
-        
+
         logger.info("Application rendered successfully")
-        
+
     except Exception as e:
         logger.error(f"Critical error in main(): {str(e)}", exc_info=True)
         st.error("An unexpected error occurred. Please check the logs and try again.")

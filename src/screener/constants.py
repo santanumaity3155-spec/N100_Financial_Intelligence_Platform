@@ -58,34 +58,122 @@ VALID_SCREEN_FIELDS = {
     # Profitability
     "roe": {"table": "financial_ratios", "type": "float", "category": "Profitability"},
     "roa": {"table": "financial_ratios", "type": "float", "category": "Profitability"},
-    "net_profit_margin": {"table": "financial_ratios", "type": "float", "category": "Profitability"},
-    "operating_profit_margin": {"table": "financial_ratios", "type": "float", "category": "Profitability"},
+    "net_profit_margin": {
+        "table": "financial_ratios",
+        "type": "float",
+        "category": "Profitability",
+    },
+    "operating_profit_margin": {
+        "table": "financial_ratios",
+        "type": "float",
+        "category": "Profitability",
+    },
     "roce": {"table": "financial_ratios", "type": "float", "category": "Profitability"},
     # Growth
-    "revenue_cagr_3yr": {"table": "financial_ratios", "type": "float", "category": "Growth"},
-    "revenue_cagr_5yr": {"table": "financial_ratios", "type": "float", "category": "Growth"},
-    "pat_cagr_3yr": {"table": "financial_ratios", "type": "float", "category": "Growth"},
-    "pat_cagr_5yr": {"table": "financial_ratios", "type": "float", "category": "Growth"},
-    "eps_cagr_3yr": {"table": "financial_ratios", "type": "float", "category": "Growth"},
-    "eps_cagr_5yr": {"table": "financial_ratios", "type": "float", "category": "Growth"},
+    "revenue_cagr_3yr": {
+        "table": "financial_ratios",
+        "type": "float",
+        "category": "Growth",
+    },
+    "revenue_cagr_5yr": {
+        "table": "financial_ratios",
+        "type": "float",
+        "category": "Growth",
+    },
+    "pat_cagr_3yr": {
+        "table": "financial_ratios",
+        "type": "float",
+        "category": "Growth",
+    },
+    "pat_cagr_5yr": {
+        "table": "financial_ratios",
+        "type": "float",
+        "category": "Growth",
+    },
+    "eps_cagr_3yr": {
+        "table": "financial_ratios",
+        "type": "float",
+        "category": "Growth",
+    },
+    "eps_cagr_5yr": {
+        "table": "financial_ratios",
+        "type": "float",
+        "category": "Growth",
+    },
     # Cash Flow
-    "free_cash_flow": {"table": "financial_ratios", "type": "float", "category": "Cash Flow"},
-    "fcf_margin": {"table": "financial_ratios", "type": "float", "category": "Cash Flow"},
-    "cash_conversion": {"table": "financial_ratios", "type": "float", "category": "Cash Flow"},
-    "cash_return_on_assets": {"table": "financial_ratios", "type": "float", "category": "Cash Flow"},
+    "free_cash_flow": {
+        "table": "financial_ratios",
+        "type": "float",
+        "category": "Cash Flow",
+    },
+    "fcf_margin": {
+        "table": "financial_ratios",
+        "type": "float",
+        "category": "Cash Flow",
+    },
+    "cash_conversion": {
+        "table": "financial_ratios",
+        "type": "float",
+        "category": "Cash Flow",
+    },
+    "cash_return_on_assets": {
+        "table": "financial_ratios",
+        "type": "float",
+        "category": "Cash Flow",
+    },
     # Leverage
-    "debt_to_equity": {"table": "financial_ratios", "type": "float", "category": "Leverage"},
-    "current_ratio": {"table": "balance_sheet", "type": "float", "category": "Leverage"},
+    "debt_to_equity": {
+        "table": "financial_ratios",
+        "type": "float",
+        "category": "Leverage",
+    },
+    "current_ratio": {
+        "table": "balance_sheet",
+        "type": "float",
+        "category": "Leverage",
+    },
     "quick_ratio": {"table": "balance_sheet", "type": "float", "category": "Leverage"},
-    "interest_coverage": {"table": "financial_ratios", "type": "float", "category": "Leverage"},
+    "interest_coverage": {
+        "table": "financial_ratios",
+        "type": "float",
+        "category": "Leverage",
+    },
     # Health
-    "overall_score": {"table": "financial_health_scores", "type": "float", "category": "Health"},
-    "rating": {"table": "financial_health_scores", "type": "string", "category": "Health"},
-    "profitability_score": {"table": "financial_health_scores", "type": "float", "category": "Health"},
-    "growth_score": {"table": "financial_health_scores", "type": "float", "category": "Health"},
-    "cashflow_score": {"table": "financial_health_scores", "type": "float", "category": "Health"},
-    "leverage_score": {"table": "financial_health_scores", "type": "float", "category": "Health"},
-    "efficiency_score": {"table": "financial_health_scores", "type": "float", "category": "Health"},
+    "overall_score": {
+        "table": "financial_health_scores",
+        "type": "float",
+        "category": "Health",
+    },
+    "rating": {
+        "table": "financial_health_scores",
+        "type": "string",
+        "category": "Health",
+    },
+    "profitability_score": {
+        "table": "financial_health_scores",
+        "type": "float",
+        "category": "Health",
+    },
+    "growth_score": {
+        "table": "financial_health_scores",
+        "type": "float",
+        "category": "Health",
+    },
+    "cashflow_score": {
+        "table": "financial_health_scores",
+        "type": "float",
+        "category": "Health",
+    },
+    "leverage_score": {
+        "table": "financial_health_scores",
+        "type": "float",
+        "category": "Health",
+    },
+    "efficiency_score": {
+        "table": "financial_health_scores",
+        "type": "float",
+        "category": "Health",
+    },
     # Dividend
     "dividend_yield": {"table": "market_cap", "type": "float", "category": "Dividend"},
 }

@@ -5,4 +5,3 @@ Currently implements the Analysis Text Parser (Sprint 5 - Module 1).
 """
 
 __version__ = "1.0.0"
-

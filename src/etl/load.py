@@ -13,7 +13,13 @@ import pandas as pd
 
 from src.config.logging_config import get_logger
 from src.database.connection import get_connection, commit, rollback, close_connection
-from src.database.schema import get_table_schema, get_all_schemas, get_indexes, TABLE_SCHEMAS, get_safe_indexes
+from src.database.schema import (
+    get_table_schema,
+    get_all_schemas,
+    get_indexes,
+    TABLE_SCHEMAS,
+    get_safe_indexes,
+)
 
 logger = get_logger(__name__)
 
@@ -21,7 +27,7 @@ logger = get_logger(__name__)
 class DataLoader:
     """
     Loads data into SQLite database.
-    
+
     Responsibilities:
     1. Create database tables
     2. Load DataFrames into tables
@@ -37,20 +43,22 @@ class DataLoader:
             "successful_loads": 0,
             "failed_loads": [],
             "total_rows_loaded": 0,
-            "tables": {}
+            "tables": {},
         }
 
-    def _sanitize_dataframe_columns(self, df: pd.DataFrame, table_name: str) -> pd.DataFrame:
+    def _sanitize_dataframe_columns(
+        self, df: pd.DataFrame, table_name: str
+    ) -> pd.DataFrame:
         """
         Sanitize DataFrame column names to match the table schema.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             DataFrame to sanitize
         table_name : str
             Name of the table
-            
+
         Returns
         -------
         pd.DataFrame
@@ -61,34 +69,36 @@ class DataLoader:
         for col in df.columns:
             col_str = str(col)
             # Replace spaces, dots, dashes with underscores
-            sanitized = col_str.replace(' ', '_').replace('.', '_').replace('-', '_')
+            sanitized = col_str.replace(" ", "_").replace(".", "_").replace("-", "_")
             # Remove any other special characters
-            sanitized = ''.join(c if c.isalnum() or c == '_' else '_' for c in sanitized)
+            sanitized = "".join(
+                c if c.isalnum() or c == "_" else "_" for c in sanitized
+            )
             # Ensure it doesn't start with a number
             if sanitized and sanitized[0].isdigit():
-                sanitized = f'col_{sanitized}'
+                sanitized = f"col_{sanitized}"
             # Ensure it's not empty
             if not sanitized:
-                sanitized = f'col_{len(sanitized_columns)}'
+                sanitized = f"col_{len(sanitized_columns)}"
             sanitized_columns.append(sanitized)
-        
+
         # Rename DataFrame columns to match sanitized names
         df = df.copy()
         df.columns = sanitized_columns
-        
+
         return df
 
     def _create_table_from_dataframe(self, table_name: str, df: pd.DataFrame) -> str:
         """
         Generate CREATE TABLE SQL based on DataFrame columns and dtypes.
-        
+
         Parameters
         ----------
         table_name : str
             Name of the table
         df : pd.DataFrame
             DataFrame to create table from
-            
+
         Returns
         -------
         str
@@ -96,63 +106,65 @@ class DataLoader:
         """
         # Map pandas dtypes to SQLite types
         type_mapping = {
-            'int64': 'INTEGER',
-            'int32': 'INTEGER',
-            'float64': 'REAL',
-            'float32': 'REAL',
-            'object': 'TEXT',
-            'bool': 'INTEGER',
-            'datetime64[ns]': 'TEXT',
-            'timedelta64[ns]': 'TEXT'
+            "int64": "INTEGER",
+            "int32": "INTEGER",
+            "float64": "REAL",
+            "float32": "REAL",
+            "object": "TEXT",
+            "bool": "INTEGER",
+            "datetime64[ns]": "TEXT",
+            "timedelta64[ns]": "TEXT",
         }
-        
+
         # Sanitize column names (replace spaces and special chars with underscores)
         sanitized_columns = []
         for col in df.columns:
             col_str = str(col)
             # Replace spaces, dots, dashes with underscores
-            sanitized = col_str.replace(' ', '_').replace('.', '_').replace('-', '_')
+            sanitized = col_str.replace(" ", "_").replace(".", "_").replace("-", "_")
             # Remove any other special characters
-            sanitized = ''.join(c if c.isalnum() or c == '_' else '_' for c in sanitized)
+            sanitized = "".join(
+                c if c.isalnum() or c == "_" else "_" for c in sanitized
+            )
             # Ensure it doesn't start with a number
             if sanitized and sanitized[0].isdigit():
-                sanitized = f'col_{sanitized}'
+                sanitized = f"col_{sanitized}"
             # Ensure it's not empty
             if not sanitized:
-                sanitized = f'col_{len(sanitized_columns)}'
+                sanitized = f"col_{len(sanitized_columns)}"
             sanitized_columns.append(sanitized)
-        
+
         # Build column definitions
         columns = []
         for col, dtype in zip(sanitized_columns, df.dtypes):
-            sql_type = type_mapping.get(str(dtype), 'TEXT')
+            sql_type = type_mapping.get(str(dtype), "TEXT")
             columns.append(f"    {col} {sql_type}")
-        
+
         # Create table SQL (DROP IF EXISTS to ensure fresh schema)
         create_sql = f"""DROP TABLE IF EXISTS {table_name};
 CREATE TABLE {table_name} (
 {','.join(columns)}
 );"""
-        
+
         return create_sql
 
     def create_tables(self, datasets: Optional[Dict[str, pd.DataFrame]] = None) -> bool:
         """
         Create all database tables.
-        
+
         Parameters
         ----------
         datasets : Dict[str, pd.DataFrame], optional
             Dictionary of datasets to create tables from. If provided, creates tables
             based on actual DataFrame columns. If None, uses predefined schemas.
-            
+
         Returns
         -------
         bool
             True if all tables created successfully
         """
         logger.info("Creating database tables")
-        
+
         try:
             conn = get_connection()
             cursor = conn.cursor()
@@ -172,16 +184,18 @@ CREATE TABLE {table_name} (
                     if df.empty:
                         logger.warning(f"Skipping empty dataset: {table_name}")
                         continue
-                    
+
                     # Create table from DataFrame
                     create_sql = self._create_table_from_dataframe(table_name, df)
                     try:
                         # Execute each statement separately (SQLite doesn't support multi-statement)
-                        for statement in create_sql.split(';'):
+                        for statement in create_sql.split(";"):
                             statement = statement.strip()
                             if statement:
                                 cursor.execute(statement)
-                        logger.debug(f"Created table {table_name} with {len(df.columns)} columns")
+                        logger.debug(
+                            f"Created table {table_name} with {len(df.columns)} columns"
+                        )
                     except Exception as e:
                         logger.error(f"Failed to create table {table_name}: {str(e)}")
                         raise
@@ -191,7 +205,9 @@ CREATE TABLE {table_name} (
                 for schema in schemas:
                     try:
                         cursor.execute(schema)
-                        logger.debug(f"Created table: {schema.split('(')[0].split()[-1]}")
+                        logger.debug(
+                            f"Created table: {schema.split('(')[0].split()[-1]}"
+                        )
                     except Exception as e:
                         logger.error(f"Failed to create table: {str(e)}")
                         raise
@@ -203,7 +219,7 @@ CREATE TABLE {table_name} (
                 try:
                     cursor.execute(f"PRAGMA table_info({table_name})")
                     columns = [row[1] for row in cursor.fetchall()]
-                    
+
                     # Get safe indexes that only reference existing columns
                     indexes = get_safe_indexes(table_name, columns)
                     all_indexes.extend(indexes)
@@ -232,11 +248,11 @@ CREATE TABLE {table_name} (
         df: pd.DataFrame,
         if_exists: str = "append",
         method: str = "multi",
-        chunksize: int = 500
+        chunksize: int = 500,
     ) -> Tuple[bool, int]:
         """
         Load DataFrame into a database table.
-        
+
         Parameters
         ----------
         table_name : str
@@ -249,7 +265,7 @@ CREATE TABLE {table_name} (
             SQL insertion method ('multi' for batch insert)
         chunksize : int, default 500
             Number of rows to insert per batch (prevents "too many SQL variables" error)
-            
+
         Returns
         -------
         Tuple[bool, int]
@@ -287,14 +303,16 @@ CREATE TABLE {table_name} (
             df = df[schema_cols]
 
             # Remove duplicate rows based on unique constraints to avoid UNIQUE constraint errors
-            if table_name in ['stock_prices', 'market_cap', 'financial_ratios']:
+            if table_name in ["stock_prices", "market_cap", "financial_ratios"]:
                 # These tables have UNIQUE constraints on specific columns
-                if table_name == 'stock_prices':
-                    df = df.drop_duplicates(subset=['company_id', 'date'], keep='first')
-                elif table_name in ['market_cap', 'financial_ratios']:
-                    if 'period' in df.columns:
-                        df = df.drop_duplicates(subset=['company_id', 'period'], keep='first')
-            
+                if table_name == "stock_prices":
+                    df = df.drop_duplicates(subset=["company_id", "date"], keep="first")
+                elif table_name in ["market_cap", "financial_ratios"]:
+                    if "period" in df.columns:
+                        df = df.drop_duplicates(
+                            subset=["company_id", "period"], keep="first"
+                        )
+
             if table_name == "sectors":
                 print("\n========== SECTORS BEFORE INSERT ==========")
                 print(df.columns.tolist())
@@ -323,7 +341,7 @@ CREATE TABLE {table_name} (
             self.load_stats["total_rows_loaded"] += rows_loaded
             self.load_stats["tables"][table_name] = {
                 "rows_loaded": rows_loaded,
-                "success": True
+                "success": True,
             }
 
             return True, rows_loaded
@@ -331,31 +349,31 @@ CREATE TABLE {table_name} (
         except Exception as e:
             logger.error(f"Failed to load {table_name}: {str(e)}")
             rollback()
-            
+
             self.load_stats["failed_loads"].append(table_name)
             self.load_stats["tables"][table_name] = {
                 "rows_loaded": 0,
                 "success": False,
-                "error": str(e)
+                "error": str(e),
             }
-            
+
             return False, 0
 
     def load_all_datasets(
         self,
         datasets: Dict[str, pd.DataFrame],
-        table_mapping: Optional[Dict[str, str]] = None
+        table_mapping: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
         """
         Load all datasets into database.
-        
+
         Parameters
         ----------
         datasets : Dict[str, pd.DataFrame]
             Dictionary mapping dataset names to DataFrames
         table_mapping : Dict[str, str], optional
             Mapping of dataset names to table names
-            
+
         Returns
         -------
         Dict[str, Any]
@@ -378,7 +396,7 @@ CREATE TABLE {table_name} (
                 self.load_stats["tables"][table_name] = {
                     "rows_loaded": 0,
                     "success": False,
-                    "error": "Empty DataFrame"
+                    "error": "Empty DataFrame",
                 }
                 self.load_stats["failed_loads"].append(table_name)
                 continue
@@ -396,18 +414,15 @@ CREATE TABLE {table_name} (
 
         return self.load_stats
 
-    def verify_table_counts(
-        self,
-        expected_counts: Dict[str, int]
-    ) -> Dict[str, Any]:
+    def verify_table_counts(self, expected_counts: Dict[str, int]) -> Dict[str, Any]:
         """
         Verify row counts in database tables.
-        
+
         Parameters
         ----------
         expected_counts : Dict[str, int]
             Dictionary mapping table names to expected row counts
-            
+
         Returns
         -------
         Dict[str, Any]
@@ -415,10 +430,7 @@ CREATE TABLE {table_name} (
         """
         logger.info("Verifying table row counts")
 
-        results = {
-            "verified": True,
-            "tables": {}
-        }
+        results = {"verified": True, "tables": {}}
 
         try:
             conn = get_connection()
@@ -433,7 +445,7 @@ CREATE TABLE {table_name} (
                     results["tables"][table_name] = {
                         "expected": expected_count,
                         "actual": actual_count,
-                        "match": match
+                        "match": match,
                     }
 
                     if not match:
@@ -443,7 +455,9 @@ CREATE TABLE {table_name} (
                             f"expected {expected_count}, got {actual_count}"
                         )
                     else:
-                        logger.info(f"Row count verified for {table_name}: {actual_count}")
+                        logger.info(
+                            f"Row count verified for {table_name}: {actual_count}"
+                        )
 
                 except Exception as e:
                     logger.error(f"Failed to verify {table_name}: {str(e)}")
@@ -452,7 +466,7 @@ CREATE TABLE {table_name} (
                         "expected": expected_count,
                         "actual": 0,
                         "match": False,
-                        "error": str(e)
+                        "error": str(e),
                     }
 
         except Exception as e:
@@ -464,12 +478,12 @@ CREATE TABLE {table_name} (
     def get_table_info(self, table_name: str) -> Dict[str, Any]:
         """
         Get information about a database table.
-        
+
         Parameters
         ----------
         table_name : str
             Name of the table
-            
+
         Returns
         -------
         Dict[str, Any]
@@ -495,10 +509,10 @@ CREATE TABLE {table_name} (
                         "name": col[1],
                         "type": col[2],
                         "not_null": bool(col[3]),
-                        "primary_key": bool(col[5])
+                        "primary_key": bool(col[5]),
                     }
                     for col in columns
-                ]
+                ],
             }
 
             return info
@@ -510,7 +524,7 @@ CREATE TABLE {table_name} (
     def get_load_stats(self) -> Dict[str, Any]:
         """
         Get load statistics.
-        
+
         Returns
         -------
         Dict[str, Any]
@@ -525,7 +539,7 @@ CREATE TABLE {table_name} (
             "successful_loads": 0,
             "failed_loads": [],
             "total_rows_loaded": 0,
-            "tables": {}
+            "tables": {},
         }
         logger.info("Load statistics cleared")
 
@@ -538,7 +552,7 @@ CREATE TABLE {table_name} (
 def load_table(table_name: str, df: pd.DataFrame, **kwargs) -> Tuple[bool, int]:
     """
     Convenience function to load a DataFrame into a table.
-    
+
     Parameters
     ----------
     table_name : str
@@ -547,7 +561,7 @@ def load_table(table_name: str, df: pd.DataFrame, **kwargs) -> Tuple[bool, int]:
         DataFrame to load
     **kwargs
         Additional arguments for DataLoader.load_table()
-        
+
     Returns
     -------
     Tuple[bool, int]
@@ -557,20 +571,17 @@ def load_table(table_name: str, df: pd.DataFrame, **kwargs) -> Tuple[bool, int]:
     return loader.load_table(table_name, df, **kwargs)
 
 
-def load_all_datasets(
-    datasets: Dict[str, pd.DataFrame],
-    **kwargs
-) -> Dict[str, Any]:
+def load_all_datasets(datasets: Dict[str, pd.DataFrame], **kwargs) -> Dict[str, Any]:
     """
     Convenience function to load all datasets.
-    
+
     Parameters
     ----------
     datasets : Dict[str, pd.DataFrame]
         Dictionary mapping dataset names to DataFrames
     **kwargs
         Additional arguments for DataLoader.load_all_datasets()
-        
+
     Returns
     -------
     Dict[str, Any]
@@ -589,11 +600,13 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     # Create sample DataFrame
-    df = pd.DataFrame({
-        "company_id": ["TCS", "INFY", "WIPRO"],
-        "period": ["2024-Q1", "2024-Q2", "2024-Q3"],
-        "revenue": [1000.0, 2000.0, 3000.0]
-    })
+    df = pd.DataFrame(
+        {
+            "company_id": ["TCS", "INFY", "WIPRO"],
+            "period": ["2024-Q1", "2024-Q2", "2024-Q3"],
+            "revenue": [1000.0, 2000.0, 3000.0],
+        }
+    )
 
     loader = DataLoader()
 

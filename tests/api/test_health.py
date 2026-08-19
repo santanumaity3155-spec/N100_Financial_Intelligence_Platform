@@ -107,6 +107,12 @@ def test_no_sensitive_secrets_in_health_response():
     response = client.get("/api/v1/health")
     content = response.text.lower()
 
-    sensitive_keywords = ["password", "secret_key", "aws_access", "bearer", "stacktrace"]
+    sensitive_keywords = [
+        "password",
+        "secret_key",
+        "aws_access",
+        "bearer",
+        "stacktrace",
+    ]
     for keyword in sensitive_keywords:
         assert keyword not in content

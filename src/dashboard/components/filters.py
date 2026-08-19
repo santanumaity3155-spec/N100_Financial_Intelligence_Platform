@@ -7,8 +7,7 @@ import numpy as np
 
 
 def numeric_bounds(
-    series: pd.Series,
-    default: Tuple[float, float] = (0.0, 100.0)
+    series: pd.Series, default: Tuple[float, float] = (0.0, 100.0)
 ) -> Tuple[float, float]:
     """
     Compute safe numeric bounds from a series using percentiles.
@@ -35,7 +34,7 @@ def numeric_bounds(
 def get_slider_ranges(
     data: pd.DataFrame,
     columns: List[str],
-    defaults: Optional[Dict[str, Tuple[float, float]]] = None
+    defaults: Optional[Dict[str, Tuple[float, float]]] = None,
 ) -> Dict[str, Tuple[float, float]]:
     """
     Compute slider ranges for specified columns from the dataset.
@@ -68,7 +67,7 @@ def render_slider(
     default_val: float,
     step: Optional[float] = None,
     key: Optional[str] = None,
-    help_text: Optional[str] = None
+    help_text: Optional[str] = None,
 ) -> float:
     """
     Render a single slider widget.
@@ -95,7 +94,7 @@ def render_slider(
         value=float(st.session_state.get(key, default_val)) if key else default_val,
         step=float(step),
         key=key,
-        help=help_text
+        help=help_text,
     )
 
 
@@ -104,7 +103,7 @@ def render_slider_group(
     filter_defs: List[Tuple[str, str, str]],
     min_filters: List[str],
     max_filters: List[str],
-    key_prefix: str = "filter"
+    key_prefix: str = "filter",
 ) -> Dict[str, float]:
     """
     Render a group of slider filters with dynamic ranges.
@@ -153,7 +152,7 @@ def render_slider_group(
             default_val=default,
             step=step,
             key=key,
-            help_text=f"Range: {lo:.2f} to {hi:.2f}"
+            help_text=f"Range: {lo:.2f} to {hi:.2f}",
         )
 
         slider_values[col] = value
@@ -165,7 +164,7 @@ def apply_preset_values(
     preset: Dict[str, float],
     ranges: Dict[str, Tuple[float, float]],
     min_filters: List[str],
-    max_filters: List[str]
+    max_filters: List[str],
 ) -> Dict[str, float]:
     """
     Clamp preset values to the dynamic slider ranges.
@@ -199,8 +198,7 @@ def apply_preset_values(
 
 
 def render_reset_button(
-    key_prefix: str = "filter",
-    help_text: str = "Reset all filters to default values"
+    key_prefix: str = "filter", help_text: str = "Reset all filters to default values"
 ) -> bool:
     """
     Render a reset filters button.
@@ -216,14 +214,12 @@ def render_reset_button(
         "🔄 Reset Filters",
         help=help_text,
         use_container_width=True,
-        key=f"{key_prefix}_reset"
+        key=f"{key_prefix}_reset",
     )
 
 
 def render_preset_buttons(
-    presets: Dict[str, Dict[str, float]],
-    key_prefix: str = "preset",
-    cols: int = 2
+    presets: Dict[str, Dict[str, float]], key_prefix: str = "preset", cols: int = 2
 ) -> Optional[str]:
     """
     Render preset strategy buttons.
@@ -249,9 +245,7 @@ def render_preset_buttons(
         col_idx = idx % cols
         with button_cols[col_idx]:
             if st.button(
-                preset_name,
-                key=f"{key_prefix}_{preset_name}",
-                use_container_width=True
+                preset_name, key=f"{key_prefix}_{preset_name}", use_container_width=True
             ):
                 selected_preset = preset_name
 
@@ -263,7 +257,7 @@ def build_filter_conditions(
     ranges: Dict[str, Tuple[float, float]],
     min_filters: List[str],
     max_filters: List[str],
-    eps: float = 1e-9
+    eps: float = 1e-9,
 ) -> List[Dict[str, Any]]:
     """
     Build filter conditions from slider values.
@@ -290,20 +284,12 @@ def build_filter_conditions(
             # For MIN filters: permissive bound is minimum (no constraint)
             if value <= lo + eps:
                 continue  # Skip - no constraint
-            conditions.append({
-                'field': col,
-                'operator': '>=',
-                'value': value
-            })
+            conditions.append({"field": col, "operator": ">=", "value": value})
         elif col in max_filters:
             # For MAX filters: permissive bound is maximum (no constraint)
             if value >= hi - eps:
                 continue  # Skip - no constraint
-            conditions.append({
-                'field': col,
-                'operator': '<=',
-                'value': value
-            })
+            conditions.append({"field": col, "operator": "<=", "value": value})
         # For other filter types, could add equality, range, etc.
 
     return conditions

@@ -1,0 +1,46 @@
+company_id,company_name,sector,previous_year,previous_pattern,latest_year,latest_pattern,changed
+ADANIENSOL,Adani Energy Solutions Ltd,,2023,Distress Signal,2024,Shareholder Returns,True
+ADANIENT,Adani Enterprises Ltd,,2023,Shareholder Returns,2024,Distress Signal,True
+ADANIGREEN,Adani Green Energy Ltd,,2023,Shareholder Returns,2024,Distress Signal,True
+ADANIPORTS,Adani Ports & Special Economic Zone Ltd,,2023,Distress Signal,2024,Reinvestor,True
+APOLLOHOSP,"Apollo Hospitals
+Chain of Indian private hospitals",,2023,Mixed,2024,Cash Accumulator,True
+BAJAJAUTO,Bajaj Auto Ltd,,2023,Mixed,2024,Shareholder Returns,True
+BOSCHLTD,Bosch Ltd,,2023,Mixed,2024,Cash Accumulator,True
+BRITANNIA,Britannia Industries Ltd,,2023,Cash Accumulator,2024,Shareholder Returns,True
+CANBK,Canara Bank,,2023,Distress Signal,2024,Shareholder Returns,True
+DIVISLAB,Divis Laboratories Ltd,,2023,Distress Signal,2024,Mixed,True
+DLF,DLF Ltd,,2023,Shareholder Returns,2024,Cash Accumulator,True
+GAIL,GAIL (India) Ltd,,2023,Distress Signal,2024,Cash Accumulator,True
+GODREJCP,Godrej Consumer Products Ltd,,2023,Cash Accumulator,2024,Distress Signal,True
+HAL,Hindustan Aeronautics Ltd,,2023,Mixed,2024,Cash Accumulator,True
+HCLTECH,HCL Technologies Ltd,,2023,Shareholder Returns,2024,Reinvestor,True
+HEROMOTOCO,Hero MotoCorp Ltd,,2023,Mixed,2024,Shareholder Returns,True
+HINDALCO,Hindalco Industries Ltd,,2023,Reinvestor,2024,Shareholder Returns,True
+ICICIBANK,ICICI Bank Ltd,,2023,Distress Signal,2024,Cash Accumulator,True
+INDIGO,Interglobe Aviation Ltd,,2023,Cash Accumulator,2024,Shareholder Returns,True
+INFY,Infosys Ltd,,2023,Shareholder Returns,2024,Mixed,True
+IOC,Indian Oil Corporation,,2023,Cash Accumulator,2024,Shareholder Returns,True
+IRCTC,Indian Railway Catering & Tourism Corporation Ltd,,2023,Cash Accumulator,2024,Mixed,True
+IRFC,Indian Railway Finance Corporation Ltd,,2023,Distress Signal,2024,Reinvestor,True
+JINDALSTEL,Jindal Steel & Power Ltd,,2023,Shareholder Returns,2024,Distress Signal,True
+JIOFIN,Jio Financial Services Ltd,,2023,Shareholder Returns,2024,Distress Signal,True
+JSWSTEEL,JSW Steel Ltd,,2023,Reinvestor,2024,Distress Signal,True
+KOTAKBANK,Kotak Mahindra Bank Ltd,,2023,Distress Signal,2024,Cash Accumulator,True
+LODHA,Macrotech Developers Ltd,,2023,Shareholder Returns,2024,Distress Signal,True
+LTIM,LTIMindtree Ltd,,2023,Mixed,2024,Cash Accumulator,True
+MOTHERSON,Samvardhana Motherson International Ltd,,2023,Reinvestor,2024,Cash Accumulator,True
+NAUKRI,Info Edge (India) Ltd,,2023,Cash Accumulator,2024,Distress Signal,True
+NESTLEIND,Nestle India Ltd,,2023,Shareholder Returns,2024,Mixed,True
+NTPC,NTPC Ltd,,2023,Shareholder Returns,2024,Cash Accumulator,True
+ONGC,Oil & Natural Gas Corpn Ltd,,2023,Cash Accumulator,2024,Mixed,True
+PNB,Punjab National Bank,,2023,Reinvestor,2024,Distress Signal,True
+RELIANCE,Reliance Industries Ltd,,2023,Cash Accumulator,2024,Mixed,True
+SBIN,State Bank of India,,2023,Distress Signal,2024,Cash Accumulator,True
+SHREECEM,Shree Cement Ltd,,2023,Cash Accumulator,2024,Reinvestor,True
+SUNPHARMA,Sun Pharmaceuticals Industries Ltd,,2023,Distress Signal,2024,Reinvestor,True
+TATAPOWER,Tata Power Company Ltd,,2023,Distress Signal,2024,Shareholder Returns,True
+TITAN,Titan Company Ltd,,2023,Distress Signal,2024,Cash Accumulator,True
+TORNTPHARM,Torrent Pharmaceuticals Ltd,,2023,Cash Accumulator,2024,Reinvestor,True
+TRENT,Trent Ltd,,2023,Reinvestor,2024,Mixed,True
+UNIONBANK,Union Bank of India,,2023,Cash Accumulator,2024,Reinvestor,True

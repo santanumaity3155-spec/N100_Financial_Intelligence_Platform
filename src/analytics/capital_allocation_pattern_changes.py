@@ -50,12 +50,16 @@ def get_available_years(conn=None) -> List[int]:
         # Get years from cash_flow table
         cf_query = "SELECT DISTINCT period FROM cash_flow WHERE period IS NOT NULL"
         cf_df = pd.read_sql(cf_query, conn)
-        cf_years = cf_df['period'].apply(parse_year_from_period).dropna().astype(int).tolist()
+        cf_years = (
+            cf_df["period"].apply(parse_year_from_period).dropna().astype(int).tolist()
+        )
 
         # Get years from profit_loss table
         pl_query = "SELECT DISTINCT period FROM profit_loss WHERE period IS NOT NULL"
         pl_df = pd.read_sql(pl_query, conn)
-        pl_years = pl_df['period'].apply(parse_year_from_period).dropna().astype(int).tolist()
+        pl_years = (
+            pl_df["period"].apply(parse_year_from_period).dropna().astype(int).tolist()
+        )
 
         # Union of years, sorted descending
         all_years = sorted(list(set(cf_years + pl_years)), reverse=True)
@@ -100,21 +104,21 @@ def compute_year_classifications(year: int, conn=None) -> pd.DataFrame:
         pl_df = pd.read_sql("SELECT * FROM profit_loss", conn)
 
         # Add year column to cash_flow and profit_loss
-        cf_df['year'] = cf_df['period'].apply(parse_year_from_period)
-        pl_df['year'] = pl_df['period'].apply(parse_year_from_period)
+        cf_df["year"] = cf_df["period"].apply(parse_year_from_period)
+        pl_df["year"] = pl_df["period"].apply(parse_year_from_period)
 
         # Filter to the given year
-        cf_year = cf_df[cf_df['year'] == year]
-        pl_year = pl_df[pl_df['year'] == year]
+        cf_year = cf_df[cf_df["year"] == year]
+        pl_year = pl_df[pl_df["year"] == year]
 
         records = []
         for _, co in companies_df.iterrows():
-            cid = co['company_id']
-            cname = co['company_name']
-            sector = co['sector']
+            cid = co["company_id"]
+            cname = co["company_name"]
+            sector = co["sector"]
 
-            c_cf = cf_year[cf_year['company_id'] == cid]
-            c_pl = pl_year[pl_year['company_id'] == cid]
+            c_cf = cf_year[cf_year["company_id"] == cid]
+            c_pl = pl_year[pl_year["company_id"] == cid]
 
             has_data = not c_cf.empty  # Consider has_data if we have cash flow data
 
@@ -125,28 +129,30 @@ def compute_year_classifications(year: int, conn=None) -> pd.DataFrame:
                 # Classify as DISTRESSED due to missing data
                 rating = classify_capital_allocation(None, None, None, None)
                 pattern = map_rating_to_pattern(rating)
-                records.append({
-                    'company_id': cid,
-                    'company_name': cname,
-                    'sector': sector,
-                    'year': year,
-                    'capital_allocation_rating': rating,
-                    'capital_allocation_pattern': pattern,
-                    'has_data': False,
-                })
+                records.append(
+                    {
+                        "company_id": cid,
+                        "company_name": cname,
+                        "sector": sector,
+                        "year": year,
+                        "capital_allocation_rating": rating,
+                        "capital_allocation_pattern": pattern,
+                        "has_data": False,
+                    }
+                )
                 continue
 
             # Extract cash flow data
             cf_row = c_cf.iloc[0]
             pl_row = c_pl.iloc[0] if not c_pl.empty else pd.Series()
 
-            ocf = cf_row.get('cash_from_operating_activity')
+            ocf = cf_row.get("cash_from_operating_activity")
             if pd.isna(ocf) or ocf is None:
-                ocf = cf_row.get('operating_activity')
+                ocf = cf_row.get("operating_activity")
 
-            capex = cf_row.get('cash_from_investing_activity')
+            capex = cf_row.get("cash_from_investing_activity")
             if pd.isna(capex) or capex is None:
-                capex = cf_row.get('investing_activity')
+                capex = cf_row.get("investing_activity")
 
             if pd.notna(capex) and capex is not None and capex < 0:
                 capex = abs(capex)
@@ -155,8 +161,8 @@ def compute_year_classifications(year: int, conn=None) -> pd.DataFrame:
 
             fcf = (ocf - capex) if (pd.notna(ocf) and ocf is not None) else None
 
-            net_profit = pl_row.get('net_profit') if 'net_profit' in pl_row else None
-            sales = pl_row.get('sales') if 'sales' in pl_row else None
+            net_profit = pl_row.get("net_profit") if "net_profit" in pl_row else None
+            sales = pl_row.get("sales") if "sales" in pl_row else None
 
             if pd.isna(net_profit):
                 net_profit = None
@@ -169,9 +175,7 @@ def compute_year_classifications(year: int, conn=None) -> pd.DataFrame:
                 else None
             )
             capex_intensity = (
-                (capex / ocf * 100.0)
-                if (ocf is not None and ocf != 0)
-                else None
+                (capex / ocf * 100.0) if (ocf is not None and ocf != 0) else None
             )
 
             rating = classify_capital_allocation(
@@ -179,21 +183,27 @@ def compute_year_classifications(year: int, conn=None) -> pd.DataFrame:
             )
             pattern = map_rating_to_pattern(rating)
 
-            records.append({
-                'company_id': cid,
-                'company_name': cname,
-                'sector': sector,
-                'year': year,
-                'capital_allocation_rating': rating,
-                'capital_allocation_pattern': pattern,
-                'has_data': True,
-            })
+            records.append(
+                {
+                    "company_id": cid,
+                    "company_name": cname,
+                    "sector": sector,
+                    "year": year,
+                    "capital_allocation_rating": rating,
+                    "capital_allocation_pattern": pattern,
+                    "has_data": True,
+                }
+            )
 
         df_out = pd.DataFrame(records)
-        logger.info(f"Computed classifications for year {year}: {len(df_out)} companies")
+        logger.info(
+            f"Computed classifications for year {year}: {len(df_out)} companies"
+        )
         return df_out
     except Exception as e:
-        logger.error(f"Error computing classifications for year {year}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Error computing classifications for year {year}: {str(e)}", exc_info=True
+        )
         return pd.DataFrame()
 
 
@@ -222,7 +232,9 @@ def compute_pattern_changes(conn=None) -> Tuple[pd.DataFrame, Dict]:
 
         # We need at least two years to compute changes
         if len(years) < 2:
-            logger.warning("Less than two years available, cannot compute year-over-year changes")
+            logger.warning(
+                "Less than two years available, cannot compute year-over-year changes"
+            )
             return pd.DataFrame(), {}
 
         # Compute classifications for each year (we'll store in a dict year -> DataFrame)
@@ -233,11 +245,11 @@ def compute_pattern_changes(conn=None) -> Tuple[pd.DataFrame, Dict]:
         # For each company, find the latest two years with has_data=True
         changes_records = []
         company_summary = {
-            'total_companies': 0,
-            'companies_with_previous_year': 0,
-            'companies_unchanged_pattern': 0,
-            'companies_changed_pattern': 0,
-            'companies_insufficient_history': 0,
+            "total_companies": 0,
+            "companies_with_previous_year": 0,
+            "companies_unchanged_pattern": 0,
+            "companies_changed_pattern": 0,
+            "companies_insufficient_history": 0,
         }
 
         # Get list of company IDs from the authoritative companies table
@@ -245,8 +257,8 @@ def compute_pattern_changes(conn=None) -> Tuple[pd.DataFrame, Dict]:
             "SELECT company_id FROM companies ORDER BY company_id",
             conn,
         )
-        company_ids = companies_df['company_id'].tolist()
-        company_summary['total_companies'] = len(company_ids)
+        company_ids = companies_df["company_id"].tolist()
+        company_summary["total_companies"] = len(company_ids)
 
         for cid in company_ids:
             # Get the company's name and sector (from any year, they are constant)
@@ -254,45 +266,51 @@ def compute_pattern_changes(conn=None) -> Tuple[pd.DataFrame, Dict]:
             sector = None
 
             # Find the latest two years with has_data=True
-            valid_years = []  # List of (year, pattern, has_data) for years where has_data is True
+            valid_years = (
+                []
+            )  # List of (year, pattern, has_data) for years where has_data is True
 
             for year in years:  # years are in descending order
                 df_year = yearly_classifications.get(year)
                 if df_year is not None and not df_year.empty:
-                    company_row = df_year[df_year['company_id'] == cid]
+                    company_row = df_year[df_year["company_id"] == cid]
                     if not company_row.empty:
                         row = company_row.iloc[0]
                         if company_name is None:
-                            company_name = row['company_name']
-                            sector = row['sector']
-                        if row['has_data']:
-                            valid_years.append((year, row['capital_allocation_pattern'], True))
+                            company_name = row["company_name"]
+                            sector = row["sector"]
+                        if row["has_data"]:
+                            valid_years.append(
+                                (year, row["capital_allocation_pattern"], True)
+                            )
 
             # If we have at least two years with actual data, compute change
             if len(valid_years) >= 2:
-                company_summary['companies_with_previous_year'] += 1
+                company_summary["companies_with_previous_year"] += 1
                 latest_year, latest_pattern, _ = valid_years[0]
                 previous_year, previous_pattern, _ = valid_years[1]
 
-                changed = (previous_pattern != latest_pattern)
+                changed = previous_pattern != latest_pattern
 
                 if changed:
-                    company_summary['companies_changed_pattern'] += 1
-                    changes_records.append({
-                        'company_id': cid,
-                        'company_name': company_name,
-                        'sector': sector,
-                        'previous_year': previous_year,
-                        'previous_pattern': previous_pattern,
-                        'latest_year': latest_year,
-                        'latest_pattern': latest_pattern,
-                        'changed': True,
-                    })
+                    company_summary["companies_changed_pattern"] += 1
+                    changes_records.append(
+                        {
+                            "company_id": cid,
+                            "company_name": company_name,
+                            "sector": sector,
+                            "previous_year": previous_year,
+                            "previous_pattern": previous_pattern,
+                            "latest_year": latest_year,
+                            "latest_pattern": latest_pattern,
+                            "changed": True,
+                        }
+                    )
                 else:
-                    company_summary['companies_unchanged_pattern'] += 1
+                    company_summary["companies_unchanged_pattern"] += 1
                     # We do not add unchanged companies to the changes output (as per spec)
             else:
-                company_summary['companies_insufficient_history'] += 1
+                company_summary["companies_insufficient_history"] += 1
                 # Do not add to changes output
 
         # Create DataFrame from changes records
@@ -302,20 +320,24 @@ def compute_pattern_changes(conn=None) -> Tuple[pd.DataFrame, Dict]:
         transition_matrix = {}
         if not changes_df.empty:
             # Group by previous_pattern and latest_pattern
-            transition = changes_df.groupby(['previous_pattern', 'latest_pattern']).size().reset_index(name='count')
+            transition = (
+                changes_df.groupby(["previous_pattern", "latest_pattern"])
+                .size()
+                .reset_index(name="count")
+            )
             # Convert to nested dictionary: previous_pattern -> {latest_pattern -> count}
             for _, row in transition.iterrows():
-                prev = row['previous_pattern']
-                curr = row['latest_pattern']
-                cnt = row['count']
+                prev = row["previous_pattern"]
+                curr = row["latest_pattern"]
+                cnt = row["count"]
                 if prev not in transition_matrix:
                     transition_matrix[prev] = {}
                 transition_matrix[prev][curr] = cnt
 
         summary = {
             **company_summary,
-            'transition_matrix': transition_matrix,
-            'years_analyzed': years,
+            "transition_matrix": transition_matrix,
+            "years_analyzed": years,
         }
 
         return changes_df, summary
@@ -324,7 +346,9 @@ def compute_pattern_changes(conn=None) -> Tuple[pd.DataFrame, Dict]:
         return pd.DataFrame(), {}
 
 
-def generate_output_files(changes_df: pd.DataFrame, summary: Dict, output_dir: Optional[Path] = None) -> Dict[str, Path]:
+def generate_output_files(
+    changes_df: pd.DataFrame, summary: Dict, output_dir: Optional[Path] = None
+) -> Dict[str, Path]:
     """
     Generate output CSV files for pattern changes and optionally summary.
 
@@ -344,6 +368,7 @@ def generate_output_files(changes_df: pd.DataFrame, summary: Dict, output_dir: O
     """
     if output_dir is None:
         from src.config.constants import OUTPUT_DIR
+
         output_dir = OUTPUT_DIR
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -354,45 +379,59 @@ def generate_output_files(changes_df: pd.DataFrame, summary: Dict, output_dir: O
     if not changes_df.empty:
         # Ensure we have the required columns
         required_cols = [
-            'company_id', 'company_name', 'sector',
-            'previous_year', 'previous_pattern',
-            'latest_year', 'latest_pattern', 'changed'
+            "company_id",
+            "company_name",
+            "sector",
+            "previous_year",
+            "previous_pattern",
+            "latest_year",
+            "latest_pattern",
+            "changed",
         ]
         # Only include columns that exist
         cols_to_use = [col for col in required_cols if col in changes_df.columns]
         changes_output_df = changes_df[cols_to_use].copy()
     else:
         # Create empty DataFrame with required columns
-        changes_output_df = pd.DataFrame(columns=[
-            'company_id', 'company_name', 'sector',
-            'previous_year', 'previous_pattern',
-            'latest_year', 'latest_pattern', 'changed'
-        ])
+        changes_output_df = pd.DataFrame(
+            columns=[
+                "company_id",
+                "company_name",
+                "sector",
+                "previous_year",
+                "previous_pattern",
+                "latest_year",
+                "latest_pattern",
+                "changed",
+            ]
+        )
 
     changes_path = output_dir / "pattern_changes.csv"
     changes_output_df.to_csv(changes_path, index=False)
     logger.info(f"Saved pattern changes to {changes_path}")
-    output_files['pattern_changes'] = changes_path
+    output_files["pattern_changes"] = changes_path
 
     # Optionally generate transition summary CSV
-    transition_matrix = summary.get('transition_matrix', {})
+    transition_matrix = summary.get("transition_matrix", {})
     if transition_matrix:
         # Flatten the transition matrix
         transition_rows = []
         for prev_pattern, next_dict in transition_matrix.items():
             for latest_pattern, count in next_dict.items():
-                transition_rows.append({
-                    'previous_pattern': prev_pattern,
-                    'latest_pattern': latest_pattern,
-                    'company_count': count,
-                })
+                transition_rows.append(
+                    {
+                        "previous_pattern": prev_pattern,
+                        "latest_pattern": latest_pattern,
+                        "company_count": count,
+                    }
+                )
 
         if transition_rows:
             transition_df = pd.DataFrame(transition_rows)
             transition_path = output_dir / "pattern_change_summary.csv"
             transition_df.to_csv(transition_path, index=False)
             logger.info(f"Saved pattern change summary to {transition_path}")
-            output_files['pattern_change_summary'] = transition_path
+            output_files["pattern_change_summary"] = transition_path
 
     return output_files
 
@@ -415,11 +454,11 @@ def run_module4c_pipeline(output_dir: Optional[Path] = None) -> Dict[str, Any]:
 
     changes_df, summary = compute_pattern_changes()
 
-    total_companies = summary.get('total_companies', 0)
-    companies_with_prev_year = summary.get('companies_with_previous_year', 0)
-    changed_count = summary.get('companies_changed_pattern', 0)
-    unchanged_count = summary.get('companies_unchanged_pattern', 0)
-    insufficient_history = summary.get('companies_insufficient_history', 0)
+    total_companies = summary.get("total_companies", 0)
+    companies_with_prev_year = summary.get("companies_with_previous_year", 0)
+    changed_count = summary.get("companies_changed_pattern", 0)
+    unchanged_count = summary.get("companies_unchanged_pattern", 0)
+    insufficient_history = summary.get("companies_insufficient_history", 0)
 
     logger.info(f"Total companies: {total_companies}")
     logger.info(f"Companies with previous year data: {companies_with_prev_year}")
@@ -430,9 +469,9 @@ def run_module4c_pipeline(output_dir: Optional[Path] = None) -> Dict[str, Any]:
     output_files = generate_output_files(changes_df, summary, output_dir)
 
     return {
-        'changes_df': changes_df,
-        'summary': summary,
-        'output_files': output_files,
+        "changes_df": changes_df,
+        "summary": summary,
+        "output_files": output_files,
     }
 
 

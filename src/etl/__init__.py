@@ -8,7 +8,6 @@ from .load import DataLoader, load_table, load_all_datasets
 from .pipeline import ETLPipeline, run_etl_pipeline
 from .data_quality import DataQualityReporter
 
-
 __all__ = [
     "DataExtractor",
     "extract_all_datasets",

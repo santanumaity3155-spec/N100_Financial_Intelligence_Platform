@@ -34,36 +34,42 @@ class TestCalculateCAGR:
 
     def test_revenue_cagr_normal(self):
         """Test Revenue CAGR with normal data."""
-        pl_data = pd.DataFrame({
-            'sales': [100, 150, 200, 250, 300],
-            'period': ['FY2019', 'FY2020', 'FY2021', 'FY2022', 'FY2023']
-        })
+        pl_data = pd.DataFrame(
+            {
+                "sales": [100, 150, 200, 250, 300],
+                "period": ["FY2019", "FY2020", "FY2021", "FY2022", "FY2023"],
+            }
+        )
         result = calculate_revenue_cagr(pl_data)
-        
+
         # 4-year CAGR from 100 to 300 = 31.61%
         assert result["revenue_cagr_5yr"]["value"] == 31.61
         assert result["revenue_cagr_5yr"]["flag"] == FLAG_NORMAL
 
     def test_pat_cagr_normal(self):
         """Test PAT CAGR with normal data."""
-        pl_data = pd.DataFrame({
-            'net_profit': [50, 60, 70, 80, 90],
-            'period': ['FY2019', 'FY2020', 'FY2021', 'FY2022', 'FY2023']
-        })
+        pl_data = pd.DataFrame(
+            {
+                "net_profit": [50, 60, 70, 80, 90],
+                "period": ["FY2019", "FY2020", "FY2021", "FY2022", "FY2023"],
+            }
+        )
         result = calculate_pat_cagr(pl_data)
-        
+
         # 4-year CAGR from 50 to 90 = 15.83%
         assert result["pat_cagr_5yr"]["value"] == 15.83
         assert result["pat_cagr_5yr"]["flag"] == FLAG_NORMAL
 
     def test_eps_cagr_normal(self):
         """Test EPS CAGR with normal data."""
-        pl_data = pd.DataFrame({
-            'eps': [10, 12, 14, 16, 18],
-            'period': ['FY2019', 'FY2020', 'FY2021', 'FY2022', 'FY2023']
-        })
+        pl_data = pd.DataFrame(
+            {
+                "eps": [10, 12, 14, 16, 18],
+                "period": ["FY2019", "FY2020", "FY2021", "FY2022", "FY2023"],
+            }
+        )
         result = calculate_eps_cagr(pl_data)
-        
+
         # 4-year CAGR from 10 to 18 = 15.83%
         assert result["eps_cagr_5yr"]["value"] == 15.83
         assert result["eps_cagr_5yr"]["flag"] == FLAG_NORMAL
@@ -122,45 +128,56 @@ class TestRevenueCAGR:
 
     def test_3_year_cagr(self):
         """Test 3-year Revenue CAGR."""
-        pl_data = pd.DataFrame({
-            'sales': [100, 133.1, 177.8, 237.4],
-            'period': ['FY2020', 'FY2021', 'FY2022', 'FY2023']
-        })
+        pl_data = pd.DataFrame(
+            {
+                "sales": [100, 133.1, 177.8, 237.4],
+                "period": ["FY2020", "FY2021", "FY2022", "FY2023"],
+            }
+        )
         result = calculate_revenue_cagr(pl_data)
-        
+
         # 3-year CAGR from 100 to 237.4 = 33.40%
         assert result["revenue_cagr_3yr"]["value"] == 33.4
         assert result["revenue_cagr_3yr"]["flag"] == FLAG_NORMAL
 
     def test_10_year_cagr(self):
         """Test 10-year Revenue CAGR."""
-        pl_data = pd.DataFrame({
-            'sales': [100, 120, 144, 173, 208, 250, 300, 360, 432, 518, 622],
-            'period': ['FY2013', 'FY2014', 'FY2015', 'FY2016', 'FY2017', 
-                      'FY2018', 'FY2019', 'FY2020', 'FY2021', 'FY2022', 'FY2023']
-        })
+        pl_data = pd.DataFrame(
+            {
+                "sales": [100, 120, 144, 173, 208, 250, 300, 360, 432, 518, 622],
+                "period": [
+                    "FY2013",
+                    "FY2014",
+                    "FY2015",
+                    "FY2016",
+                    "FY2017",
+                    "FY2018",
+                    "FY2019",
+                    "FY2020",
+                    "FY2021",
+                    "FY2022",
+                    "FY2023",
+                ],
+            }
+        )
         result = calculate_revenue_cagr(pl_data)
-        
+
         # 10-year CAGR from 100 to 518 = 20.05%
         assert result["revenue_cagr_10yr"]["value"] == 20.05
         assert result["revenue_cagr_10yr"]["flag"] == FLAG_NORMAL
 
     def test_insufficient_data_points(self):
         """Test insufficient data points returns INSUFFICIENT."""
-        pl_data = pd.DataFrame({
-            'sales': [100],
-            'period': ['FY2023']
-        })
+        pl_data = pd.DataFrame({"sales": [100], "period": ["FY2023"]})
         result = calculate_revenue_cagr(pl_data)
         assert result["revenue_cagr_3yr"]["value"] is None
         assert result["revenue_cagr_3yr"]["flag"] == FLAG_INSUFFICIENT
 
     def test_missing_sales_column(self):
         """Test missing sales column returns INSUFFICIENT."""
-        pl_data = pd.DataFrame({
-            'net_profit': [100, 200],
-            'period': ['FY2022', 'FY2023']
-        })
+        pl_data = pd.DataFrame(
+            {"net_profit": [100, 200], "period": ["FY2022", "FY2023"]}
+        )
         result = calculate_revenue_cagr(pl_data)
         assert result["revenue_cagr_3yr"]["value"] is None
         assert result["revenue_cagr_3yr"]["flag"] == FLAG_INSUFFICIENT
@@ -174,10 +191,9 @@ class TestRevenueCAGR:
 
     def test_nan_sales_values(self):
         """Test NaN sales values are handled."""
-        pl_data = pd.DataFrame({
-            'sales': [100, np.nan, 200],
-            'period': ['FY2021', 'FY2022', 'FY2023']
-        })
+        pl_data = pd.DataFrame(
+            {"sales": [100, np.nan, 200], "period": ["FY2021", "FY2022", "FY2023"]}
+        )
         result = calculate_revenue_cagr(pl_data)
         # Should use 100 to 200 (2 years)
         assert result["revenue_cagr_3yr"]["value"] is not None
@@ -189,34 +205,40 @@ class TestPATCAGR:
 
     def test_pat_decline_to_loss(self):
         """Test PAT decline to loss."""
-        pl_data = pd.DataFrame({
-            'net_profit': [100, 80, 50, 20, -30],
-            'period': ['FY2019', 'FY2020', 'FY2021', 'FY2022', 'FY2023']
-        })
+        pl_data = pd.DataFrame(
+            {
+                "net_profit": [100, 80, 50, 20, -30],
+                "period": ["FY2019", "FY2020", "FY2021", "FY2022", "FY2023"],
+            }
+        )
         result = calculate_pat_cagr(pl_data)
-        
+
         assert result["pat_cagr_3yr"]["value"] is None
         assert result["pat_cagr_3yr"]["flag"] == FLAG_DECLINE_TO_LOSS
 
     def test_pat_turnaround(self):
         """Test PAT turnaround from loss to profit."""
-        pl_data = pd.DataFrame({
-            'net_profit': [-50, -20, 10, 30, 50],
-            'period': ['FY2019', 'FY2020', 'FY2021', 'FY2022', 'FY2023']
-        })
+        pl_data = pd.DataFrame(
+            {
+                "net_profit": [-50, -20, 10, 30, 50],
+                "period": ["FY2019", "FY2020", "FY2021", "FY2022", "FY2023"],
+            }
+        )
         result = calculate_pat_cagr(pl_data)
-        
+
         assert result["pat_cagr_3yr"]["value"] is None
         assert result["pat_cagr_3yr"]["flag"] == FLAG_TURNAROUND
 
     def test_pat_both_negative(self):
         """Test PAT both negative."""
-        pl_data = pd.DataFrame({
-            'net_profit': [-100, -80, -60, -40, -20],
-            'period': ['FY2019', 'FY2020', 'FY2021', 'FY2022', 'FY2023']
-        })
+        pl_data = pd.DataFrame(
+            {
+                "net_profit": [-100, -80, -60, -40, -20],
+                "period": ["FY2019", "FY2020", "FY2021", "FY2022", "FY2023"],
+            }
+        )
         result = calculate_pat_cagr(pl_data)
-        
+
         assert result["pat_cagr_3yr"]["value"] is None
         assert result["pat_cagr_3yr"]["flag"] == FLAG_BOTH_NEGATIVE
 
@@ -226,23 +248,27 @@ class TestEPSCAGR:
 
     def test_eps_zero_base(self):
         """Test EPS with zero base value."""
-        pl_data = pd.DataFrame({
-            'eps': [0, 5, 10, 15, 20],
-            'period': ['FY2019', 'FY2020', 'FY2021', 'FY2022', 'FY2023']
-        })
+        pl_data = pd.DataFrame(
+            {
+                "eps": [0, 5, 10, 15, 20],
+                "period": ["FY2019", "FY2020", "FY2021", "FY2022", "FY2023"],
+            }
+        )
         result = calculate_eps_cagr(pl_data)
-        
+
         assert result["eps_cagr_3yr"]["value"] is None
         assert result["eps_cagr_3yr"]["flag"] == FLAG_ZERO_BASE
 
     def test_eps_normal_growth(self):
         """Test normal EPS growth."""
-        pl_data = pd.DataFrame({
-            'eps': [5, 7, 9, 11, 13],
-            'period': ['FY2019', 'FY2020', 'FY2021', 'FY2022', 'FY2023']
-        })
+        pl_data = pd.DataFrame(
+            {
+                "eps": [5, 7, 9, 11, 13],
+                "period": ["FY2019", "FY2020", "FY2021", "FY2022", "FY2023"],
+            }
+        )
         result = calculate_eps_cagr(pl_data)
-        
+
         # 4-year CAGR from 5 to 13 = 26.98%
         assert result["eps_cagr_5yr"]["value"] == 26.98
         assert result["eps_cagr_5yr"]["flag"] == FLAG_NORMAL
@@ -253,36 +279,40 @@ class TestDataValidation:
 
     def test_duplicate_periods(self):
         """Test duplicate periods are detected."""
-        pl_data = pd.DataFrame({
-            'sales': [100, 200, 300],
-            'period': ['FY2021', 'FY2022', 'FY2021']  # Duplicate FY2021
-        })
+        pl_data = pd.DataFrame(
+            {
+                "sales": [100, 200, 300],
+                "period": ["FY2021", "FY2022", "FY2021"],  # Duplicate FY2021
+            }
+        )
         result = calculate_revenue_cagr(pl_data)
         assert result["revenue_cagr_3yr"]["flag"] == FLAG_INSUFFICIENT
 
     def test_out_of_order_periods(self):
         """Test out-of-order periods are detected."""
-        pl_data = pd.DataFrame({
-            'sales': [100, 200, 300],
-            'period': ['FY2023', 'FY2021', 'FY2022']  # Not sorted
-        })
+        pl_data = pd.DataFrame(
+            {
+                "sales": [100, 200, 300],
+                "period": ["FY2023", "FY2021", "FY2022"],  # Not sorted
+            }
+        )
         result = calculate_revenue_cagr(pl_data)
         assert result["revenue_cagr_3yr"]["flag"] == FLAG_INSUFFICIENT
 
     def test_missing_period_column(self):
         """Test missing period column."""
-        pl_data = pd.DataFrame({
-            'sales': [100, 200, 300]
-        })
+        pl_data = pd.DataFrame({"sales": [100, 200, 300]})
         result = calculate_revenue_cagr(pl_data)
         assert result["revenue_cagr_3yr"]["flag"] == FLAG_INSUFFICIENT
 
     def test_all_nan_values(self):
         """Test all NaN values in column."""
-        pl_data = pd.DataFrame({
-            'sales': [np.nan, np.nan, np.nan],
-            'period': ['FY2021', 'FY2022', 'FY2023']
-        })
+        pl_data = pd.DataFrame(
+            {
+                "sales": [np.nan, np.nan, np.nan],
+                "period": ["FY2021", "FY2022", "FY2023"],
+            }
+        )
         result = calculate_revenue_cagr(pl_data)
         assert result["revenue_cagr_3yr"]["value"] is None
         assert result["revenue_cagr_3yr"]["flag"] == FLAG_INSUFFICIENT
@@ -293,24 +323,26 @@ class TestCalculateAllCAGR:
 
     def test_calculate_all_metrics(self):
         """Test calculating all CAGR metrics at once."""
-        pl_data = pd.DataFrame({
-            'sales': [100, 150, 200, 250, 300],
-            'net_profit': [10, 15, 20, 25, 30],
-            'eps': [5, 7.5, 10, 12.5, 15],
-            'period': ['FY2019', 'FY2020', 'FY2021', 'FY2022', 'FY2023']
-        })
-        
+        pl_data = pd.DataFrame(
+            {
+                "sales": [100, 150, 200, 250, 300],
+                "net_profit": [10, 15, 20, 25, 30],
+                "eps": [5, 7.5, 10, 12.5, 15],
+                "period": ["FY2019", "FY2020", "FY2021", "FY2022", "FY2023"],
+            }
+        )
+
         result = calculate_all_cagr(pl_data, company_id="TEST001", period="FY2023")
-        
+
         # Check that all metrics are calculated
         assert "revenue_cagr_5yr" in result
         assert "pat_cagr_5yr" in result
         assert "eps_cagr_5yr" in result
-        
+
         # Check company_id and period are included
         assert result["company_id"] == "TEST001"
         assert result["period"] == "FY2023"
-        
+
         # Verify values (4-year CAGR)
         assert result["revenue_cagr_5yr"]["value"] == 31.61
         assert result["pat_cagr_5yr"]["value"] == 31.61
@@ -318,15 +350,17 @@ class TestCalculateAllCAGR:
 
     def test_calculate_all_with_mixed_data(self):
         """Test calculate_all with some edge cases."""
-        pl_data = pd.DataFrame({
-            'sales': [100, 150, -200, 300],  # End value is positive
-            'net_profit': [10, 15, -20, 25],  # End value is positive
-            'eps': [5, 7.5, -10, 12.5],  # End value is positive
-            'period': ['FY2020', 'FY2021', 'FY2022', 'FY2023']
-        })
-        
+        pl_data = pd.DataFrame(
+            {
+                "sales": [100, 150, -200, 300],  # End value is positive
+                "net_profit": [10, 15, -20, 25],  # End value is positive
+                "eps": [5, 7.5, -10, 12.5],  # End value is positive
+                "period": ["FY2020", "FY2021", "FY2022", "FY2023"],
+            }
+        )
+
         result = calculate_all_cagr(pl_data)
-        
+
         # All windows end with positive values, so all should be NORMAL
         # (CAGR only looks at start and end values, not intermediate values)
         assert result["revenue_cagr_3yr"]["flag"] == FLAG_NORMAL
@@ -373,12 +407,11 @@ class TestEdgeCases:
 
     def test_window_capping(self):
         """Test that window size is capped at actual years."""
-        pl_data = pd.DataFrame({
-            'sales': [100, 200],
-            'period': ['FY2020', 'FY2023']  # 3 years apart
-        })
+        pl_data = pd.DataFrame(
+            {"sales": [100, 200], "period": ["FY2020", "FY2023"]}  # 3 years apart
+        )
         result = calculate_revenue_cagr(pl_data)
-        
+
         # Should calculate 3-year CAGR (actual years), not 5 or 10
         assert result["revenue_cagr_3yr"]["value"] is not None
         assert result["revenue_cagr_3yr"]["flag"] == FLAG_NORMAL
@@ -393,8 +426,9 @@ class TestUtilityFunctions:
     def test_get_cagr_descriptions(self):
         """Test get_cagr_descriptions returns all metrics."""
         from src.analytics.cagr import get_cagr_descriptions
+
         descriptions = get_cagr_descriptions()
-        
+
         assert "revenue_cagr_3yr" in descriptions
         assert "pat_cagr_5yr" in descriptions
         assert "eps_cagr_10yr" in descriptions
@@ -403,8 +437,9 @@ class TestUtilityFunctions:
     def test_get_cagr_formulas(self):
         """Test get_cagr_formulas returns formulas."""
         from src.analytics.cagr import get_cagr_formulas
+
         formulas = get_cagr_formulas()
-        
+
         assert "revenue_cagr" in formulas
         assert "pat_cagr" in formulas
         assert "eps_cagr" in formulas
@@ -413,8 +448,9 @@ class TestUtilityFunctions:
     def test_get_cagr_flag_descriptions(self):
         """Test get_cagr_flag_descriptions returns all flags."""
         from src.analytics.cagr import get_cagr_flag_descriptions
+
         descriptions = get_cagr_flag_descriptions()
-        
+
         assert FLAG_NORMAL in descriptions
         assert FLAG_DECLINE_TO_LOSS in descriptions
         assert FLAG_TURNAROUND in descriptions

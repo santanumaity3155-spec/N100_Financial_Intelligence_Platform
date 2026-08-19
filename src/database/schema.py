@@ -463,7 +463,7 @@ def get_all_indexes() -> List[str]:
 def get_safe_indexes(table_name: str, existing_columns: List[str]) -> List[str]:
     """
     Get CREATE INDEX statements for columns that actually exist in the table.
-    
+
     This prevents errors when trying to create indexes on non-existent columns,
     which can happen when tables are created dynamically from DataFrames.
 
@@ -481,15 +481,15 @@ def get_safe_indexes(table_name: str, existing_columns: List[str]) -> List[str]:
     """
     safe_indexes = []
     index_statements = INDEXES.get(table_name, [])
-    
+
     for index_sql in index_statements:
         # Extract column name from index statement
         # Format: "CREATE INDEX IF NOT EXISTS idx_name ON table(column);"
         try:
             # Parse the column name from the SQL
-            column_part = index_sql.split('(')[1].split(')')[0]
-            column_name = column_part.split('.')[-1]  # Handle table.column format
-            
+            column_part = index_sql.split("(")[1].split(")")[0]
+            column_name = column_part.split(".")[-1]  # Handle table.column format
+
             # Only add index if column exists
             if column_name in existing_columns:
                 safe_indexes.append(index_sql)
@@ -500,5 +500,5 @@ def get_safe_indexes(table_name: str, existing_columns: List[str]) -> List[str]:
                 )
         except (IndexError, AttributeError) as e:
             logger.warning(f"Could not parse index SQL: {index_sql}. Error: {e}")
-    
+
     return safe_indexes

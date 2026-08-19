@@ -24,25 +24,35 @@ router = APIRouter(tags=["Documents"])
 # PYDANTIC RESPONSE MODELS
 # =============================================================================
 
+
 class DocumentItem(BaseModel):
+    """DocumentItem class representation."""
+
     id: Optional[int] = Field(None, description="Primary key ID")
     company_id: str = Field(..., description="Company ticker symbol")
     year: Optional[str] = Field(None, description="Financial report year")
     annual_report: Optional[str] = Field(None, description="Annual report document URL")
     document_url: Optional[str] = Field(None, description="Alias for annual report URL")
-    is_url_valid: bool = Field(..., description="Boolean flag indicating whether document URL is valid")
+    is_url_valid: bool = Field(
+        ..., description="Boolean flag indicating whether document URL is valid"
+    )
 
 
 class CompanyDocumentsResponse(BaseModel):
+    """CompanyDocumentsResponse class representation."""
+
     ticker: str = Field(..., description="Requested company ticker symbol")
     company_name: str = Field(..., description="Official company name")
     document_count: int = Field(..., description="Total annual report documents found")
-    documents: List[DocumentItem] = Field(..., description="List of annual report document entries")
+    documents: List[DocumentItem] = Field(
+        ..., description="List of annual report document entries"
+    )
 
 
 # =============================================================================
 # URL VALIDATION HELPER
 # =============================================================================
+
 
 def validate_annual_report_url(url: Optional[str]) -> bool:
     """
@@ -71,11 +81,11 @@ def validate_annual_report_url(url: Optional[str]) -> bool:
         # Basic path check for pdf or document path
         path_lower = parsed.path.lower()
         has_doc_extension = (
-            path_lower.endswith(".pdf") or
-            "corpfiling" in path_lower or
-            "annualreport" in path_lower or
-            "his_ann_rpt" in path_lower or
-            "attachhis" in path_lower
+            path_lower.endswith(".pdf")
+            or "corpfiling" in path_lower
+            or "annualreport" in path_lower
+            or "his_ann_rpt" in path_lower
+            or "attachhis" in path_lower
         )
 
         return domain_match or has_doc_extension
@@ -88,6 +98,7 @@ def validate_annual_report_url(url: Optional[str]) -> bool:
 # ENDPOINT
 # =============================================================================
 
+
 @router.get(
     "/companies/{ticker}/documents",
     response_model=CompanyDocumentsResponse,
@@ -96,8 +107,8 @@ def validate_annual_report_url(url: Optional[str]) -> bool:
     responses={
         200: {"description": "Document list returned successfully"},
         404: {"description": "Company ticker not found"},
-        500: {"description": "Internal server error"}
-    }
+        500: {"description": "Internal server error"},
+    },
 )
 def get_company_documents(ticker: str) -> CompanyDocumentsResponse:
     """
@@ -107,19 +118,22 @@ def get_company_documents(ticker: str) -> CompanyDocumentsResponse:
         if not ticker or not ticker.strip():
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Ticker symbol cannot be empty"
+                detail="Ticker symbol cannot be empty",
             )
 
         ticker_clean = ticker.strip().upper()
         conn = get_connection()
 
         # Check company existence
-        cur = conn.execute("SELECT company_id, company_name FROM companies WHERE company_id = ?", (ticker_clean,))
+        cur = conn.execute(
+            "SELECT company_id, company_name FROM companies WHERE company_id = ?",
+            (ticker_clean,),
+        )
         comp_row = cur.fetchone()
         if not comp_row:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Company ticker '{ticker}' not found."
+                detail=f"Company ticker '{ticker}' not found.",
             )
         comp_name = comp_row["company_name"]
 
@@ -131,7 +145,7 @@ def get_company_documents(ticker: str) -> CompanyDocumentsResponse:
             WHERE company_id = ?
             ORDER BY year DESC
             """,
-            (ticker_clean,)
+            (ticker_clean,),
         )
         rows = doc_cur.fetchall()
 
@@ -142,20 +156,22 @@ def get_company_documents(ticker: str) -> CompanyDocumentsResponse:
             rep_url = r["annual_report"] or r["document_url"]
             is_valid = validate_annual_report_url(rep_url)
 
-            doc_items.append(DocumentItem(
-                id=doc_id,
-                company_id=ticker_clean,
-                year=str(yr) if yr is not None else None,
-                annual_report=rep_url,
-                document_url=rep_url,
-                is_url_valid=is_valid
-            ))
+            doc_items.append(
+                DocumentItem(
+                    id=doc_id,
+                    company_id=ticker_clean,
+                    year=str(yr) if yr is not None else None,
+                    annual_report=rep_url,
+                    document_url=rep_url,
+                    is_url_valid=is_valid,
+                )
+            )
 
         return CompanyDocumentsResponse(
             ticker=ticker_clean,
             company_name=comp_name,
             document_count=len(doc_items),
-            documents=doc_items
+            documents=doc_items,
         )
 
     except HTTPException:
@@ -164,5 +180,5 @@ def get_company_documents(ticker: str) -> CompanyDocumentsResponse:
         logger.exception(f"Error in GET /companies/{ticker}/documents")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve company documents"
+            detail="Failed to retrieve company documents",
         ) from exc

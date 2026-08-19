@@ -45,7 +45,10 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     logger.warning(f"Request validation failed for {request.url.path}: {exc.errors()}")
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
-        content={"detail": "Invalid parameter values or query parameters", "errors": str(exc.errors())},
+        content={
+            "detail": "Invalid parameter values or query parameters",
+            "errors": str(exc.errors()),
+        },
     )
 
 
@@ -59,6 +62,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # -----------------------------------------------------------------------------
 # Request Logging Middleware

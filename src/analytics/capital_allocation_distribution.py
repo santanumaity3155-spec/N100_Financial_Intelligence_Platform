@@ -87,7 +87,9 @@ def determine_latest_year(cf_df: pd.DataFrame, pl_df: pd.DataFrame) -> int:
         years.extend(pl_years.tolist())
 
     if not years:
-        logger.warning("No valid period/year found in financial statements, falling back to 2024")
+        logger.warning(
+            "No valid period/year found in financial statements, falling back to 2024"
+        )
         return 2024
 
     latest = int(max(years))
@@ -201,9 +203,7 @@ def compute_latest_year_classifications(
                 else None
             )
             capex_intensity = (
-                (capex / ocf * 100.0)
-                if (ocf is not None and ocf != 0)
-                else None
+                (capex / ocf * 100.0) if (ocf is not None and ocf != 0) else None
             )
 
             rating = classify_capital_allocation(

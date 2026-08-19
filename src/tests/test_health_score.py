@@ -14,5 +14,11 @@ sys.path.insert(0, str(project_root))
 
 if __name__ == "__main__":
     import pytest
-    test_file = Path(__file__).resolve().parents[2] / "tests" / "health_score" / "test_health_score_engine.py"
+
+    test_file = (
+        Path(__file__).resolve().parents[2]
+        / "tests"
+        / "health_score"
+        / "test_health_score_engine.py"
+    )
     sys.exit(pytest.main(["-v", str(test_file)]))

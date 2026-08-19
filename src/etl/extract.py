@@ -22,7 +22,7 @@ logger = get_logger(__name__)
 class DataExtractor:
     """
     Extracts data from Excel files.
-    
+
     Responsibilities:
     1. Read Excel files from raw data directory
     2. Handle different sheet names and header rows
@@ -32,7 +32,7 @@ class DataExtractor:
     def __init__(self, raw_data_dir: Optional[Path] = None):
         """
         Initialize the DataExtractor.
-        
+
         Parameters
         ----------
         raw_data_dir : Path, optional
@@ -44,7 +44,7 @@ class DataExtractor:
     def _detect_header_row(self, file_path: Path, sheet_name: str = 0, **kwargs) -> int:
         """
         Detect which row contains the actual headers.
-        
+
         Parameters
         ----------
         file_path : Path
@@ -53,44 +53,56 @@ class DataExtractor:
             Sheet name or index to read
         **kwargs
             Additional arguments to pass to pd.read_excel()
-            
+
         Returns
         -------
         int
             Row number to use as header (0-indexed). Returns None if no header row exists.
         """
         # Read first 3 rows without header to inspect structure
-        df_raw = pd.read_excel(file_path, sheet_name=sheet_name, header=None, nrows=3, **kwargs)
-        
+        df_raw = pd.read_excel(
+            file_path, sheet_name=sheet_name, header=None, nrows=3, **kwargs
+        )
+
         if len(df_raw) == 0:
             return 0
-        
+
         # Check row 1 (index 1) - if it contains string column names that look like headers
         if len(df_raw) > 1:
             row_1 = df_raw.iloc[1]
             string_count = sum(1 for val in row_1 if isinstance(val, str))
-            numeric_count = sum(1 for val in row_1 if isinstance(val, (int, float)) and not isinstance(val, bool))
-            
+            numeric_count = sum(
+                1
+                for val in row_1
+                if isinstance(val, (int, float)) and not isinstance(val, bool)
+            )
+
             # If row 1 has mostly strings and looks like headers, use header=1
             # Heuristic: headers typically have more strings than numbers
             if string_count > numeric_count and string_count > len(row_1) * 0.5:
                 logger.debug(f"Detected header row at index 1 for {file_path.name}")
                 return 1
-        
+
         # Check if row 0 contains headers (no title row)
         if len(df_raw) > 0:
             row_0 = df_raw.iloc[0]
             string_count = sum(1 for val in row_0 if isinstance(val, str))
-            numeric_count = sum(1 for val in row_0 if isinstance(val, (int, float)) and not isinstance(val, bool))
-            
+            numeric_count = sum(
+                1
+                for val in row_0
+                if isinstance(val, (int, float)) and not isinstance(val, bool)
+            )
+
             # If row 0 has mostly strings, it might be headers
             if string_count > numeric_count and string_count > len(row_0) * 0.5:
                 logger.debug(f"Detected header row at index 0 for {file_path.name}")
                 return 0
-        
+
         # If we reach here, there's no clear header row (all numeric or mixed)
         # Return None to indicate no header - data starts from row 0
-        logger.debug(f"No header row detected for {file_path.name}, data starts from row 0")
+        logger.debug(
+            f"No header row detected for {file_path.name}, data starts from row 0"
+        )
         return None
 
     def read_excel_file(
@@ -98,11 +110,11 @@ class DataExtractor:
         file_path: Path,
         sheet_name: str = 0,
         header: Optional[int] = None,
-        **kwargs
+        **kwargs,
     ) -> pd.DataFrame:
         """
         Read a single Excel file.
-        
+
         Parameters
         ----------
         file_path : Path
@@ -113,12 +125,12 @@ class DataExtractor:
             Row number to use as column names. If None, auto-detects header row.
         **kwargs
             Additional arguments to pass to pd.read_excel()
-            
+
         Returns
         -------
         pd.DataFrame
             DataFrame containing the Excel data
-            
+
         Raises
         ------
         FileNotFoundError
@@ -131,42 +143,36 @@ class DataExtractor:
 
         try:
             logger.info(f"Reading Excel file: {file_path.name}")
-            
+
             # Auto-detect header row if not specified
             if header is None:
                 header = self._detect_header_row(file_path, sheet_name, **kwargs)
-            
+
             logger.debug(f"Using header={header} for {file_path.name}")
-            
+
             # Read the Excel file with the resolved header row
             if file_path.name == "sectors.xlsx":
                 logger.info("Using header=0 for sectors.xlsx")
-                df = pd.read_excel(
-                    file_path,
-                    sheet_name=sheet_name,
-                    header=0,
-                    **kwargs
-                )
+                df = pd.read_excel(file_path, sheet_name=sheet_name, header=0, **kwargs)
             else:
                 df = pd.read_excel(
-                    file_path,
-                    sheet_name=sheet_name,
-                    header=header,
-                    **kwargs
+                    file_path, sheet_name=sheet_name, header=header, **kwargs
                 )
-            
+
             logger.info(f"{file_path.name} columns after read: {list(df.columns)}")
-            
+
             # If no header was found (all numeric columns), assign default names
             if all(isinstance(col, (int, float)) for col in df.columns):
-                logger.warning(f"No header row found for {file_path.name}, assigning default column names")
-                df.columns = [f'col_{i}' for i in range(len(df.columns))]
-            
+                logger.warning(
+                    f"No header row found for {file_path.name}, assigning default column names"
+                )
+                df.columns = [f"col_{i}" for i in range(len(df.columns))]
+
             logger.info(
                 f"Successfully read {file_path.name}: "
                 f"{len(df)} rows, {len(df.columns)} columns"
             )
-            
+
             return df
 
         except Exception as e:
@@ -176,12 +182,12 @@ class DataExtractor:
     def extract_all_datasets(self) -> Dict[str, pd.DataFrame]:
         """
         Extract all datasets defined in RAW_DATASETS.
-        
+
         Returns
         -------
         Dict[str, pd.DataFrame]
             Dictionary mapping dataset names to DataFrames
-            
+
         Raises
         ------
         FileNotFoundError
@@ -190,40 +196,42 @@ class DataExtractor:
             If any file cannot be read
         """
         datasets = {}
-        
+
         for dataset_name, filename in RAW_DATASETS.items():
             file_path = self.raw_data_dir / filename
-            
+
             try:
                 # Read the Excel file - let read_excel_file auto-detect the header
                 df = self.read_excel_file(file_path)
-                
+
                 # Normalize column names FIRST (before mapping) to ensure consistent matching
                 # This converts "Year", "YEAR", " year " all to "year" for consistent mapping
                 df = self._normalize_column_names_for_mapping(df)
-                
+
                 # Apply column mapping if available (BEFORE dropping id column)
                 try:
                     df = apply_column_mapping(df, dataset_name)
                     logger.info(f"After mapping ({dataset_name}): {list(df.columns)}")
                 except Exception as e:
-                    logger.warning(f"Could not apply column mapping for {dataset_name}: {str(e)}")
-                
+                    logger.warning(
+                        f"Could not apply column mapping for {dataset_name}: {str(e)}"
+                    )
+
                 # Drop Excel 'id' column if it exists (DB has auto-increment id)
                 # Only drop if it wasn't mapped to company_id
-                if 'id' in df.columns and 'company_id' not in df.columns:
-                    df = df.drop(columns=['id'])
+                if "id" in df.columns and "company_id" not in df.columns:
+                    df = df.drop(columns=["id"])
                     logger.debug(f"Dropped 'id' column from {dataset_name}")
-                
+
                 # Drop any rows that are completely empty
-                df = df.dropna(how='all')
-                
+                df = df.dropna(how="all")
+
                 # Reset index
                 df = df.reset_index(drop=True)
-                
+
                 # Store with normalized name
                 datasets[dataset_name] = df
-                
+
                 logger.info(
                     f"Extracted {dataset_name}: "
                     f"{len(df)} rows, {len(df.columns)} columns"
@@ -242,57 +250,57 @@ class DataExtractor:
     def _normalize_column_names_for_mapping(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Normalize column names for consistent mapping.
-        
+
         This is a lightweight normalization that only prepares columns for mapping,
         without applying the full normalization that happens later in the pipeline.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             DataFrame with original column names
-            
+
         Returns
         -------
         pd.DataFrame
             DataFrame with normalized column names
         """
         df = df.copy()
-        
+
         # Create mapping of old to new column names
         new_columns = {}
         for col in df.columns:
             # Convert to string, strip whitespace, convert to lowercase
             col_str = str(col).strip().lower()
             # Replace spaces and special characters with underscores
-            col_normalized = re.sub(r'[^a-z0-9]+', '_', col_str)
+            col_normalized = re.sub(r"[^a-z0-9]+", "_", col_str)
             # Remove leading/trailing underscores
-            col_normalized = col_normalized.strip('_')
+            col_normalized = col_normalized.strip("_")
             # Remove multiple consecutive underscores
-            col_normalized = re.sub(r'_+', '_', col_normalized)
-            
+            col_normalized = re.sub(r"_+", "_", col_normalized)
+
             if col_normalized and col_normalized != col:
                 new_columns[col] = col_normalized
-        
+
         if new_columns:
             df.rename(columns=new_columns, inplace=True)
             logger.debug(f"Normalized {len(new_columns)} column names for mapping")
-        
+
         return df
 
     def extract_single_dataset(self, dataset_name: str) -> pd.DataFrame:
         """
         Extract a single dataset by name.
-        
+
         Parameters
         ----------
         dataset_name : str
             Name of the dataset (must be in RAW_DATASETS)
-            
+
         Returns
         -------
         pd.DataFrame
             DataFrame containing the dataset
-            
+
         Raises
         ------
         ValueError
@@ -308,16 +316,16 @@ class DataExtractor:
 
         filename = RAW_DATASETS[dataset_name]
         file_path = self.raw_data_dir / filename
-        
+
         logger.info(f"Extracting single dataset: {dataset_name}")
         df = self.read_excel_file(file_path)
-        
+
         return df
 
     def get_raw_data_info(self) -> Dict[str, Any]:
         """
         Get information about raw data files.
-        
+
         Returns
         -------
         Dict[str, Any]
@@ -327,26 +335,26 @@ class DataExtractor:
             "raw_data_dir": str(self.raw_data_dir),
             "datasets": {},
             "total_files": 0,
-            "missing_files": []
+            "missing_files": [],
         }
 
         for dataset_name, filename in RAW_DATASETS.items():
             file_path = self.raw_data_dir / filename
-            
+
             if file_path.exists():
                 file_size = file_path.stat().st_size
                 info["datasets"][dataset_name] = {
                     "filename": filename,
                     "path": str(file_path),
                     "exists": True,
-                    "size_bytes": file_size
+                    "size_bytes": file_size,
                 }
                 info["total_files"] += 1
             else:
                 info["datasets"][dataset_name] = {
                     "filename": filename,
                     "path": str(file_path),
-                    "exists": False
+                    "exists": False,
                 }
                 info["missing_files"].append(dataset_name)
 
@@ -355,7 +363,7 @@ class DataExtractor:
     def validate_raw_files(self) -> bool:
         """
         Validate that all required raw files exist.
-        
+
         Returns
         -------
         bool
@@ -363,11 +371,11 @@ class DataExtractor:
         """
         info = self.get_raw_data_info()
         missing = info["missing_files"]
-        
+
         if missing:
             logger.error(f"Missing raw data files: {missing}")
             return False
-        
+
         logger.info(f"All {info['total_files']} raw data files validated successfully")
         return True
 
@@ -380,7 +388,7 @@ class DataExtractor:
 def extract_all_datasets() -> Dict[str, pd.DataFrame]:
     """
     Convenience function to extract all datasets.
-    
+
     Returns
     -------
     Dict[str, pd.DataFrame]
@@ -393,12 +401,12 @@ def extract_all_datasets() -> Dict[str, pd.DataFrame]:
 def extract_single_dataset(dataset_name: str) -> pd.DataFrame:
     """
     Convenience function to extract a single dataset.
-    
+
     Parameters
     ----------
     dataset_name : str
         Name of the dataset
-        
+
     Returns
     -------
     pd.DataFrame
@@ -415,14 +423,14 @@ def extract_single_dataset(dataset_name: str) -> pd.DataFrame:
 if __name__ == "__main__":
 
     logging.basicConfig(level=logging.INFO)
-    
+
     extractor = DataExtractor()
-    
+
     # Validate files
     if extractor.validate_raw_files():
         # Extract all datasets
         datasets = extractor.extract_all_datasets()
-        
+
         # Print summary
         for name, df in datasets.items():
             print(f"{name}: {len(df)} rows, {len(df.columns)} columns")

@@ -31,6 +31,7 @@ class DatabaseConnection:
     """
 
     def __init__(self):
+        """Initialize class instance attributes."""
         DATABASE_DIR.mkdir(parents=True, exist_ok=True)
         self.database_path = SQLITE_DATABASE
         self._local = threading.local()
@@ -44,6 +45,7 @@ class DatabaseConnection:
 
     @connection.setter
     def connection(self, val: Optional[sqlite3.Connection]):
+        """Connection functionality."""
         self._local.conn = val
 
     def connect(self) -> sqlite3.Connection:
@@ -64,9 +66,7 @@ class DatabaseConnection:
         if conn is None:
             try:
                 conn = sqlite3.connect(
-                    self.database_path,
-                    check_same_thread=False,
-                    timeout=30.0
+                    self.database_path, check_same_thread=False, timeout=30.0
                 )
                 conn.row_factory = sqlite3.Row
                 conn.execute("PRAGMA foreign_keys = ON;")
@@ -133,6 +133,7 @@ db = DatabaseConnection()
 # -----------------------------------------------------
 # Utility Functions
 # -----------------------------------------------------
+
 
 def get_connection() -> sqlite3.Connection:
     """

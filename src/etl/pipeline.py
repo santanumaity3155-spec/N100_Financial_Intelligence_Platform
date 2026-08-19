@@ -34,6 +34,7 @@ class ETLPipeline:
     """
 
     def __init__(self) -> None:
+        """Initialize class instance attributes."""
         self.extractor = DataExtractor()
         self.validator = DataValidator()
         self.normalizer = DataNormalizer()
@@ -156,11 +157,17 @@ class ETLPipeline:
                 required_columns=required_columns,
                 expected_types=expected_types,
                 missing_threshold=None,
-                duplicate_subset=required_columns[:2] if len(required_columns) >= 2 else None,
+                duplicate_subset=(
+                    required_columns[:2] if len(required_columns) >= 2 else None
+                ),
             )
 
         summary = self.validator.get_validation_summary()
-        logger.info("Validation complete: %s/%s passed", summary["passed"], summary["total_datasets"])
+        logger.info(
+            "Validation complete: %s/%s passed",
+            summary["passed"],
+            summary["total_datasets"],
+        )
         return summary
 
     def _normalize(self, datasets: Dict[str, Any]) -> Dict[str, Any]:
@@ -183,7 +190,9 @@ class ETLPipeline:
 
             subset = self._get_duplicate_subset(dataset_name)
             if subset:
-                normalized_df = self.normalizer.remove_duplicates(normalized_df, subset=subset)
+                normalized_df = self.normalizer.remove_duplicates(
+                    normalized_df, subset=subset
+                )
 
             normalized_datasets[dataset_name] = normalized_df
 
@@ -229,7 +238,9 @@ class ETLPipeline:
         logger.info("Loaded %s total rows", load_stats.get("total_rows_loaded", 0))
         return load_stats
 
-    def _generate_reports(self, validation_results: Dict[str, Any], load_stats: Dict[str, Any]) -> None:
+    def _generate_reports(
+        self, validation_results: Dict[str, Any], load_stats: Dict[str, Any]
+    ) -> None:
         logger.info("Generating data quality reports...")
 
         self.reporter.set_validation_results(validation_results)
@@ -274,9 +285,26 @@ class ETLPipeline:
 
     def _get_numeric_columns(self, dataset_name: str) -> list:
         numeric_columns_map = {
-            "profit_loss": ["revenue", "gross_profit", "operating_profit", "net_profit", "eps"],
-            "balance_sheet": ["total_assets", "total_liabilities", "total_equity", "current_assets", "current_liabilities"],
-            "cash_flow": ["operating_cash_flow", "investing_cash_flow", "financing_cash_flow", "free_cash_flow"],
+            "profit_loss": [
+                "revenue",
+                "gross_profit",
+                "operating_profit",
+                "net_profit",
+                "eps",
+            ],
+            "balance_sheet": [
+                "total_assets",
+                "total_liabilities",
+                "total_equity",
+                "current_assets",
+                "current_liabilities",
+            ],
+            "cash_flow": [
+                "operating_cash_flow",
+                "investing_cash_flow",
+                "financing_cash_flow",
+                "free_cash_flow",
+            ],
             "financial_ratios": [
                 "pe_ratio",
                 "pb_ratio",
@@ -288,7 +316,13 @@ class ETLPipeline:
                 "quick_ratio",
                 "dividend_yield",
             ],
-            "stock_prices": ["open_price", "high_price", "low_price", "close_price", "volume"],
+            "stock_prices": [
+                "open_price",
+                "high_price",
+                "low_price",
+                "close_price",
+                "volume",
+            ],
             "market_cap": ["market_cap", "enterprise_value", "shares_outstanding"],
         }
         return numeric_columns_map.get(dataset_name, [])
@@ -307,10 +341,16 @@ class ETLPipeline:
         }
         return duplicate_subset_map.get(dataset_name)
 
-    def _get_pipeline_results(self, validation_results: Dict[str, Any], load_stats: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_pipeline_results(
+        self, validation_results: Dict[str, Any], load_stats: Dict[str, Any]
+    ) -> Dict[str, Any]:
         return {
             "pipeline_stats": self.pipeline_stats,
-            "validation_summary": validation_results.get("summary", validation_results) if validation_results else {},
+            "validation_summary": (
+                validation_results.get("summary", validation_results)
+                if validation_results
+                else {}
+            ),
             "load_stats": load_stats,
             "normalization_log": self.normalizer.get_normalization_log(),
             "transformation_log": self.transformer.get_transformation_log(),
@@ -334,4 +374,3 @@ def run_etl_pipeline(
         load=load,
         generate_reports=generate_reports,
     )
-
