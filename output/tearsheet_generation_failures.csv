@@ -1,8 +1,4 @@
 company_id,error,stage
-ABB,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\ABB_tearsheet.pdf',tearsheet_generation
-DLF,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\DLF_tearsheet.pdf',tearsheet_generation
-HDFCBANK,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\HDFCBANK_tearsheet.pdf',tearsheet_generation
-LICI,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\LICI_tearsheet.pdf',tearsheet_generation
+ICICIPRULI,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\ICICIPRULI_tearsheet.pdf',tearsheet_generation
 NTPC,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\NTPC_tearsheet.pdf',tearsheet_generation
-SHREECEM,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\SHREECEM_tearsheet.pdf',tearsheet_generation
-TECHM,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\TECHM_tearsheet.pdf',tearsheet_generation
+RECLTD,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\RECLTD_tearsheet.pdf',tearsheet_generation
