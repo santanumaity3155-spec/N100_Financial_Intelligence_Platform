@@ -536,10 +536,17 @@ def render_quick_stats() -> None:
             try:
                 ratios_df = get_ratios()
                 if not ratios_df.empty and "year" in ratios_df.columns:
-                    latest_year = int(ratios_df["year"].max())
+                    years = (
+                        ratios_df["year"]
+                        .astype(str)
+                        .str.extract(r"(\d{4})")[0]
+                        .dropna()
+                        .astype(int)
+                    )
+                    latest_year = int(years.max()) if not years.empty else "N/A"
                 else:
                     latest_year = "N/A"
-            except:
+            except Exception:
                 latest_year = "N/A"
             
             st.metric(

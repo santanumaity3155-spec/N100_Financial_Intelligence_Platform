@@ -224,6 +224,61 @@ def test_empty_data_handling():
         raise AssertionError(f"Failed to test empty data handling: {e}")
 
 
+def test_home_page_kpis_and_quality_companies():
+    """Test that calculate_home_kpis, get_top_quality_companies, and get_ratios execute successfully without TypeError."""
+    try:
+        from src.dashboard.utils.db import get_ratios
+
+        home_module = importlib.import_module("src.dashboard.pages.01_home")
+
+        # 1. Test get_ratios with and without ticker
+        ratios_single = get_ratios("INFY", year=2024)
+        assert (
+            not ratios_single.empty
+        ), "get_ratios for single ticker INFY should return data"
+        assert "ticker" in ratios_single.columns
+
+        ratios_all = get_ratios(year=2024)
+        assert (
+            not ratios_all.empty
+        ), "get_ratios(year=2024) without ticker should return aggregate data"
+        assert (
+            len(ratios_all) > 1
+        ), "get_ratios(year=2024) should return multiple company rows"
+
+        # 2. Test calculate_home_kpis
+        kpis = home_module.calculate_home_kpis(2024)
+        assert isinstance(kpis, dict), "calculate_home_kpis should return a dict"
+        assert kpis["total_companies"] > 0, "total_companies should be > 0"
+        assert kpis["avg_roe"] is not None, "avg_roe should not be None"
+        assert kpis["median_pe"] is not None, "median_pe should not be None"
+        assert (
+            kpis["median_debt_to_equity"] is not None
+        ), "median_debt_to_equity should not be None"
+
+        # 3. Test get_top_quality_companies
+        top_df = home_module.get_top_quality_companies(2024, top_n=5)
+        assert (
+            not top_df.empty
+        ), "get_top_quality_companies should return non-empty DataFrame"
+        assert (
+            len(top_df) <= 5
+        ), "get_top_quality_companies should return at most top_n rows"
+        assert "Ticker" in top_df.columns
+        assert "Composite Score" in top_df.columns
+
+        # 4. Test get_sector_breakdown
+        sector_df = home_module.get_sector_breakdown(2024)
+        assert (
+            not sector_df.empty
+        ), "get_sector_breakdown should return non-empty DataFrame"
+        assert "Sector" in sector_df.columns
+        assert "Company Count" in sector_df.columns
+
+    except Exception as e:
+        raise AssertionError(f"Home page calculation test failed: {e}")
+
+
 def test_page_discovery_and_navigation():
     """Test that page discovery and navigation is properly configured."""
     # Test that the individual page modules can be imported and have main functions

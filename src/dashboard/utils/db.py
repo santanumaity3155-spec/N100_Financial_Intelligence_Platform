@@ -139,14 +139,20 @@ def get_companies() -> pd.DataFrame:
         with get_connection() as conn:
             query = """
                 SELECT 
-                    company_id as ticker,
-                    company_name as name,
-                    sector,
-                    industry,
-                    isin_code as isin,
-                    listed_date
-                FROM companies
-                ORDER BY company_id
+                    c.company_id as ticker,
+                    c.company_name as name,
+                    COALESCE(c.sector, pg.peer_group_name, 'Unclassified') as sector,
+                    c.industry,
+                    c.isin_code as isin,
+                    c.listed_date
+                FROM companies c
+                LEFT JOIN (
+                    SELECT company_id, peer_group_name
+                    FROM peer_groups
+                    WHERE peer_group_name IS NOT NULL
+                    GROUP BY company_id
+                ) pg ON c.company_id = pg.company_id
+                ORDER BY c.company_id
             """
 
             df = pd.read_sql_query(query, conn)
@@ -167,48 +173,45 @@ def get_companies() -> pd.DataFrame:
 
 
 @st.cache_data(ttl=600)
-def get_ratios(ticker: str, year: Optional[int] = None) -> pd.DataFrame:
+def get_ratios(
+    ticker: Optional[str] = None, year: Optional[int] = None
+) -> pd.DataFrame:
     """
-    Retrieve financial ratios for a specific company.
+    Retrieve financial ratios for a specific company or all companies.
 
     Args:
-        ticker: Company ticker symbol (e.g., 'RELIANCE', 'TCS')
+        ticker: Optional company ticker symbol (e.g., 'RELIANCE', 'TCS'). If None, returns ratios for all companies.
         year: Optional year filter (e.g., 2024). If None, returns all years.
 
     Returns:
         pd.DataFrame: DataFrame containing financial ratios with columns:
             - ticker: Company ticker
             - year: Financial year
-            - pe_ratio: Price to Earnings ratio (from financial_kpis)
-            - pb_ratio: Price to Book ratio (from financial_kpis)
+            - pe_ratio: Price to Earnings ratio
+            - pb_ratio: Price to Book ratio
             - roe: Return on Equity
             - roa: Return on Assets
             - debt_equity: Debt to Equity ratio
             - current_ratio: Current ratio
+            - revenue_cagr_5yr: 5-year Revenue CAGR
+            - revenue_growth: Revenue growth
+            - profit_growth: Profit growth
             - And other financial metrics
 
     Returns empty DataFrame if:
-        - Ticker is missing or empty
-        - No data found for the ticker
+        - No data found
         - Database is unavailable
 
     Example:
         df = get_ratios('RELIANCE', year=2024)
+        df_all = get_ratios(year=2024)
     """
     logger.info(f"Executing query: get_ratios(ticker={ticker}, year={year})")
     start_time = time.time()
 
-    # Validate input
-    if not ticker or not isinstance(ticker, str):
-        logger.warning(f"Invalid ticker provided: {ticker}")
-        return pd.DataFrame()
-
-    ticker = ticker.strip().upper()
-
     try:
         with get_connection() as conn:
-            # Base query - pe_ratio and pb_ratio are in financial_kpis, not financial_ratios
-            # Note: financial_ratios uses 'period' column (e.g., 'Mar 2024'), not 'year'
+            # Join financial_ratios with financial_kpis (for period match and TTM CAGR) and market_cap (for fallback valuation metrics)
             query = """
                 SELECT 
                     r.company_id as ticker,
@@ -219,32 +222,39 @@ def get_ratios(ticker: str, year: Optional[int] = None) -> pd.DataFrame:
                     r.current_ratio,
                     r.quick_ratio,
                     r.dividend_yield,
-                    k.pe_ratio,
-                    k.pb_ratio,
+                    COALESCE(k.pe_ratio, m.pe_ratio) as pe_ratio,
+                    COALESCE(k.pb_ratio, m.pb_ratio) as pb_ratio,
                     k.net_profit_margin,
                     k.operating_margin,
                     k.gross_margin,
                     k.interest_coverage,
                     k.asset_turnover,
                     k.inventory_turnover,
-                    k.revenue_cagr as revenue_growth,
-                    k.profit_cagr as profit_growth,
+                    COALESCE(k.revenue_cagr, k_ttm.revenue_cagr) as revenue_cagr_5yr,
+                    COALESCE(k.revenue_cagr, k_ttm.revenue_cagr) as revenue_growth,
+                    COALESCE(k.profit_cagr, k_ttm.profit_cagr) as profit_growth,
                     k.eps,
                     k.ev_ebitda
                 FROM financial_ratios r
                 LEFT JOIN financial_kpis k ON r.company_id = k.company_id AND r.period = k.period
-                WHERE r.company_id = ?
+                LEFT JOIN financial_kpis k_ttm ON r.company_id = k_ttm.company_id AND k_ttm.period = 'TTM'
+                LEFT JOIN market_cap m ON r.company_id = m.company_id
             """
-            params = [ticker]
+            where_clauses = []
+            params = []
 
-            # Add year filter if provided (convert int year to period format)
+            if ticker and isinstance(ticker, str) and ticker.strip():
+                where_clauses.append("r.company_id = ?")
+                params.append(ticker.strip().upper())
+
             if year is not None:
-                # Try to match year to period format (e.g., 2024 -> 'Mar 2024')
-                # This is a best-effort match since period format varies
-                query += " AND r.period LIKE ?"
+                where_clauses.append("r.period LIKE ?")
                 params.append(f"%{year}%")
 
-            query += " ORDER BY r.period DESC"
+            if where_clauses:
+                query += " WHERE " + " AND ".join(where_clauses)
+
+            query += " ORDER BY r.company_id, r.period DESC"
 
             df = pd.read_sql_query(query, conn, params=params)
 
@@ -263,12 +273,14 @@ def get_ratios(ticker: str, year: Optional[int] = None) -> pd.DataFrame:
 
     except sqlite3.Error as e:
         logger.error(
-            f"Database error in get_ratios() for {ticker}: {str(e)}", exc_info=True
+            f"Database error in get_ratios() for ticker={ticker}, year={year}: {str(e)}",
+            exc_info=True,
         )
         return pd.DataFrame()
     except Exception as e:
         logger.error(
-            f"Unexpected error in get_ratios() for {ticker}: {str(e)}", exc_info=True
+            f"Unexpected error in get_ratios() for ticker={ticker}, year={year}: {str(e)}",
+            exc_info=True,
         )
         return pd.DataFrame()
 
