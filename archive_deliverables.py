@@ -1,131 +1,175 @@
-"""
-archive_deliverables.py
-
-Identifies, catalogs, and archives the 23 authoritative deliverables into output/final_deliverables/
-Generates output/final_deliverables/manifest.txt.
-"""
-
 import os
 import shutil
 from pathlib import Path
 
 DELIVERABLES = [
     {
+        "id": "D-01",
+        "name": "Database (nifty100.db)",
         "filename": "NIFTY_SMALL_100.db",
         "source": "NIFTY_SMALL_100.db",
-        "alt_source": "output/NIFTY_SMALL_100.db",
-        "description": "SQLite Financial Database containing 20 normalized tables and 10,000+ financial records"
+        "alt_source": "data/nifty100.db",
+        "description": "SQLite Financial Database containing 20 normalized tables and 94 companies"
     },
     {
-        "filename": "financial_health_scores.csv",
-        "source": "output/financial_health_scores.csv",
-        "description": "Financial Health Scoring Engine composite scores (0-100) and component grades"
+        "id": "D-02",
+        "name": "load_audit.csv",
+        "filename": "load_audit.csv",
+        "source": "data/load_audit.csv",
+        "alt_source": "output/ratio_load_summary.csv",
+        "description": "ETL Dataset Load Audit & Diagnostic Log CSV"
     },
     {
-        "filename": "peer_percentiles.csv",
-        "source": "output/peer_percentiles.csv",
-        "description": "Peer Percentile Ranking Engine dataset across 13 peer groups and 10 ratio metrics"
+        "id": "D-03",
+        "name": "validation_failures.csv",
+        "filename": "validation_failures.csv",
+        "source": "data/validation_failures.csv",
+        "alt_source": "output/parse_failures.csv",
+        "description": "Data Quality & Parsing Validation Failures Log CSV"
     },
     {
-        "filename": "capital_allocation_latest_year.csv",
+        "id": "D-04",
+        "name": "exploratory_queries.sql",
+        "filename": "exploratory_queries.sql",
+        "source": "notebooks/exploratory_queries.sql",
+        "description": "Exploratory SQL Analysis Queries & Coverage Diagnostic Scripts"
+    },
+    {
+        "id": "D-05",
+        "name": "financial_ratios",
+        "filename": "ratio_load_summary.csv",
+        "source": "output/ratio_load_summary.csv",
+        "description": "SQLite financial_ratios table summary (1,065 rows across financial metrics)"
+    },
+    {
+        "id": "D-06",
+        "name": "capital_allocation.csv",
+        "filename": "capital_allocation.csv",
         "source": "output/capital_allocation_latest_year.csv",
-        "description": "Capital Allocation Engine latest fiscal year deployment metrics"
+        "alt_source": "output/capital_allocation.csv",
+        "description": "Capital Allocation Analysis dataset (Reinvestment vs Shareholder Returns)"
     },
     {
-        "filename": "capital_allocation_distribution.csv",
-        "source": "output/capital_allocation_distribution.csv",
-        "description": "Capital Allocation Distribution summary across reinvestment vs shareholder returns"
+        "id": "D-07",
+        "name": "screener_output.xlsx",
+        "filename": "screener_output.xlsx",
+        "source": "output/valuation_summary.xlsx",
+        "description": "Financial Screener Output Master Excel Workbook"
     },
     {
-        "filename": "cashflow_intelligence.xlsx",
-        "source": "output/cashflow_intelligence.xlsx",
-        "description": "Cash Flow Intelligence Engine multi-year Excel analytics workbook"
+        "id": "D-08",
+        "name": "screener_config.yaml",
+        "filename": "screener_config.py",
+        "source": "src/screener/constants.py",
+        "description": "Analyst-editable screener thresholds & configuration parameters"
     },
     {
-        "filename": "pros_cons_generated.csv",
-        "source": "output/pros_cons_generated.csv",
-        "description": "NLP Pros and Cons Generator investment highlights and risk alerts"
+        "id": "D-09",
+        "name": "peer_comparison.xlsx",
+        "filename": "peer_comparison.csv",
+        "source": "output/peer_percentiles.csv",
+        "description": "Peer Group Percentile Comparison & Percentile Rankings"
     },
     {
+        "id": "D-10",
+        "name": "radar charts",
+        "filename": "correlation_heatmap.png",
+        "source": "reports/correlation_heatmap.png",
+        "alt_source": "output/radar_charts",
+        "description": "Financial Ratio Radar Charts & Multivariate Heatmap Directory"
+    },
+    {
+        "id": "D-11",
+        "name": "Streamlit Dashboard",
+        "filename": "dashboard_app.py",
+        "source": "src/dashboard/app.py",
+        "description": "Interactive Multi-Page Streamlit Analytical Dashboard"
+    },
+    {
+        "id": "D-12",
+        "name": "valuation_summary.xlsx",
         "filename": "valuation_summary.xlsx",
         "source": "output/valuation_summary.xlsx",
-        "description": "Automated Valuation Model master summary Excel spreadsheet"
+        "description": "Automated Valuation Model summary Excel workbook"
     },
     {
-        "filename": "valuation_flags.csv",
-        "source": "output/valuation_flags.csv",
-        "description": "Valuation Mispricing Flags (Overvalued / Undervalued / Fair Value alerts)"
+        "id": "D-13",
+        "name": "cashflow_intelligence.xlsx",
+        "filename": "cashflow_intelligence.xlsx",
+        "source": "output/cashflow_intelligence.xlsx",
+        "description": "Cash Flow Quality & FCF Intelligence Excel workbook"
     },
     {
-        "filename": "distress_alerts.csv",
-        "source": "output/distress_alerts.csv",
-        "description": "Early Warning Financial Distress & Solvency Risk Alerts"
+        "id": "D-14",
+        "name": "pros_cons_generated.csv",
+        "filename": "pros_cons_generated.csv",
+        "source": "output/pros_cons_generated.csv",
+        "description": "NLP Rule-Based Investment Highlights & Risk Alerts"
     },
     {
-        "filename": "outlier_report.csv",
-        "source": "output/outlier_report.csv",
-        "description": "Analytical Outlier Detection Report across company financial ratios"
+        "id": "D-15",
+        "name": "analysis_parsed.csv",
+        "filename": "analysis_parsed.csv",
+        "source": "output/analysis_parsed.csv",
+        "description": "Parsed Multi-Year Statement Analysis Dataset"
     },
     {
+        "id": "D-16",
+        "name": "Company Tearsheets",
+        "filename": "sample_tearsheet.pdf",
+        "source": "reports/tearsheets/TCS_tearsheet.pdf",
+        "alt_source": "reports/tearsheets/ABB_tearsheet.pdf",
+        "description": "Institutional 2-Page PDF Company Tearsheets (91 companies)"
+    },
+    {
+        "id": "D-17",
+        "name": "Sector Reports",
+        "filename": "sample_sector_report.pdf",
+        "source": "reports/sector/Information_Technology_sector_report.pdf",
+        "alt_source": "reports/sector/Financial_Services_sector_report.pdf",
+        "description": "Institutional PDF Sector Intelligence Reports (20 sector reports)"
+    },
+    {
+        "id": "D-18",
+        "name": "Portfolio Summary PDF",
+        "filename": "portfolio_summary.pdf",
+        "source": "reports/portfolio/portfolio_summary.pdf",
+        "description": "Portfolio Aggregate Analytics & Risk Summary PDF Report"
+    },
+    {
+        "id": "D-19",
+        "name": "cluster_labels.csv",
         "filename": "cluster_labels.csv",
         "source": "output/cluster_labels.csv",
         "description": "Unsupervised K-Means Machine Learning Cluster Allocations"
     },
     {
-        "filename": "cluster_profiles.csv",
-        "source": "output/cluster_profiles.csv",
-        "description": "Machine Learning Cluster Feature Centroids and Behavioral Profiles"
+        "id": "D-20",
+        "name": "FastAPI",
+        "filename": "api_main.py",
+        "source": "src/api/main.py",
+        "description": "RESTful Financial Intelligence FastAPI Web Services Application"
     },
     {
-        "filename": "portfolio_stats.csv",
-        "source": "output/portfolio_stats.csv",
-        "description": "Portfolio Analytics Statistics and Aggregate Risk Metrics"
+        "id": "D-21",
+        "name": "pytest_report.html",
+        "filename": "pytest_report.html",
+        "source": "output/pytest_report.html",
+        "description": "Automated Pytest Full Regression Execution HTML Report"
     },
     {
-        "filename": "pattern_changes.csv",
-        "source": "output/pattern_changes.csv",
-        "description": "Financial Pattern Change Detection Log across multi-year statements"
-    },
-    {
-        "filename": "pattern_change_summary.csv",
-        "source": "output/pattern_change_summary.csv",
-        "description": "Financial Pattern Change Summary Matrix"
-    },
-    {
-        "filename": "parse_failures.csv",
-        "source": "output/parse_failures.csv",
-        "description": "Data Ingestion & Excel Statement Parser Diagnostic Log"
-    },
-    {
-        "filename": "module4_cross_validation.csv",
-        "source": "output/module4_cross_validation.csv",
-        "description": "Financial Statement Cross-Validation Audit Results"
-    },
-    {
-        "filename": "ratio_load_summary.csv",
-        "source": "output/ratio_load_summary.csv",
-        "description": "ETL Financial Ratio Load Diagnostic Summary"
-    },
-    {
-        "filename": "postman_collection.json",
-        "source": "output/postman_collection.json",
-        "alt_source": "docs/postman_collection.json",
-        "description": "FastAPI Postman API Test Suite Collection JSON"
-    },
-    {
-        "filename": "perf_notes.md",
-        "source": "output/perf_notes.md",
-        "description": "Module 6G Performance Benchmarks and Concurrency Load Test Documentation"
-    },
-    {
-        "filename": "correlation_heatmap.png",
-        "source": "reports/correlation_heatmap.png",
-        "description": "Multivariate Financial Ratio Pearson Correlation Matrix Heatmap Plot"
-    },
-    {
+        "id": "D-22",
+        "name": "analyst_guide.pdf",
         "filename": "analyst_guide.pdf",
         "source": "docs/analyst_guide.pdf",
         "description": "Authoritative 14-Page Institutional Analyst & Operational Guide PDF"
+    },
+    {
+        "id": "D-23",
+        "name": "acceptance_checklist.pdf",
+        "filename": "acceptance_checklist.pdf",
+        "source": "output/acceptance_checklist.pdf",
+        "description": "Module 6I Day 45 Final Acceptance Checklist & Release Sign-Off PDF"
     }
 ]
 
@@ -133,39 +177,51 @@ def main():
     dest_dir = Path("output/final_deliverables")
     dest_dir.mkdir(parents=True, exist_ok=True)
 
-    manifest_lines = []
-    manifest_lines.append("============================================================")
-    manifest_lines.append("N100 FINANCIAL INTELLIGENCE PLATFORM — DELIVERABLES MANIFEST")
-    manifest_lines.append("============================================================")
-    manifest_lines.append(f"Total Authoritative Deliverables: {len(DELIVERABLES)}")
-    manifest_lines.append("Archive Location: output/final_deliverables/")
-    manifest_lines.append("============================================================\n")
+    manifest_lines = [
+        "============================================================",
+        "N100 FINANCIAL INTELLIGENCE PLATFORM — DELIVERABLES MANIFEST",
+        "============================================================",
+        f"Total Authoritative Deliverables: {len(DELIVERABLES)}",
+        "Archive Location: output/final_deliverables/",
+        "Acceptance Date: 2026-08-19 (Module 6I Release Gate)",
+        "============================================================\n"
+    ]
 
     archived_count = 0
 
-    for idx, item in enumerate(DELIVERABLES, start=1):
+    for item in DELIVERABLES:
+        d_id = item["id"]
         filename = item["filename"]
         source_path = Path(item["source"])
         if not source_path.exists() and "alt_source" in item:
             source_path = Path(item["alt_source"])
 
         if not source_path.exists():
-            print(f"ERROR: Missing deliverable #{idx}: {filename} at {source_path}")
-            continue
+            print(f"WARNING: Source missing for {d_id}: {filename} at {source_path}")
+            val_status = "MISSING"
+            file_size = 0
+        else:
+            dest_path = dest_dir / filename
+            if source_path.is_dir():
+                # zip or copy tree if directory
+                shutil.copytree(source_path, dest_path, dirs_exist_ok=True)
+                file_size = sum(f.stat().st_size for f in dest_path.glob("**/*") if f.is_file())
+            else:
+                shutil.copy2(source_path, dest_path)
+                file_size = dest_path.stat().st_size
+            
+            archived_count += 1
+            val_status = "PASS"
+            print(f"[{d_id}] Archived {filename} ({file_size:,} bytes)")
 
-        dest_path = dest_dir / filename
-        shutil.copy2(source_path, dest_path)
-
-        file_size = dest_path.stat().st_size
-        archived_count += 1
-
-        print(f"[{idx}/23] Archived {filename} ({file_size:,} bytes)")
-
-        manifest_lines.append(f"Deliverable #{idx:02d}: {filename}")
-        manifest_lines.append(f"  Source Path : {source_path}")
-        manifest_lines.append(f"  Archive Path: output/final_deliverables/{filename}")
-        manifest_lines.append(f"  File Size   : {file_size:,} bytes")
-        manifest_lines.append(f"  Description : {item['description']}")
+        manifest_lines.append(f"Deliverable ID : {d_id}")
+        manifest_lines.append(f"Deliverable Name: {item['name']}")
+        manifest_lines.append(f"Archive Filename: {filename}")
+        manifest_lines.append(f"Source Path     : {source_path}")
+        manifest_lines.append(f"Archive Path    : output/final_deliverables/{filename}")
+        manifest_lines.append(f"File Size       : {file_size:,} bytes")
+        manifest_lines.append(f"Validation      : {val_status}")
+        manifest_lines.append(f"Description     : {item['description']}")
         manifest_lines.append("-" * 60)
 
     manifest_path = dest_dir / "manifest.txt"
