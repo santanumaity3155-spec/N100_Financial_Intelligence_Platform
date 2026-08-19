@@ -1,1 +1,6 @@
 company_id,error,stage
+ADANIENT,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\ADANIENT_tearsheet.pdf',tearsheet_generation
+BAJAJAUTO,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\BAJAJAUTO_tearsheet.pdf',tearsheet_generation
+IOC,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\IOC_tearsheet.pdf',tearsheet_generation
+LICI,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\LICI_tearsheet.pdf',tearsheet_generation
+TATAMOTORS,[Errno 22] Invalid argument: 'D:\\New Project\\Bluestock_Projects\\Nifty 100\\N100 Financial Intelligence Platform\\N100_Financial_Intelligence_Platform\\reports\\tearsheets\\TATAMOTORS_tearsheet.pdf',tearsheet_generation
