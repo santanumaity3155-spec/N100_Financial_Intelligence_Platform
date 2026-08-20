@@ -24,10 +24,16 @@ from src.analytics.capital_allocation_pattern_changes import (
     get_available_years,
     compute_year_classifications,
 )
-from validate_module4a import main as validate_module4a_main
-from validate_module4b import validate_module4b
-from validate_module4c import validate_module4c
-from validate_module4 import validate_module4
+try:
+    from tools.validation.validate_module4a import main as validate_module4a_main
+    from tools.validation.validate_module4b import validate_module4b
+    from tools.validation.validate_module4c import validate_module4c
+    from tools.validation.validate_module4 import validate_module4
+except ImportError:
+    from validate_module4a import main as validate_module4a_main
+    from validate_module4b import validate_module4b
+    from validate_module4c import validate_module4c
+    from validate_module4 import validate_module4
 
 
 class TestModule4DIntegration:

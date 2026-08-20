@@ -233,6 +233,7 @@ def get_ratios(
                     COALESCE(k.revenue_cagr, k_ttm.revenue_cagr) as revenue_cagr_5yr,
                     COALESCE(k.revenue_cagr, k_ttm.revenue_cagr) as revenue_growth,
                     COALESCE(k.profit_cagr, k_ttm.profit_cagr) as profit_growth,
+                    COALESCE(k.profit_cagr, k_ttm.profit_cagr) as pat_cagr_5yr,
                     k.eps,
                     k.ev_ebitda
                 FROM financial_ratios r
@@ -885,7 +886,22 @@ def get_all_screener_data(period: str = "Mar 2024") -> pd.DataFrame:
     try:
         with get_connection() as conn:
             companies = pd.read_sql_query(
-                "SELECT company_id, company_name, sector, industry FROM companies",
+                """
+                SELECT 
+                    c.company_id,
+                    c.company_name,
+                    COALESCE(c.sector, s.sub_sector, s.broad_sector, pg.peer_group_name, 'Unclassified') as sector,
+                    COALESCE(s.sub_sector, c.industry, 'Unknown') as sub_sector,
+                    c.industry
+                FROM companies c
+                LEFT JOIN sectors s ON c.company_id = s.company_id
+                LEFT JOIN (
+                    SELECT company_id, peer_group_name
+                    FROM peer_groups
+                    WHERE peer_group_name IS NOT NULL
+                    GROUP BY company_id
+                ) pg ON c.company_id = pg.company_id
+                """,
                 conn,
             )
             ratios = pd.read_sql_query(

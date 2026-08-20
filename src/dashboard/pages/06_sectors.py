@@ -117,8 +117,8 @@ def get_available_sectors(df: pd.DataFrame) -> List[str]:
     if df.empty or "sector" not in df.columns:
         return []
 
-    sectors = df["sector"].dropna().astype(str).unique().tolist()
-    sectors = sorted([s for s in sectors if s and s != "nan"])
+    sector_series = df["sector"].dropna().astype("string").str.strip()
+    sectors = sorted([s for s in sector_series.unique().tolist() if s and s.lower() not in ("nan", "none", "<na>")])
 
     logger.info(f"Found {len(sectors)} sectors")
     return sectors

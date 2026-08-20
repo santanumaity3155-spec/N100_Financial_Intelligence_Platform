@@ -1996,7 +1996,7 @@ def _run_foundation_report(  # Renamed from main for Module 2A smoke run
     return report
 
 
-MODULE_2D_COMPLETION_REPORT_PATH: Path = PROJECT_ROOT / "MODULE_2D_COMPLETION_REPORT.md"
+MODULE_2D_COMPLETION_REPORT_PATH: Path = PROJECT_ROOT / "docs" / "completion_reports" / "MODULE_2D_COMPLETION_REPORT.md"
 
 
 def load_all_company_ids(conn: Any) -> Tuple[List[str], Dict[str, Any]]:

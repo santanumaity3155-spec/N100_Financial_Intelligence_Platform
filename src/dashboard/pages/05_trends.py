@@ -227,13 +227,18 @@ def prepare_trend_data(
         trend_df.columns = ["year", "value"]
 
         # Convert to numeric, coercing errors to NaN
+        trend_df["year"] = pd.to_numeric(trend_df["year"], errors="coerce")
         trend_df["value"] = pd.to_numeric(trend_df["value"], errors="coerce")
 
-        # Drop NaN values
-        trend_df = trend_df.dropna()
+        # Drop rows with non-finite/NaN values in year or value
+        trend_df = trend_df.dropna(subset=["year", "value"]).copy()
 
-        # Convert year to int
-        trend_df["year"] = pd.to_numeric(trend_df["year"], errors="coerce").astype(int)
+        if trend_df.empty:
+            logger.warning(f"No non-null trend observations for {metric_name}")
+            return pd.DataFrame()
+
+        # Safely convert year to int
+        trend_df["year"] = trend_df["year"].astype(int)
 
         # Sort by year ascending
         trend_df = trend_df.sort_values("year").reset_index(drop=True)
@@ -554,7 +559,7 @@ def main() -> None:
             trend_data[metric_key] = df
 
     if not trend_data:
-        st.warning(f"No trend data available for the selected metrics")
+        st.warning("No valid historical data is available for the selected metrics.")
         logger.warning(f"No trend data for selected metrics for company {selected_id}")
         return
 
